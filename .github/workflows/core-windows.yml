@@ -1,7 +1,8 @@
 name: core-windows
 
 # CI do núcleo compartilhado ShipLua em Windows/MSVC (critério v0.1.0, PLAN Fase 10).
-# Usa o gerador Visual Studio 2022 (multi-config) — sem actions de terceiros.
+# O gerador "Visual Studio 17 2022" não localiza o VS no runner atual; usamos o
+# ambiente MSVC (msvc-dev-cmd) + Ninja, que encontra `cl` no PATH — padrão estável.
 # O núcleo já compilou sob MSVC 19.44 na integração dos forks (OOT-001).
 
 on:
@@ -18,16 +19,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Versions
         run: |
           cmake --version
+          cl
           python --version
 
       - name: Configure
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake --build build --config Release
+        run: cmake --build build
 
       - name: Test
-        run: ctest --test-dir build -C Release --output-on-failure --timeout 120
+        run: ctest --test-dir build --output-on-failure --timeout 120
