@@ -57,7 +57,11 @@
 ---@field player_index integer
 ---@field sequence_id integer
 
----@alias ShipLuaEventName "game.ready"|"game.frame"|"game.shutdown"|"scene.enter"|"actor.init"|"actor.update"|"actor.destroy"|"save.loaded"|"text.open"|"audio.sequence_started"
+---@class ShipLuaEventInputHotkey
+---@field action string
+---@field key string
+
+---@alias ShipLuaEventName "game.ready"|"game.frame"|"game.shutdown"|"scene.enter"|"actor.init"|"actor.update"|"actor.destroy"|"save.loaded"|"text.open"|"audio.sequence_started"|"input.hotkey"
 
 ship = ship or {}
 ship.api = ship.api or {}
