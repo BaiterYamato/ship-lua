@@ -23,6 +23,18 @@
 
 ## Histórico
 
+### 2026-07-13 (4) — CI Linux do núcleo
+
+- Adicionado `.github/workflows/core-linux.yml` (governança / Build-CI).
+  Espelha o build/teste verificado: Ubuntu + CMake/Ninja + FetchContent
+  (Lua 5.4.7, toml++ 3.4.0, miniz 3.1.2) + ctest, `--timeout 120`.
+  Dispara em push/PR para `main` e por `workflow_dispatch`.
+- Testes Python: só stdlib; CMake usa `find_package(Python3)` + `Python3_EXECUTABLE`
+  (portável, sem `python` hardcoded). Sem `pip install` necessário.
+- Windows/macOS CI ficam para um passo seguinte após o Linux ficar verde.
+- Nada da branch em andamento do builder (HOST-002, claims OOT-002/MM-002) foi
+  integrado: ainda sem handoff/código.
+
 ### 2026-07-13 (3) — Coordenação HOST-001 (bootstrap dos forks)
 
 - Merge `--no-ff` de `agent/HOST-001-submodules` em `main` (`8a702c1` → `c92d0e7`).

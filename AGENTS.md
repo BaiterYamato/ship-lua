@@ -644,8 +644,9 @@ Para evitar conflitos de merge, cada papel escreve apenas nos seus arquivos:
   `generated/**`, `docs/**`, `rfcs/**`, `coordination/claims/**`,
   `coordination/handoffs/**`, `coordination/STATUS.md`.
 - **Governança escreve:** `PLAN.md`, `AGENTS.md`, `coordination/INTEGRATION.md`,
-  e realiza a integração em `main` (fast-forward dos topos validados do builder,
-  com commits de documentação por cima).
+  `.github/**` (workflows de CI), e realiza a integração em `main` (fast-forward
+  ou merge sem conflito dos topos validados do builder, com commits de documentação
+  e CI por cima).
 
 Se um papel precisar tocar um arquivo do outro, registre antes na sua reivindicação
 ou no log de integração.

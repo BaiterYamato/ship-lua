@@ -1,0 +1,40 @@
+name: core-linux
+
+# CI do núcleo compartilhado ShipLua em Linux (critério v0.1.0, PLAN Fase 10).
+# Espelha o build/teste verificado localmente: CMake + Ninja + FetchContent
+# (Lua 5.4.7, toml++ 3.4.0, miniz 3.1.2) e ctest. Testes Python usam só stdlib.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: build + ctest (ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ python3
+
+      - name: Versions
+        run: |
+          cmake --version
+          g++ --version
+          python3 --version
+          ninja --version
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure --timeout 120
