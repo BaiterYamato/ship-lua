@@ -76,6 +76,7 @@ destino e validar o round-trip OoT/MM com o mesmo pacote de mod.
 - `WORLD-004` — review (catálogo de assets por owner/contrato, sondas autenticadas e 29/29 testes MinGW/MSVC).
 - `OOT-WORLD-002` — review (sonda de três espadas nativas, resolução fail-closed; `soh.exe` gerado; PR #12).
 - `MM-WORLD-002` — review (sonda de três espadas nativas, resolução fail-closed; `2ship.exe` gerado; PR #9).
+- `OOT-WORLD-001` — review (adaptador de save portátil OoT, destinos Kakariko/Market e bootstrap; `soh.exe` gerado no Windows/MSVC).
 
 ## Bloqueios
 
