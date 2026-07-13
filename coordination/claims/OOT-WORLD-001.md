@@ -1,0 +1,23 @@
+# OOT-WORLD-001
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex
+- Branch: agent/OOT-WORLD-001-portable-save
+- Started: 2026-07-13T17:20:00-03:00
+- Depends on: WORLD-003
+- Files:
+  - extern/ship-lua/coordination/claims/OOT-WORLD-001.md
+  - extern/ship-lua/coordination/handoffs/OOT-WORLD-001.md
+  - extern/ship-lua/coordination/STATUS.md
+  - soh/soh/OotWorldAdapter.h
+  - soh/soh/OotWorldAdapter.cpp
+  - soh/soh/ShipLuaBootstrap.h
+  - soh/soh/ShipLuaBootstrap.cpp
+  - soh/soh/OTRGlobals.cpp
+  - soh/CMakeLists.txt
+- Goal:
+  - Capturar vida, capacidade, rupees, inventário e espada do save OoT em IDs canônicos.
+  - Preparar e aplicar importação validada sem expor enums internos ao núcleo.
+  - Resolver destinos principais de OoT por IDs estáveis.
+  - Manter rollback antes de qualquer mutação do save vivo.
