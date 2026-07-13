@@ -37,6 +37,7 @@ Revisar e integrar a pilha de PRs da Fase 2 em ordem.
 - `MOD-005` — review (grafo e validação de dependências).
 - `MOD-006` — review (ordem determinística por grafo, prioridade e ID).
 - `MOD-007` — review (ciclos, incompatibilidades e IDs duplicados).
+- `TOOL-001` — review (validador CLI para manifesto, diretório e `.shipmod`).
 
 ## Bloqueios
 
@@ -48,6 +49,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, concluir TOOL-001 ou iniciar a
-Fase 3 por API-001/RFC. Baseline de build dos jogos (CI-001/CI-002) e
+Integrar os PRs empilhados em ordem. Depois, iniciar a Fase 3 por
+ARCH-001/ARCH-002 e API-001. Baseline de build dos jogos (CI-001/CI-002) e
 submódulo `extern/ship-lua` nos forks ficam para a Fase 4.

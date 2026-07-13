@@ -1,0 +1,22 @@
+# TOOL-001
+
+- Status: review
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / MinGW g++ 15.2 + Ninja
+- Branch: agent/TOOL-001-manifest-validator
+- Started: 2026-07-13T00:00:00-03:00
+- Depends on: MOD-003/MOD-004 (PRs #2/#3; branch empilhada sobre #4)
+- Files:
+  - tools/manifest_validator.cpp
+  - docs/manifest-validator.md
+  - tests/CMakeLists.txt
+  - tests/fixtures/validator/**
+  - CMakeLists.txt
+  - coordination/claims/TOOL-001.md
+  - coordination/handoffs/TOOL-001.md
+  - coordination/STATUS.md
+- Goal:
+  - Validar manifesto em arquivo, diretório ou pacote `.shipmod`.
+  - Reutilizar parser/extrator canônicos sem executar o entrypoint Lua.
+  - Retornar exit codes distintos para sucesso, inválido e uso incorreto.
+  - Exibir interface e documentação em português do Brasil.
