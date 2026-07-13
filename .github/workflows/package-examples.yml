@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Baixar o repositório
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Instalar ferramentas
         run: |
@@ -61,7 +61,7 @@ jobs:
         run: sha256sum hello-world.shipmod > hello-world.shipmod.sha256
 
       - name: Publicar pacote validado
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: shiplua-example-packages
           path: |
