@@ -1,7 +1,7 @@
 id = "community.dog_spawner"
 name = "Dog Spawner"
 version = "0.1.0"
-api = ">=0.1 <0.2"
+api = ">=0.2 <0.3"
 entrypoint = "main.lua"
 description = "Aperte F (rebindável) para spawnar um cachorro da Clock Town."
 authors = ["BaiterYamato"]
