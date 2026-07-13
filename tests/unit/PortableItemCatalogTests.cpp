@@ -64,7 +64,7 @@ void TestPortableItemValidation() {
   ShipLua::PortableItem bombs;
   bombs.id = "shared.bombs";
   bombs.origin = ShipLua::WorldId::Mm;
-  bombs.quantity = 1000;
+  bombs.quantity = 100;
   Check(!created.value->Validate(bombs).isOk(),
         "quantidade portátil acima do contrato deve ser rejeitada");
   bombs.quantity = 40;
