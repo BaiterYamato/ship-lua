@@ -1,0 +1,24 @@
+# WORLD-002
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / CMake + Ninja + MSVC
+- Repository: BaiterYamato/ship-lua
+- Branch: agent/WORLD-002-authenticated-handoff
+- Started: 2026-07-13T17:54:23-03:00
+- Depends on: WORLD-001, STORE-003
+- Files:
+  - rfcs/0005-authenticated-world-handoff.md
+  - include/shiplua/world/WorldHandoff.h
+  - src/world/WorldHandoff.cpp
+  - tests/unit/WorldHandoffTests.cpp
+  - tests/CMakeLists.txt
+  - coordination/claims/WORLD-002.md
+  - coordination/handoffs/WORLD-002.md
+  - coordination/STATUS.md
+- Goal:
+  - Serializar o estado portátil e o destino em um envelope binário versionado.
+  - Autenticar todo o envelope antes de aceitar qualquer campo do handoff.
+  - Rejeitar truncamento, adulteração, chave incorreta e versões incompatíveis.
+  - Publicar o envelope por substituição atômica usando STORE-003.
+  - Manter segredo, paths e primitivas de processo fora da API pública Lua.
