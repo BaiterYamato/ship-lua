@@ -6,15 +6,15 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + Fases 2 e 3 em review + ciclo de vida e descoberta dos hosts em review
+bootstrap-done + Fases 2 e 3 em review + carga de mods nos hosts em review
 
 ## Repositórios
 
 | Repositório | Estado | Branch de integração | Baseline |
 |---|---|---|---|
 | BaiterYamato/ship-lua | criado + push (origin) | main | — |
-| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001/002/003/004 em review (PRs #5 a #8) | lua/main | `fb3259f7` |
-| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001/002/003/004 em review (PRs #1 a #4) | lua/main | `b3cc3662` |
+| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001 a OOT-005 em review (PRs #5 a #9) | lua/main | `fb3259f7` |
+| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001 a MM-005 em review (PRs #1 a #5) | lua/main | `b3cc3662` |
 
 > Nota: o fork do Shipwright foi renomeado para `Shipwright-HyliaFoundry`.
 > Ambos os forks têm default `develop` e branch de integração `lua/main` já criada.
@@ -60,8 +60,9 @@ em paralelo, revisar o pacote comum do EXAMPLE-001.
 - `MM-003` — review (shutdown idempotente antes dos serviços do host; `2ship.exe` gerado; PR #3).
 - `OOT-004` — review (`oot`, versão 9.1.2 e commit real injetados/detectados; PR #8).
 - `MM-004` — review (`mm`, versão 4.0.2 e commit real injetados/detectados; PR #4).
-- `OOT-005` — review (diretório de mods do usuário localizado com segurança; PR #9).
-- `MM-005` — review (diretório de mods do usuário localizado com segurança; PR #5).
+- `MOD-008` — done (descoberta da raiz, compatibilidade, dependências, isolamento e cache de `.shipmod`; integrado em `main`).
+- `OOT-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `soh.exe` gerado; PR #9).
+- `MM-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `2ship.exe` gerado; PR #5).
 - `EXAMPLE-001` — review (pacote comum reproduzível, conformidade OoT/MM e artefato de CI; PR #20).
 
 ## Bloqueios
@@ -76,4 +77,4 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 Integrar os PRs empilhados em ordem e confirmar o workflow de pacote do
 EXAMPLE-001. Os builds Windows/MSVC estão verdes nos dois hosts; execução com
-ativos legítimos e validação macOS continuam pendentes.
+ativos legítimos, Linux e macOS continuam pendentes.
