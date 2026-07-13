@@ -1,0 +1,5 @@
+id = "example.validator"
+name = "Validator Example"
+version = "0.1.0"
+api = ">=0.1 <1.0"
+entrypoint = "main.lua"

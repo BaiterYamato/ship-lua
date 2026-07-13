@@ -60,6 +60,9 @@ add_library(shiplua STATIC ${SHIPLUA_SOURCES})
 target_include_directories(shiplua PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(shiplua PRIVATE lua_static tomlplusplus::tomlplusplus miniz)
 
+add_executable(shiplua_manifest_validator tools/manifest_validator.cpp)
+target_link_libraries(shiplua_manifest_validator PRIVATE shiplua)
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------

@@ -29,3 +29,16 @@ add_executable(dependency_resolver_tests unit/DependencyResolverTests.cpp)
 target_link_libraries(dependency_resolver_tests PRIVATE shiplua)
 
 add_test(NAME dependency_resolver_tests COMMAND dependency_resolver_tests)
+
+add_test(NAME validator_valid_file
+    COMMAND shiplua_manifest_validator
+        "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/manifest/valid-minimal.toml")
+add_test(NAME validator_valid_directory
+    COMMAND shiplua_manifest_validator
+        "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/validator/valid-mod")
+add_test(NAME validator_invalid_manifest
+    COMMAND shiplua_manifest_validator
+        "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/manifest/invalid-version.toml")
+set_tests_properties(validator_invalid_manifest PROPERTIES WILL_FAIL TRUE)
+add_test(NAME validator_usage COMMAND shiplua_manifest_validator)
+set_tests_properties(validator_usage PROPERTIES WILL_FAIL TRUE)
