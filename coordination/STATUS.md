@@ -6,7 +6,7 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + Fase 2 e arquitetura base em review
+bootstrap-done + Fase 2, arquitetura e schemas da API em review
 
 ## Repositórios
 
@@ -40,6 +40,9 @@ Revisar e integrar a pilha de PRs da Fase 2 em ordem.
 - `TOOL-001` — review (validador CLI para manifesto, diretório e `.shipmod`).
 - `ARCH-001` — review (inventário de hooks nos commits atuais dos dois hosts).
 - `ARCH-002` — review (RFC 0001 da arquitetura núcleo/adaptadores).
+- `API-001` — review (`schema/api.yml` com tipos, funções e erros).
+- `API-002` — review (`schema/events.yml` com payloads, suporte e fases).
+- `API-003` — review (`schema/capabilities.yml` com status e hosts).
 
 ## Bloqueios
 
@@ -51,6 +54,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar a Fase 3 por API-001.
+Integrar os PRs empilhados em ordem. Depois, iniciar EVENT-001.
 Baseline de build dos jogos (CI-001/CI-002) e
 submódulo `extern/ship-lua` nos forks ficam para a Fase 4.
