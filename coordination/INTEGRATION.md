@@ -5,8 +5,8 @@
 
 ## Estado de `main`
 
-- Tip integrado: `265a200` (merge de HOST-004 coord + MOD-008 root loader).
-- Build/teste: **21/21 verdes** (rebuild limpo; inclui `mod_root_loader_tests`).
+- Tip integrado: `1adebb2` (MOD-008 handoff + OOT-005/MM-005 coordenação).
+- Build/teste: **21/21 verdes** (código inalterado desde `265a200`; MOD-008 já validado).
 - **CI Linux (`core-linux.yml`): verde** em cada push a `main` (critério v0.1.0 §16).
 - Lua v5.4.7 + toml++ v3.4.0 + miniz 3.1.2 (FetchContent).
 
@@ -17,7 +17,8 @@
 | OOT-001 / MM-001 (submódulo + CMake) | review | forks (PRs #5 / #1) |
 | OOT-002 / MM-002 (bootstrap) | review | forks |
 | OOT-003 / MM-003 (shutdown) | review | forks |
-| OOT-004 / MM-004 (identity) | claim (em andamento) | forks |
+| OOT-004 / MM-004 (identity) | review | forks |
+| OOT-005 / MM-005 (localizar dir. de mods) | review | forks |
 
 ## PRs abertos nos forks (Fase 4) — pendentes de decisão do owner
 
