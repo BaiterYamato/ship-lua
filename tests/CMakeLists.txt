@@ -67,3 +67,7 @@ add_test(NAME api_cpp_codegen_check
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_cpp_api.py" --check)
 add_test(NAME api_cpp_codegen_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_cpp_api.py")
+add_test(NAME api_docs_codegen_check
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_api_docs.py" --check)
+add_test(NAME api_docs_codegen_tests
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_api_docs.py")
