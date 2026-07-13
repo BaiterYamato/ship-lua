@@ -6,33 +6,38 @@ ShipLua
 
 ## Estado global
 
-core-runtime-local (GitHub bootstrap pendente de autorização)
+bootstrap-done (repos criados) + core-runtime em review
 
 ## Repositórios
 
 | Repositório | Estado | Branch de integração | Baseline |
 |---|---|---|---|
-| BaiterYamato/ship-lua | local-only (git init, sem remote) | main | — |
-| BaiterYamato/Shipwright | pending | lua/main | registrar SHA |
-| BaiterYamato/2ship2harkinian | pending | lua/main | registrar SHA |
+| BaiterYamato/ship-lua | criado + push (origin) | main | — |
+| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | fork ok, lua/main existe | lua/main | registrar SHA |
+| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | fork ok, lua/main existe | lua/main | registrar SHA |
+
+> Nota: o fork do Shipwright foi renomeado para `Shipwright-HyliaFoundry`.
+> Ambos os forks têm default `develop` e branch de integração `lua/main` já criada.
 
 ## Tarefa ativa recomendada
 
-`GOV-001`/`GOV-002` (aguardando OK do owner) ou `CORE-002`/`MOD-001` local.
+`CORE-002` (gerenciador multi-mod) + `MOD-001`/`MOD-002` (manifesto TOML).
 
 ## Progresso
 
+- `GOV-001` — done (forks já existiam; `lua/main` presente nos dois).
+- `GOV-002` — done (BaiterYamato/ship-lua criado e com push).
 - `CORE-001` — review (runtime Lua 5.4 isolado + sandbox; ctest verde no Windows/MinGW).
 
 ## Bloqueios
 
-- GOV-001/GOV-002 (forks e repo público no GitHub) aguardam autorização explícita do owner.
+Nenhum registrado.
 
 ## Última integração
 
-Ainda não executada (repo local, sem remote).
+ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Autorizar bootstrap GitHub OU seguir local com CORE-002 (gerenciador multi-mod)
-e MOD-001/MOD-002 (manifesto TOML).
+Seguir com CORE-002 e MOD-001/MOD-002. Baseline de build dos jogos
+(CI-001/CI-002) e submódulo `extern/ship-lua` nos forks ficam para a Fase 4.
