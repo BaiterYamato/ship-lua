@@ -1,6 +1,6 @@
 # MM-WORLD-002
 
-- Status: claimed
+- Status: review
 - Agent: codex-windows-01
 - Platform: Windows 11 / Codex / MSVC
 - Repository: BaiterYamato/2ship2harkinian
@@ -10,7 +10,6 @@
 - Files:
   - mm/2s2h/MmWorldAdapter.h
   - mm/2s2h/MmWorldAdapter.cpp
-  - mm/2s2h/ShipLuaBootstrap.cpp
   - extern/ship-lua
   - coordination/claims/MM-WORLD-002.md
   - coordination/handoffs/MM-WORLD-002.md
