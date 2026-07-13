@@ -111,6 +111,17 @@ const char* ErrorMessage(ErrorCode code) {
     return "falha desconhecida da API ship";
 }
 
+bool IsValidHotkeyId(std::string_view id) {
+    if (id.empty() || id.size() > 64 || id.front() < 'a' || id.front() > 'z') {
+        return false;
+    }
+    return std::all_of(id.begin() + 1, id.end(), [](unsigned char character) {
+        return (character >= 'a' && character <= 'z') ||
+               (character >= '0' && character <= '9') ||
+               character == '_' || character == '.' || character == '-';
+    });
+}
+
 Result<void> ValidateHostContext(const LuaApiHostContext& context) {
     if (!context.gameId.empty() && context.gameId != "oot" && context.gameId != "mm") {
         return Result<void>::err(ErrorCode::InvalidArgument,
@@ -146,6 +157,7 @@ LuaApiBinding::LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logge
       mEvents(events),
       mLogger(std::move(logger)),
       mHostContext(std::move(hostContext)),
+      mHotkeys(mHostContext.hotkeys),
       mModLoadOrder(modLoadOrder),
       mModPriority(modPriority),
       mMaxConsecutiveFailures(std::max<std::size_t>(1, maxConsecutiveFailures)) {
@@ -243,6 +255,10 @@ void LuaApiBinding::BuildModule(lua_State* state) {
     SetFunction(state, -1, "error", &LuaApiBinding::LogError, this);
     lua_setfield(state, ship, "log");
 
+    lua_newtable(state);
+    SetFunction(state, -1, "register", &LuaApiBinding::HotkeysRegister, this);
+    lua_setfield(state, ship, "hotkeys");
+
     lua_pushvalue(state, ship);
     mShipReference = luaL_ref(state, LUA_REGISTRYINDEX);
     lua_pop(state, 1);
@@ -254,6 +270,18 @@ void LuaApiBinding::BuildModule(lua_State* state) {
 
 void LuaApiBinding::Uninstall() noexcept {
     lua_State* state = mRuntime.State();
+    for (auto& [id, callback] : mHotkeyCallbacks) {
+        (void)id;
+        callback->active = false;
+    }
+    if (mHotkeys != nullptr) {
+        try {
+            mHotkeys->UnregisterMod(mRuntime.ModId());
+        } catch (...) {
+            // Callbacks are already inactive, so a broken host registry cannot
+            // retain a callable reference to the Lua state.
+        }
+    }
     for (auto& [id, callback] : mCallbacks) {
         (void)id;
         callback->active = false;
@@ -269,6 +297,13 @@ void LuaApiBinding::Uninstall() noexcept {
     }
     mCallbacks.clear();
     if (state != nullptr) {
+        for (auto& [id, callback] : mHotkeyCallbacks) {
+            (void)id;
+            if (callback->registryReference != kNoReference) {
+                luaL_unref(state, LUA_REGISTRYINDEX, callback->registryReference);
+                callback->registryReference = kNoReference;
+            }
+        }
         if (mShipReference != kNoReference) {
             luaL_unref(state, LUA_REGISTRYINDEX, mShipReference);
             mShipReference = kNoReference;
@@ -276,6 +311,7 @@ void LuaApiBinding::Uninstall() noexcept {
         lua_pushnil(state);
         lua_setglobal(state, "require");
     }
+    mHotkeyCallbacks.clear();
     mInstalled = false;
 }
 
@@ -498,6 +534,171 @@ int LuaApiBinding::EventsOff(lua_State* state) noexcept {
         return Fail(state, ErrorMessage(error));
     }
     lua_pushboolean(state, 1);
+    return 1;
+}
+
+int LuaApiBinding::HotkeysRegister(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr) {
+        return Fail(state, "contexto da API ship indisponível");
+    }
+    const char* error = nullptr;
+    int result = 0;
+    try {
+        result = binding->RegisterHotkey(state, error);
+    } catch (...) {
+        error = "exceção C++ durante registro de hotkey";
+    }
+    return error != nullptr ? Fail(state, error) : result;
+}
+
+int LuaApiBinding::RegisterHotkey(lua_State* state, const char*& error) {
+    LuaApiBinding* binding = this;
+    if (mHotkeys == nullptr) {
+        error = ErrorMessage(ErrorCode::Unsupported);
+        return 0;
+    }
+    if (lua_type(state, 1) != LUA_TSTRING) {
+        error = "ship.hotkeys.register exige um id textual";
+        return 0;
+    }
+    std::size_t idLen = 0;
+    const char* idRaw = lua_tolstring(state, 1, &idLen);
+    if (idRaw == nullptr || idLen == 0) {
+        error = "ship.hotkeys.register exige um id não vazio";
+        return 0;
+    }
+    const std::string id(idRaw, idLen);
+    if (!IsValidHotkeyId(id)) {
+        error = "id de hotkey deve corresponder a [a-z][a-z0-9_.-]{0,63}";
+        return 0;
+    }
+
+    // Optional options table at arg 2 ({default=, label=}), callback at arg 3.
+    // Or callback directly at arg 2.
+    int callbackIndex = 0;
+    std::string defaultKey;
+    std::string label;
+    if (lua_istable(state, 2) && lua_isfunction(state, 3)) {
+        callbackIndex = 3;
+        lua_getfield(state, 2, "default");
+        if (!lua_isnil(state, -1) && lua_type(state, -1) != LUA_TSTRING) {
+            lua_pop(state, 1);
+            error = "default de hotkey deve ser textual";
+            return 0;
+        }
+        if (lua_type(state, -1) == LUA_TSTRING) {
+            std::size_t n = 0;
+            const char* s = lua_tolstring(state, -1, &n);
+            if (s != nullptr) {
+                defaultKey.assign(s, n);
+            }
+        }
+        lua_pop(state, 1);
+        lua_getfield(state, 2, "label");
+        if (!lua_isnil(state, -1) && lua_type(state, -1) != LUA_TSTRING) {
+            lua_pop(state, 1);
+            error = "label de hotkey deve ser textual";
+            return 0;
+        }
+        if (lua_type(state, -1) == LUA_TSTRING) {
+            std::size_t n = 0;
+            const char* s = lua_tolstring(state, -1, &n);
+            if (s != nullptr) {
+                label.assign(s, n);
+            }
+        }
+        lua_pop(state, 1);
+    } else if (lua_isfunction(state, 2)) {
+        callbackIndex = 2;
+    } else {
+        error = "ship.hotkeys.register exige callback ou opções e callback";
+        return 0;
+    }
+    if (defaultKey.size() > 32) {
+        error = "default de hotkey excede 32 bytes";
+        return 0;
+    }
+    if (label.size() > 128) {
+        error = "label de hotkey excede 128 bytes";
+        return 0;
+    }
+
+    auto callback = std::make_shared<HotkeyCallback>();
+
+    // Store the Lua callback as a registry ref (mirrors RegisterEvent).
+    lua_pushvalue(state, callbackIndex);
+    const int reference = luaL_ref(state, LUA_REGISTRYINDEX);
+    if (reference == LUA_NOREF) {
+        error = "não foi possível reter o callback de hotkey";
+        return 0;
+    }
+
+    callback->registryReference = reference;
+    LuaRuntime* runtime = &binding->mRuntime;
+    const std::string modId = binding->mRuntime.ModId();
+    Logger logger = binding->mLogger;
+    std::shared_ptr<HotkeyRegistry> registry = binding->mHotkeys;
+
+    const std::size_t maxFailures = binding->mMaxConsecutiveFailures;
+    std::function<void()> onFire = [runtime, callback, logger, modId, id, maxFailures]() {
+        if (!callback->active || callback->registryReference == kNoReference) {
+            return;
+        }
+        lua_State* s = runtime->State();
+        if (s == nullptr) {
+            return;
+        }
+        lua_pushcfunction(s, TracebackHandler);
+        const int handlerIndex = lua_gettop(s);
+        lua_rawgeti(s, LUA_REGISTRYINDEX, callback->registryReference);
+        const int status = lua_pcall(s, 0, 0, handlerIndex);
+        if (status != LUA_OK) {
+            std::size_t n = 0;
+            const char* msg = lua_tolstring(s, -1, &n);
+            const std::string failure = msg != nullptr ? std::string(msg, n)
+                                                       : "callback de hotkey falhou sem mensagem";
+            lua_pop(s, 2);
+            logger.error(modId, failure);
+            ++callback->consecutiveFailures;
+            if (callback->consecutiveFailures >= maxFailures) {
+                callback->active = false;
+                logger.error(modId, "hotkey '" + id + "' desativada após falhas repetidas");
+            }
+        } else {
+            lua_pop(s, 1);
+            callback->consecutiveFailures = 0;
+        }
+    };
+
+    HotkeyBinding hb;
+    hb.id = id;
+    hb.modId = modId;
+    hb.defaultKey = defaultKey;
+    hb.label = label;
+
+    bool registered = false;
+    try {
+        registered = registry->Register(hb, onFire);
+    } catch (...) {
+        registered = false;
+    }
+    if (registered) {
+        const auto previous = binding->mHotkeyCallbacks.find(id);
+        if (previous != binding->mHotkeyCallbacks.end()) {
+            previous->second->active = false;
+            if (previous->second->registryReference != kNoReference) {
+                luaL_unref(state, LUA_REGISTRYINDEX, previous->second->registryReference);
+                previous->second->registryReference = kNoReference;
+            }
+        }
+        binding->mHotkeyCallbacks[id] = std::move(callback);
+    } else {
+        callback->active = false;
+        callback->registryReference = kNoReference;
+        luaL_unref(state, LUA_REGISTRYINDEX, reference);
+    }
+    lua_pushboolean(state, registered ? 1 : 0);
     return 1;
 }
 

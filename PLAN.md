@@ -826,6 +826,35 @@ Disponibilizar leitura e escrita segura.
 - API comum funciona nos dois jogos;
 - divergências são capacidades específicas.
 
+## Fase 6A — Sessão entre mundos
+
+### Objetivo
+
+Permitir que uma única sessão ShipLua atravesse destinos de OoT e MM sem
+descartar o estado portátil do jogador. O núcleo coordena a transação; cada
+adaptador traduz structs, IDs e assets do próprio host.
+
+### Tarefas
+
+| ID | Tarefa | Depende |
+|---|---|---|
+| WORLD-001 | contrato de sessão, estado portátil e transação sintética OoT/MM | ARCH-002 |
+| WORLD-002 | serialização autenticada do handoff entre processos | WORLD-001, STORE-003 |
+| WORLD-003 | catálogo canônico de itens e regras de tradução | WORLD-001, PLAYER-001 |
+| WORLD-004 | namespace e montagem validada de assets OoT/MM | WORLD-001 |
+| OOT-WORLD-001 | captura/restauração do estado portátil no Shipwright | WORLD-003 |
+| MM-WORLD-001 | captura/restauração do estado portátil no 2Ship | WORLD-003 |
+| CONF-WORLD-001 | viagem OoT → MM → OoT preservando equipamento | OOT-WORLD-001, MM-WORLD-001 |
+
+### Aceite
+
+- dois adaptadores podem estar registrados simultaneamente;
+- viagem falha sem alterar o mundo ativo quando o destino não prepara ou não confirma;
+- itens não suportados permanecem no estado canônico e reaparecem ao retornar;
+- equipamento aceito só é ativado quando o destino resolve o asset necessário;
+- nenhum `SaveContext*`, ID cru ou path de archive entra no núcleo;
+- o mesmo contrato suporta adaptadores no mesmo processo e handoff entre processos.
+
 ---
 
 ## Fase 7 — Storage, console e hot reload

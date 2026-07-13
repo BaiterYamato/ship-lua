@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "api_version": "0.1.0",
+  "api_version": "0.2.0",
   "events": [
     {"name": "game.ready", "kind": "observe", "phase": "mvp", "cancellable": false, "support": ["oot", "mm"], "capability": null, "payload": [
       {"name": "game_id", "type": "game_id", "required": true},

@@ -1,0 +1,26 @@
+# WORLD-004
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / CMake + Ninja + MSVC
+- Repository: BaiterYamato/ship-lua
+- Branch: agent/WORLD-004-asset-catalog
+- Started: 2026-07-13T18:20:00-03:00
+- Depends on: WORLD-001, WORLD-003
+- Files:
+  - rfcs/0007-cross-world-assets.md
+  - include/shiplua/world/WorldAssetCatalog.h
+  - include/shiplua/world/WorldSession.h
+  - src/world/WorldAssetCatalog.cpp
+  - src/world/WorldSession.cpp
+  - tests/unit/WorldAssetCatalogTests.cpp
+  - tests/CMakeLists.txt
+  - coordination/claims/WORLD-004.md
+  - coordination/handoffs/WORLD-004.md
+  - coordination/STATUS.md
+- Goal:
+  - Definir assets lógicos por owner, namespace e contrato de factory sem paths no núcleo.
+  - Exigir prova de archive, isolamento de namespace e carga real antes de resolver um asset.
+  - Impedir que a mera presença de um arquivo seja tratada como compatibilidade.
+  - Invalidar provas de um host quando seus archives forem recarregados.
+  - Preparar adaptadores OoT/MM para validar bundles de equipamento nativos ou estrangeiros compatíveis.

@@ -22,6 +22,31 @@ def cpp_identifier(value: str) -> str:
     return identifier
 
 
+# C++ reserved words that cannot be used as struct field names. A schema field
+# named with one of these is emitted with a trailing underscore so the struct
+# compiles; the on-wire/Lua name is unchanged (FieldBinding.name keeps the
+# original string).
+CPP_KEYWORDS = frozenset({
+    "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand", "bitor",
+    "bool", "break", "case", "catch", "char", "char8_t", "char16_t", "char32_t",
+    "class", "compl", "concept", "const", "consteval", "constexpr", "const_cast",
+    "continue", "co_await", "co_return", "co_yield", "decltype", "default", "delete",
+    "do", "double", "dynamic_cast", "else", "enum", "explicit", "export", "extern",
+    "false", "float", "for", "friend", "goto", "if", "inline", "int", "long",
+    "mutable", "namespace", "new", "noexcept", "not", "not_eq", "nullptr",
+    "operator", "or", "or_eq", "private", "protected", "public", "register",
+    "reinterpret_cast", "requires", "return", "short", "signed", "sizeof",
+    "static", "static_assert", "static_cast", "struct", "switch", "template",
+    "this", "thread_local", "throw", "true", "try", "typedef", "typeid",
+    "typename", "union", "unsigned", "using", "virtual", "void", "volatile",
+    "wchar_t", "while", "xor", "xor_eq",
+})
+
+
+def cpp_field_name(name: str) -> str:
+    return name + "_" if name in CPP_KEYWORDS else name
+
+
 def cpp_string(value: str | None) -> str:
     if value is None:
         return "{}"
@@ -115,7 +140,7 @@ def generate(api: dict[str, Any], events: dict[str, Any],
                 field_type = cpp_type(field["type"], custom_types)
                 if not field.get("required", True):
                     field_type = f"std::optional<{field_type}>"
-                lines.append(f"    {field_type} {field['name']};")
+                lines.append(f"    {field_type} {cpp_field_name(field['name'])};")
             lines.extend(["};", ""])
 
     lines.extend([

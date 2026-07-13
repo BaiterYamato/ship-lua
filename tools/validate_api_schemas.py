@@ -145,6 +145,8 @@ def validate_documents(api: dict[str, Any], events: dict[str, Any],
                 errors.append(f"função '{name}': capability órfã '{capability}'")
             elif definition.get("status") != "contract":
                 errors.append(f"função '{name}': capability '{capability}' ainda não contratada")
+            elif availability != "common" and availability not in definition.get("hosts", []):
+                errors.append(f"função '{name}': availability excede hosts da capability")
         validate_fields(function.get("arguments", []), f"função '{name}' argumentos")
         result_type = _base_type(function.get("returns"), f"função '{name}' retorno", errors)
         if result_type is not None and result_type not in known_types:
@@ -206,7 +208,7 @@ def main() -> int:
         for error in errors:
             print(f"Erro: {error}", file=sys.stderr)
         return 1
-    print("Schemas ShipLua válidos: API 0.1.0")
+    print("Schemas ShipLua válidos: API 0.2.0")
     return 0
 
 

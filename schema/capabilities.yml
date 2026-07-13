@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "api_version": "0.1.0",
+  "api_version": "0.2.0",
   "capabilities": [
     {"name": "scene.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de cena."},
     {"name": "actor.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de ator com handles e snapshots."},
@@ -11,6 +11,7 @@
     {"name": "mm.cycle", "status": "planned", "hosts": ["mm"], "description": "Lifecycle do ciclo de três dias."},
     {"name": "mm.owl_save", "status": "planned", "hosts": ["mm"], "description": "Semântica de owl save."},
     {"name": "mm.clock", "status": "planned", "hosts": ["mm"], "description": "Leitura estável do relógio de MM."},
+    {"name": "mm.player.jump", "status": "contract", "hosts": ["mm"], "description": "Aplica um impulso vertical validado ao jogador de Majora's Mask quando ele está no chão."},
     {"name": "oot.ocarina", "status": "planned", "hosts": ["oot"], "description": "Eventos e estado de ocarina de OoT."},
     {"name": "oot.dungeon_keys", "status": "planned", "hosts": ["oot"], "description": "Estado de chaves de dungeon de OoT."},
     {"name": "oot.equipment", "status": "planned", "hosts": ["oot"], "description": "Equipamento específico de OoT."}

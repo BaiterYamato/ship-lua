@@ -13,16 +13,17 @@ bootstrap-done + Fases 2 e 3 em review + carga de mods nos hosts em review
 | Repositório | Estado | Branch de integração | Baseline |
 |---|---|---|---|
 | BaiterYamato/ship-lua | criado + push (origin) | main | — |
-| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001 a OOT-005 em review (PRs #5 a #9) | lua/main | `fb3259f7` |
-| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001 a MM-005 em review (PRs #1 a #5) | lua/main | `b3cc3662` |
+| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001 a OOT-005 + OOT-HOTKEY-001 em review (PRs #5 a #10) | lua/main | `fb3259f7` |
+| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001 a MM-005 + hotkey e pulo MM em review (PRs #1 a #7) | lua/main | `b3cc3662` |
 
 > Nota: o fork do Shipwright foi renomeado para `Shipwright-HyliaFoundry`.
 > Ambos os forks têm default `develop` e branch de integração `lua/main` já criada.
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar, em ordem, as pilhas OOT-001 → OOT-005 e MM-001 → MM-005;
-em paralelo, revisar o pacote comum do EXAMPLE-001.
+Revisar HOTKEY-001 e, depois, os bridges empilhados OOT-HOTKEY-001 e
+MM-HOTKEY-001. Para o exemplo de pulo, revisar MM-JUMP-001 após o hotkey MM;
+a ação permanece exclusiva de MM e capability-gated.
 
 ## Progresso
 
@@ -64,6 +65,14 @@ em paralelo, revisar o pacote comum do EXAMPLE-001.
 - `OOT-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `soh.exe` gerado; PR #9).
 - `MM-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `2ship.exe` gerado; PR #5).
 - `EXAMPLE-001` — review (pacote comum reproduzível, conformidade OoT/MM e artefato de CI; PR #20).
+- `HOTKEY-001` — review (`ship.hotkeys.register` comum, callbacks seguros no unload e 24/24 testes; PR #21).
+- `OOT-HOTKEY-001` — review (registry/configuração/dispatch no thread principal; `soh.exe` gerado; PR #10).
+- `MM-HOTKEY-001` — review (registry/configuração/dispatch no thread principal; `2ship.exe` gerado; PR #6).
+- `MM-JUMP-001` — review (`ship.mm.player.jump`, capability e exemplo MM; 24/24 testes e `2ship.exe` gerado; PRs ship-lua #22 e 2Ship #7).
+- `WORLD-001` — review (sessão transacional OoT/MM, inventário canônico, assets lógicos e round-trip sintético; 25/25 testes MinGW/MSVC).
+- `WORLD-003` — review (catálogo canônico extensível, tradução explícita de equipamento e adiamento de itens exclusivos; 26/26 testes MinGW/MSVC).
+- `STORE-003` — review (substituição atômica interna, sincronização e testes de concorrência; 25/25 testes verdes em MinGW e MSVC).
+- `WORLD-002` — review (envelope v1 com HMAC-SHA-256, anti-replay e publicação atômica; 28/28 testes MinGW/MSVC).
 
 ## Bloqueios
 
@@ -75,6 +84,8 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem e confirmar o workflow de pacote do
-EXAMPLE-001. Os builds Windows/MSVC estão verdes nos dois hosts; execução com
-ativos legítimos, Linux e macOS continuam pendentes.
+Integrar HOTKEY-001 antes dos dois bridges de host e confirmar o workflow de
+pacote do EXAMPLE-001. Depois de MM-HOTKEY-001, revisar MM-JUMP-001. Em paralelo,
+revisar WORLD-001 e WORLD-003 antes de iniciar OOT-WORLD-001 e MM-WORLD-001.
+Os builds Windows/MSVC estão verdes; execução com ativos legítimos, Linux
+e macOS continuam pendentes.

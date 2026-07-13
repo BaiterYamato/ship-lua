@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "shiplua/events/EventDispatcher.h"
+#include "shiplua/input/HotkeyRegistry.h"
 #include "shiplua/runtime/Logger.h"
 #include "shiplua/runtime/LuaRuntime.h"
 #include "shiplua/runtime/Result.h"
@@ -19,8 +20,9 @@ namespace ShipLua {
 struct LuaApiHostContext {
     std::string gameId;
     std::string hostVersion;
-    std::string runtimeVersion = "0.1.0";
+    std::string runtimeVersion = "0.2.0";
     std::vector<std::string> capabilities;
+    std::shared_ptr<HotkeyRegistry> hotkeys;  // nullable; null = host without hotkey support
 };
 
 class LuaApiBinding {
@@ -44,6 +46,12 @@ class LuaApiBinding {
         bool active = true;
     };
 
+    struct HotkeyCallback {
+        int registryReference = -2;
+        std::size_t consecutiveFailures = 0;
+        bool active = true;
+    };
+
     static LuaApiBinding* FromUpvalue(lua_State* state);
     static int InstallProtected(lua_State* state) noexcept;
     static int Require(lua_State* state) noexcept;
@@ -55,6 +63,7 @@ class LuaApiBinding {
     static int CapabilityList(lua_State* state) noexcept;
     static int EventsOn(lua_State* state) noexcept;
     static int EventsOff(lua_State* state) noexcept;
+    static int HotkeysRegister(lua_State* state) noexcept;
     static int LogDebug(lua_State* state) noexcept;
     static int LogInfo(lua_State* state) noexcept;
     static int LogWarn(lua_State* state) noexcept;
@@ -63,6 +72,7 @@ class LuaApiBinding {
     Result<Subscription> RegisterEvent(lua_State* state, const std::string& eventName,
                                        int callbackIndex, int callbackPriority);
     Result<void> RemoveEvent(Subscription subscription);
+    int RegisterHotkey(lua_State* state, const char*& error);
     EventFlow InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
                              EventPayload& payload);
     int WriteLog(lua_State* state, LogLevel level) noexcept;
@@ -73,6 +83,8 @@ class LuaApiBinding {
     EventDispatcher& mEvents;
     Logger mLogger;
     LuaApiHostContext mHostContext;
+    std::shared_ptr<HotkeyRegistry> mHotkeys;
+    std::map<std::string, std::shared_ptr<HotkeyCallback>> mHotkeyCallbacks;
     std::size_t mModLoadOrder = 0;
     int mModPriority = 50;
     std::size_t mMaxConsecutiveFailures = 3;

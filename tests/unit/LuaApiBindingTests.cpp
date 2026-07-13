@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "shiplua/host/ModHost.h"
+#include "shiplua/input/HotkeyRegistry.h"
 
 namespace {
 
@@ -22,7 +23,7 @@ ShipLua::Manifest MakeManifest(std::string id, int priority = 50) {
     manifest.id = std::move(id);
     manifest.name = "Binding test";
     manifest.version = "0.1.0";
-    manifest.apiRange = ">=0.1 <0.2";
+    manifest.apiRange = ">=0.1 <0.3";
     manifest.entrypoint = "main.lua";
     manifest.loadPriority = priority;
     return manifest;
@@ -55,7 +56,7 @@ local ship = require("ship")
 assert(require("ship") == ship)
 local forbidden = pcall(require, "filesystem")
 assert(not forbidden)
-assert(ship.api.version() == "0.1.0")
+assert(ship.api.version() == "0.2.0")
 assert(ship.runtime.version() == "0.1.0")
 
 ship.events.on("game.ready", function(event)
@@ -80,7 +81,7 @@ end)
             {"game_id", game},
             {"host_version", hostVersion},
             {"runtime_version", "0.1.0"},
-            {"api_version", "0.1.0"},
+            {"api_version", "0.2.0"},
         };
         const auto dispatched = host.DispatchEvent("game.ready", payload);
         Check(dispatched.isOk() && dispatched.value->callbacksInvoked == 1 &&
@@ -192,7 +193,7 @@ void TestMissingAndInvalidHostContext() {
     ShipLua::ModHost host{ShipLua::Logger([](auto, const auto&, const auto&) {})};
     const auto loaded = host.LoadModFromManifestAndSource(MakeManifest("test.no_host"), R"lua(
 local ship = require("ship")
-assert(ship.api.version() == "0.1.0")
+assert(ship.api.version() == "0.2.0")
 local game_ok = pcall(ship.game.id)
 local version_ok = pcall(ship.game.host_version)
 assert(not game_ok and not version_ok)
@@ -244,6 +245,152 @@ void TestBindingInstallRespectsMemoryLimit() {
     host.UnloadAll();
 }
 
+struct FakeHotkey : ShipLua::HotkeyBinding {
+    std::function<void()> onFire;
+};
+
+struct FakeHotkeyRegistry : ShipLua::HotkeyRegistry {
+    bool Register(const ShipLua::HotkeyBinding& b, std::function<void()> onFire) override {
+        for (auto& existing : registered) {
+            if (existing.modId == b.modId && existing.id == b.id) {
+                static_cast<ShipLua::HotkeyBinding&>(existing) = b;
+                existing.onFire = std::move(onFire);
+                return true;
+            }
+        }
+        FakeHotkey f;
+        static_cast<ShipLua::HotkeyBinding&>(f) = b;
+        f.onFire = std::move(onFire);
+        registered.push_back(std::move(f));
+        return true;
+    }
+    void UnregisterMod(const std::string& modId) override {
+        registered.erase(
+            std::remove_if(registered.begin(), registered.end(), [&](const FakeHotkey& hotkey) {
+                return hotkey.modId == modId;
+            }),
+            registered.end());
+    }
+    void Fire(const std::string& modId, const std::string& id) override {
+        for (auto& f : registered) {
+            if (f.modId == modId && f.id == id && f.onFire) {
+                f.onFire();
+            }
+        }
+    }
+    std::vector<ShipLua::HotkeyBinding> Registered() const override {
+        std::vector<ShipLua::HotkeyBinding> out;
+        for (const auto& f : registered) {
+            out.push_back(f);
+        }
+        return out;
+    }
+    std::vector<FakeHotkey> registered;
+};
+
+void TestHotkeysRegisterFiresCallbackOnBothHosts() {
+    for (const std::string game : {"oot", "mm"}) {
+        std::vector<CapturedLog> logs;
+        auto registry = std::make_shared<FakeHotkeyRegistry>();
+        const std::string hostVersion = game == "oot" ? "9.1.0" : "4.2.0";
+        ShipLua::LuaApiHostContext context{game, hostVersion, "0.2.0", {}, registry};
+        ShipLua::ModHost host(context, CaptureLogger(logs));
+
+    const std::string source = R"lua(
+local ship = require("ship")
+FIRED = 0
+assert(ship.hotkeys ~= nil)
+local ok = ship.hotkeys.register("jump", {default="K", label="Pulo"}, function()
+    FIRED = FIRED + 1
+end)
+assert(ok == true)
+)lua";
+        Check(host.LoadModFromManifestAndSource(MakeManifest("community.jump"), source).isOk(),
+              "jump mod should load with a hotkey registry on " + game);
+        Check(registry->registered.size() == 1, "one hotkey registered on " + game);
+        if (!registry->registered.empty()) {
+            Check(registry->registered[0].id == "jump", "id stored on " + game);
+            Check(registry->registered[0].defaultKey == "K", "defaultKey stored on " + game);
+            Check(registry->registered[0].label == "Pulo", "label stored on " + game);
+            ShipLua::LuaRuntime* runtime = host.GetRuntime("community.jump");
+            Check(runtime != nullptr, "jump runtime should exist on " + game);
+            registry->Fire("community.jump", "jump");
+            if (runtime != nullptr) {
+                const auto assertFired = runtime->DoString("assert(FIRED == 1)");
+                Check(assertFired.isOk(), "hotkey callback should fire once on " + game);
+            }
+        }
+        Check(host.UnloadMod("community.jump").isOk(), "hotkey mod should unload on " + game);
+        Check(registry->registered.empty(), "unload should remove host binding on " + game);
+        registry->Fire("community.jump", "jump");
+    }
+}
+
+void TestHotkeyReplacementAndValidation() {
+    auto registry = std::make_shared<FakeHotkeyRegistry>();
+    ShipLua::LuaApiHostContext context{"oot", "9.1.0", "0.2.0", {}, registry};
+    ShipLua::ModHost host(context, ShipLua::Logger([](auto, const auto&, const auto&) {}));
+    const auto loaded = host.LoadModFromManifestAndSource(MakeManifest("test.hotkeys"), R"lua(
+local ship = require("ship")
+COUNT = 0
+assert(ship.hotkeys.register("action", {default="F8", label="Primeira"}, function() COUNT = 1 end))
+assert(ship.hotkeys.register("action", {default="F9", label="Segunda"}, function() COUNT = 2 end))
+assert(not pcall(ship.hotkeys.register, "Invalid ID", function() end))
+assert(not pcall(ship.hotkeys.register, "valid", {default=8}, function() end))
+)lua");
+    Check(loaded.isOk(), "replacement and validation script should load");
+    Check(registry->registered.size() == 1, "replacement should keep one host binding");
+    if (!registry->registered.empty()) {
+        Check(registry->registered[0].defaultKey == "F9", "replacement should update metadata");
+        registry->Fire("test.hotkeys", "action");
+        Check(host.GetRuntime("test.hotkeys")->DoString("assert(COUNT == 2)").isOk(),
+              "replacement should invoke only the latest callback");
+    }
+    host.UnloadAll();
+    Check(registry->registered.empty(), "UnloadAll should remove replaced hotkey binding");
+}
+
+void TestHotkeyFailureIsolationAndDisable() {
+    std::vector<CapturedLog> logs;
+    auto registry = std::make_shared<FakeHotkeyRegistry>();
+    ShipLua::LuaApiHostContext context{"mm", "4.2.0", "0.2.0", {}, registry};
+    ShipLua::ModHost host(context, CaptureLogger(logs));
+    const auto loaded = host.LoadModFromManifestAndSource(MakeManifest("test.broken_hotkey"), R"lua(
+local ship = require("ship")
+ATTEMPTS = 0
+assert(ship.hotkeys.register("broken", {default="F10"}, function()
+    ATTEMPTS = ATTEMPTS + 1
+    error("hotkey boom")
+end))
+)lua");
+    Check(loaded.isOk(), "broken hotkey mod should load before callback runs");
+    for (int attempt = 0; attempt < 4; ++attempt) {
+        registry->Fire("test.broken_hotkey", "broken");
+    }
+    Check(host.GetRuntime("test.broken_hotkey")->DoString("assert(ATTEMPTS == 3)").isOk(),
+          "hotkey callback should become inactive after three failures");
+    Check(ContainsLog(logs, "test.broken_hotkey",
+                      "hotkey 'broken' desativada após falhas repetidas"),
+          "failure threshold should be logged with the mod id");
+    host.UnloadAll();
+}
+
+void TestHotkeysNullRegistryIsNoOp() {
+    std::vector<CapturedLog> logs;
+    ShipLua::LuaApiHostContext context{"mm", "4.2.0", "0.1.0"};  // hotkeys left null
+    ShipLua::ModHost host(context, CaptureLogger(logs));
+
+    const std::string source = R"lua(
+local ship = require("ship")
+assert(ship.hotkeys ~= nil, "ship.hotkeys is common API surface")
+local ok = pcall(ship.hotkeys.register, "jump", function() end)
+assert(not ok, "registration without a host registry must report unsupported")
+)lua";
+    Check(host.LoadModFromManifestAndSource(MakeManifest("community.jump"), source).isOk(),
+          "mod loads even without a hotkey registry");
+    host.UnloadAll();
+}
+
 } // namespace
 
 int main() {
@@ -254,6 +401,10 @@ int main() {
     TestMissingAndInvalidHostContext();
     TestUnloadAllCopiesOwnedIds();
     TestBindingInstallRespectsMemoryLimit();
+    TestHotkeysRegisterFiresCallbackOnBothHosts();
+    TestHotkeyReplacementAndValidation();
+    TestHotkeyFailureIsolationAndDisable();
+    TestHotkeysNullRegistryIsNoOp();
     if (failures != 0) {
         std::cerr << failures << " check(s) failed\n";
         return 1;
