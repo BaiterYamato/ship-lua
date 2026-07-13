@@ -1,0 +1,22 @@
+# WORLD-003
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex
+- Branch: agent/WORLD-003-item-catalog
+- Started: 2026-07-13T16:45:46-03:00
+- Depends on: WORLD-001, PLAYER-001
+- Files:
+  - PLAN.md
+  - coordination/STATUS.md
+  - coordination/claims/WORLD-003.md
+  - coordination/handoffs/WORLD-003.md
+  - rfcs/0005-portable-item-catalog.md
+  - include/shiplua/world/PortableItemCatalog.h
+  - src/world/PortableItemCatalog.cpp
+  - tests/unit/PortableItemCatalogTests.cpp
+  - tests/CMakeLists.txt
+- Goal:
+  - Definir IDs canônicos sem depender dos enums internos de OoT ou MM.
+  - Registrar equivalências explícitas e preservar itens exclusivos do mundo de origem.
+  - Validar quantidades, equipamento e referências lógicas de assets antes dos adaptadores reais.
