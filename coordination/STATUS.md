@@ -47,6 +47,7 @@ Revisar e integrar a pilha de PRs da Fase 2 em ordem.
 - `EVENT-002` — review (ordem por carga, prioridades, mod e registro).
 - `EVENT-003` — review (`observe`, `filter`, `transform`, `consume` e isolamento de falhas).
 - `TIMER-001` — review (`after`/`every` por frame, cancelamento e isolamento de falhas).
+- `CODEGEN-001` — review (tipos e metadados C++ gerados dos schemas com gate de drift).
 
 ## Bloqueios
 
@@ -58,6 +59,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar CODEGEN-001.
+Integrar os PRs empilhados em ordem. Depois, iniciar CODEGEN-002/003.
 Baseline de build dos jogos (CI-001/CI-002) e
 submódulo `extern/ship-lua` nos forks ficam para a Fase 4.
