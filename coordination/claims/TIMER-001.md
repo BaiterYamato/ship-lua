@@ -1,0 +1,23 @@
+# TIMER-001
+
+- Status: review
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / MinGW g++ 15.2 + Ninja
+- Branch: agent/TIMER-001-frame-timers
+- Started: 2026-07-13T01:29:08-03:00
+- Depends on: EVENT-001 (PR #8; branch empilhada)
+- Files:
+  - include/shiplua/timer/FrameTimerScheduler.h
+  - src/timer/FrameTimerScheduler.cpp
+  - tests/unit/FrameTimerSchedulerTests.cpp
+  - tests/CMakeLists.txt
+  - docs/api/frame-timers.md
+  - coordination/claims/TIMER-001.md
+  - coordination/handoffs/TIMER-001.md
+  - coordination/STATUS.md
+- Goal:
+  - Implementar timers determinísticos por frame sem dependência de host ou Lua.
+  - Suportar execução única e repetição com cancelamento seguro.
+  - Isolar falhas de callback e preservar timers saudáveis.
+  - Definir mutations durante tick e restrição à thread proprietária.
+- Completed: 2026-07-13T01:32:44-03:00
