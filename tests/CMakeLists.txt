@@ -30,6 +30,11 @@ target_link_libraries(dependency_resolver_tests PRIVATE shiplua)
 
 add_test(NAME dependency_resolver_tests COMMAND dependency_resolver_tests)
 
+add_executable(mod_root_loader_tests unit/ModRootLoaderTests.cpp)
+target_link_libraries(mod_root_loader_tests PRIVATE shiplua miniz)
+
+add_test(NAME mod_root_loader_tests COMMAND mod_root_loader_tests)
+
 add_executable(event_dispatcher_tests unit/EventDispatcherTests.cpp)
 target_link_libraries(event_dispatcher_tests PRIVATE shiplua)
 

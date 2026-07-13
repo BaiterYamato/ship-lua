@@ -671,6 +671,7 @@ Encontrar, validar, ordenar e carregar mods.
 | MOD-005 | grafo de dependências | MOD-004 |
 | MOD-006 | ordem determinística | MOD-005 |
 | MOD-007 | detecção de ciclos e conflitos | MOD-005 |
+| MOD-008 | orquestrar descoberta, compatibilidade e carga da raiz | MOD-003, MOD-007, BIND-001 |
 | TOOL-001 | validador CLI | MOD-001 |
 | TEST-002 | fixtures válidas e inválidas | MOD-002 |
 
