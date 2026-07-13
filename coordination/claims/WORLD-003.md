@@ -1,6 +1,6 @@
 # WORLD-003
 
-- Status: claimed
+- Status: review
 - Agent: codex-windows-01
 - Platform: Windows 11 / Codex
 - Branch: agent/WORLD-003-item-catalog

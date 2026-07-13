@@ -70,6 +70,7 @@ a ação permanece exclusiva de MM e capability-gated.
 - `MM-HOTKEY-001` — review (registry/configuração/dispatch no thread principal; `2ship.exe` gerado; PR #6).
 - `MM-JUMP-001` — review (`ship.mm.player.jump`, capability e exemplo MM; 24/24 testes e `2ship.exe` gerado; PRs ship-lua #22 e 2Ship #7).
 - `WORLD-001` — review (sessão transacional OoT/MM, inventário canônico, assets lógicos e round-trip sintético; 25/25 testes MinGW/MSVC).
+- `WORLD-003` — review (catálogo canônico extensível, tradução explícita de equipamento e adiamento de itens exclusivos; 26/26 testes MinGW/MSVC).
 
 ## Bloqueios
 
@@ -83,6 +84,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 Integrar HOTKEY-001 antes dos dois bridges de host e confirmar o workflow de
 pacote do EXAMPLE-001. Depois de MM-HOTKEY-001, revisar MM-JUMP-001. Em paralelo,
-revisar WORLD-001 e iniciar o catálogo de tradução WORLD-003 antes dos adaptadores
-reais. Os builds Windows/MSVC estão verdes; execução com ativos legítimos, Linux
+revisar WORLD-001 e WORLD-003 antes de iniciar OOT-WORLD-001 e MM-WORLD-001.
+Os builds Windows/MSVC estão verdes; execução com ativos legítimos, Linux
 e macOS continuam pendentes.
