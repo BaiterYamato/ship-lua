@@ -30,6 +30,11 @@ target_link_libraries(dependency_resolver_tests PRIVATE shiplua)
 
 add_test(NAME dependency_resolver_tests COMMAND dependency_resolver_tests)
 
+add_executable(event_dispatcher_tests unit/EventDispatcherTests.cpp)
+target_link_libraries(event_dispatcher_tests PRIVATE shiplua)
+
+add_test(NAME event_dispatcher_tests COMMAND event_dispatcher_tests)
+
 add_test(NAME validator_valid_file
     COMMAND shiplua_manifest_validator
         "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/manifest/valid-minimal.toml")
