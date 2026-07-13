@@ -5,8 +5,8 @@
 
 ## Estado de `main`
 
-- Tip integrado: `1adebb2` (MOD-008 handoff + OOT-005/MM-005 coordenação).
-- Build/teste: **21/21 verdes** (código inalterado desde `265a200`; MOD-008 já validado).
+- Tip integrado: `e6dcf6c` (EXAMPLE-001 hello-world + conformidade).
+- Build/teste: **24/24 verdes** (rebuild limpo; inclui conformidade hello-world).
 - **CI Linux (`core-linux.yml`): verde** em cada push a `main` (critério v0.1.0 §16).
 - Lua v5.4.7 + toml++ v3.4.0 + miniz 3.1.2 (FetchContent).
 
@@ -33,6 +33,24 @@
   governança (opcional — não afeta o build).
 
 ## Histórico
+
+### 2026-07-13 (7) — EXAMPLE-001 hello-world + vertical slice (§14) provado no núcleo
+
+- Fast-forward de `main` (`1adebb2` → `e6dcf6c`): EXAMPLE-001.
+  - `examples/hello-world/` (manifest.toml + main.lua idênticos ao §14 do PLAN).
+  - `tests/conformance/HelloWorldConformanceTests.cpp` + packaging Python:
+    empacota `hello-world.shipmod`, carrega via `LoadModsFromRoot`, dispara
+    `game.ready`, confere log "Hello from <jogo> host=<versão>" e unload sem
+    callback vazado — **para oot e mm**.
+  - `.github/workflows/package-examples.yml` — workflow de empacotamento de
+    exemplos adicionado pelo builder (arquivo novo, não colide com `core-linux.yml`;
+    CI de exemplos passa a ser co-mantido — ver nota abaixo).
+- Validação: **rebuild limpo, 24/24 verdes**. Marco: o contrato da API do vertical
+  slice (§14) está provado ponta-a-ponta no núcleo (parte in-game real depende
+  dos adaptadores dos hosts nos forks).
+- Nota de propriedade: `.github/**` era território de governança (§17); o builder
+  contribuiu `package-examples.yml`. Aceito (sem colisão de arquivos); CI de
+  núcleo (`core-linux.yml`) permanece com a governança.
 
 ### 2026-07-13 (6) — HOST-004 + MOD-008 root loader (código)
 
