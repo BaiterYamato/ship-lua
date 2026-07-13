@@ -12,10 +12,12 @@ review
 - Itens exclusivos sem tradução, como a máscara Deku, permanecem adiados.
 - Mods podem registrar IDs namespaced sem ampliar o catálogo embutido.
 - Quantidades, equipamento e referências lógicas de assets são validados antes do adaptador.
+- O preview distingue equipamento traduzido para equivalente nativo de equipamento que mantém asset estrangeiro.
 
 ## Commits
 
 - `4a7c389` — Add portable item catalog.
+- `f02f393` — Distinguish translated equipment from foreign-asset equipment.
 
 ## Arquivos alterados
 
