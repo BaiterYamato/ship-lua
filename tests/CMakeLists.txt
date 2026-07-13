@@ -55,6 +55,11 @@ target_link_libraries(portable_item_catalog_tests PRIVATE shiplua)
 
 add_test(NAME portable_item_catalog_tests COMMAND portable_item_catalog_tests)
 
+add_executable(atomic_file_tests unit/AtomicFileTests.cpp)
+target_link_libraries(atomic_file_tests PRIVATE shiplua)
+
+add_test(NAME atomic_file_tests COMMAND atomic_file_tests)
+
 add_executable(generated_api_bindings_tests unit/GeneratedApiBindingsTests.cpp)
 target_link_libraries(generated_api_bindings_tests PRIVATE shiplua)
 

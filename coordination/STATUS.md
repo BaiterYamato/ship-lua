@@ -71,6 +71,7 @@ a ação permanece exclusiva de MM e capability-gated.
 - `MM-JUMP-001` — review (`ship.mm.player.jump`, capability e exemplo MM; 24/24 testes e `2ship.exe` gerado; PRs ship-lua #22 e 2Ship #7).
 - `WORLD-001` — review (sessão transacional OoT/MM, inventário canônico, assets lógicos e round-trip sintético; 25/25 testes MinGW/MSVC).
 - `WORLD-003` — review (catálogo canônico extensível, tradução explícita de equipamento e adiamento de itens exclusivos; 26/26 testes MinGW/MSVC).
+- `STORE-003` — review (substituição atômica interna, sincronização e testes de concorrência; 25/25 testes verdes em MinGW e MSVC).
 
 ## Bloqueios
 

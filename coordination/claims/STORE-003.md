@@ -1,0 +1,21 @@
+# STORE-003
+
+- Status: review
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex
+- Branch: agent/STORE-003-atomic-write
+- Started: 2026-07-13T17:47:12-03:00
+- Depends on: none
+- Files:
+  - include/shiplua/storage/AtomicFile.h
+  - src/storage/AtomicFile.cpp
+  - tests/unit/AtomicFileTests.cpp
+  - tests/CMakeLists.txt
+  - coordination/claims/STORE-003.md
+  - coordination/handoffs/STORE-003.md
+  - coordination/STATUS.md
+- Goal:
+  - Escrever envelopes e dados internos por substituição atômica no mesmo diretório.
+  - Sincronizar o arquivo temporário antes da substituição quando a plataforma permitir.
+  - Preservar o arquivo anterior em falhas anteriores ao commit.
+  - Não expor filesystem irrestrito à API Lua.
