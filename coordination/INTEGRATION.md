@@ -5,12 +5,32 @@
 
 ## Estado de `main`
 
-- Tip integrado: `64a76fa` (merge de CODEGEN-001/002/003 + BIND-001).
-- Validação: Windows 11 / MinGW g++ 15.2 / Ninja / C++20.
-  `100% tests passed, 0 tests failed out of 20` (ctest, timeout 60s).
+- Tip integrado: `c92d0e7` (merge de HOST-001 — coordenação OOT-001/MM-001).
+- Build/teste: idêntico a `64a76fa` (HOST-001 não alterou código): 20/20 verdes.
 - Lua v5.4.7 (FetchContent) + toml++ v3.4.0 (FetchContent).
 
+## PRs abertos nos forks (Fase 4) — pendentes de decisão do owner
+
+| PR | Repo | O que faz | Estado |
+|---|---|---|---|
+| #5 | BaiterYamato/Shipwright-HyliaFoundry | `build(oot)`: submódulo `extern/ship-lua` + CMake, base `lua/main` | validado pelo builder (MSVC Release x64); **governança NÃO mergeou** — não é verificável neste ambiente (build completo do jogo) |
+| #1 | BaiterYamato/2ship2harkinian | `build(mm)`: submódulo `extern/ship-lua` + CMake, base `lua/main` | idem |
+
+- Pin do submódulo nos forks: `ad5aad6` (código do BIND-001) — já contém todo o
+  núcleo (runtime, manifesto, eventos, timers, codegen, binding). Sugestão: antes
+  do merge nos forks, bump do pin para o tip de `main` para incluir os docs de
+  governança (opcional — não afeta o build).
+
 ## Histórico
+
+### 2026-07-13 (3) — Coordenação HOST-001 (bootstrap dos forks)
+
+- Merge `--no-ff` de `agent/HOST-001-submodules` em `main` (`8a702c1` → `c92d0e7`).
+  Conteúdo real: só coordenação (STATUS + claims/handoffs de OOT-001 e MM-001).
+  Sem código ship-lua → build inalterado. Merge limpo.
+- PR ship-lua#14 (branch HOST-001) fechado como merged pelo push.
+- Fork PRs #5 (Shipwright) e #1 (2ship) abertos pelo builder — ver tabela acima.
+  Não integrados pela governança (não verificáveis aqui).
 
 ### 2026-07-13 (2) — Codegen + binding Lua
 
