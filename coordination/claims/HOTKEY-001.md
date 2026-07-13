@@ -1,0 +1,33 @@
+# HOTKEY-001
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / CMake + Ninja
+- Repository: BaiterYamato/ship-lua
+- Branch: agent/HOTKEY-001-hotkey-api
+- Started: 2026-07-13T07:00:00-03:00
+- Depends on: BIND-001, EVENT-001, MOD-008
+- Files:
+  - rfcs/0002-common-hotkey-registration.md
+  - include/shiplua/input/**
+  - include/shiplua/api/LuaApiBinding.h
+  - src/input/**
+  - src/api/LuaApiBinding.cpp
+  - schema/api.yml
+  - schema/capabilities.yml
+  - generated/**
+  - tools/generate_cpp_api.py
+  - tools/validate_api_schemas.py
+  - tests/unit/LuaApiBindingTests.cpp
+  - tests/unit/GeneratedApiBindingsTests.cpp
+  - tests/unit/ModRootLoaderTests.cpp
+  - examples/dog-spawner/**
+  - examples/jump/**
+  - coordination/claims/HOTKEY-001.md
+  - coordination/handoffs/HOTKEY-001.md
+  - coordination/STATUS.md
+- Goal:
+  - Definir `ship.hotkeys.register` como contrato comum e versionado.
+  - Remover registros e callbacks de forma segura no unload de cada mod.
+  - Permitir adaptadores OoT e MM equivalentes sem headers de jogo no núcleo.
+  - Provar registro, disparo, substituição e descarregamento sem callback residual.
