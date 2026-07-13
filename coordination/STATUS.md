@@ -64,6 +64,7 @@ em paralelo, revisar o pacote comum do EXAMPLE-001.
 - `OOT-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `soh.exe` gerado; PR #9).
 - `MM-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `2ship.exe` gerado; PR #5).
 - `EXAMPLE-001` — review (pacote comum reproduzível, conformidade OoT/MM e artefato de CI; PR #20).
+- `STORE-003` — review (substituição atômica interna, sincronização e testes de concorrência; 25/25 testes verdes em MinGW e MSVC).
 
 ## Bloqueios
 
