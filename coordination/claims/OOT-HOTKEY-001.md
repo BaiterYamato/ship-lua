@@ -1,0 +1,21 @@
+# OOT-HOTKEY-001
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / Visual Studio 2022
+- Repository: BaiterYamato/Shipwright-HyliaFoundry
+- Branch: agent/OOT-HOTKEY-001-hotkey-bridge
+- Started: 2026-07-13T07:20:00-03:00
+- Depends on: OOT-005, HOTKEY-001
+- Files:
+  - extern/ship-lua
+  - soh/soh/OotHotkeyRegistry.h
+  - soh/soh/OotHotkeyRegistry.cpp
+  - soh/soh/ShipLuaBootstrap.h
+  - soh/soh/ShipLuaBootstrap.cpp
+  - soh/soh/OTRGlobals.cpp
+  - coordination/handoffs/OOT-HOTKEY-001.md
+- Goal:
+  - Injetar o registry comum no Shipwright.
+  - Despachar keydowns no thread principal com configuração por mod.
+  - Remover bindings no unload e compilar o host OoT.

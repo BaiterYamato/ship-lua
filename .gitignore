@@ -26,6 +26,7 @@ Thumbs.db
 
 # Python
 __pycache__/
+build-cmake/
 *.py[cod]
 
 # CMake

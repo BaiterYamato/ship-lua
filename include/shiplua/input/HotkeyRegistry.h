@@ -30,6 +30,10 @@ class HotkeyRegistry {
     // repeated (modId, id) pair.
     virtual bool Register(const HotkeyBinding& binding, std::function<void()> onFire) = 0;
 
+    // Removes every binding owned by a mod. Called during unload before the
+    // corresponding Lua state is destroyed. Implementations must be idempotent.
+    virtual void UnregisterMod(const std::string& modId) = 0;
+
     // Fires the registered callback. No-op if absent.
     virtual void Fire(const std::string& modId, const std::string& id) = 0;
 
@@ -43,6 +47,7 @@ class NullHotkeyRegistry : public HotkeyRegistry {
   public:
     explicit NullHotkeyRegistry(Logger logger = {});
     bool Register(const HotkeyBinding& binding, std::function<void()> onFire) override;
+    void UnregisterMod(const std::string& modId) override;
     void Fire(const std::string& modId, const std::string& id) override;
     std::vector<HotkeyBinding> Registered() const override;
 

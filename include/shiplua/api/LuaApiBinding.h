@@ -46,6 +46,12 @@ class LuaApiBinding {
         bool active = true;
     };
 
+    struct HotkeyCallback {
+        int registryReference = -2;
+        std::size_t consecutiveFailures = 0;
+        bool active = true;
+    };
+
     static LuaApiBinding* FromUpvalue(lua_State* state);
     static int InstallProtected(lua_State* state) noexcept;
     static int Require(lua_State* state) noexcept;
@@ -66,6 +72,7 @@ class LuaApiBinding {
     Result<Subscription> RegisterEvent(lua_State* state, const std::string& eventName,
                                        int callbackIndex, int callbackPriority);
     Result<void> RemoveEvent(Subscription subscription);
+    int RegisterHotkey(lua_State* state);
     EventFlow InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
                              EventPayload& payload);
     int WriteLog(lua_State* state, LogLevel level) noexcept;
@@ -77,7 +84,7 @@ class LuaApiBinding {
     Logger mLogger;
     LuaApiHostContext mHostContext;
     std::shared_ptr<HotkeyRegistry> mHotkeys;
-    std::vector<int> mHotkeyRefs;
+    std::map<std::string, std::shared_ptr<HotkeyCallback>> mHotkeyCallbacks;
     std::size_t mModLoadOrder = 0;
     int mModPriority = 50;
     std::size_t mMaxConsecutiveFailures = 3;
