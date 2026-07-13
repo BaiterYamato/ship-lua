@@ -56,6 +56,9 @@ struct WorldDestination {
 struct WorldImportPreview {
     std::vector<std::string> acceptedItemIds;
     std::vector<std::string> deferredItemIds;
+    // Accepted canonical items materialized as target-native equivalents.
+    // Their source-world visual assets are not used by the target.
+    std::vector<std::string> translatedItemIds;
 };
 
 struct WorldTravelResult {
@@ -63,6 +66,7 @@ struct WorldTravelResult {
     WorldDestination destination;
     std::vector<std::string> acceptedItemIds;
     std::vector<std::string> deferredItemIds;
+    std::vector<std::string> translatedItemIds;
 };
 
 class IWorldAdapter {

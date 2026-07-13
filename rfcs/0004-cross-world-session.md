@@ -68,10 +68,12 @@ Itens diferidos permanecem no snapshot canônico. Quando o jogador retorna a um
 mundo que os aceita, reaparecem. Itens adquiridos no destino são mesclados no
 próximo snapshot.
 
-Um item equipado só pode ser aceito se seu asset lógico for resolvido pelo
-destino. Resolver significa que o adaptador montou e validou o namespace do
-archive e possui factory/runtime compatível; encontrar um arquivo com o mesmo
-nome não é suficiente.
+Um item equipado mantido sem tradução só pode ser aceito se seu asset lógico for
+resolvido pelo destino. Um item traduzido explicitamente pelo catálogo usa o
+asset nativo do equivalente no destino e deve aparecer em `translatedItemIds`.
+Resolver asset estrangeiro significa que o adaptador montou e validou o
+namespace do archive e possui factory/runtime compatível; encontrar um arquivo
+com o mesmo nome não é suficiente.
 
 ## Assets OoT/MM
 
@@ -100,6 +102,7 @@ captura/restauração e o catálogo de assets.
 - nenhum acesso arbitrário a filesystem ou archive pelo mod Lua;
 - limites explícitos de vida, rupees, quantidade e número de itens;
 - preview deve particionar todos os itens sem IDs extras ou duplicados;
+- `translatedItemIds` deve ser subconjunto dos itens aceitos;
 - commit falho não muda o mundo ativo;
 - assets protegidos não entram no repositório nem em fixtures.
 
@@ -115,7 +118,8 @@ OoT → MM → OoT passar. Isso evita prometer teleporte antes de existir host c
 - viagem OoT → Clock Town → Kakariko;
 - hookshot diferido em MM e restaurado em OoT;
 - máscara MM preservada enquanto OoT está ativo;
-- equipamento cross-world rejeitado sem asset resolvível;
+- equipamento cross-world sem tradução rejeitado sem asset resolvível;
+- equipamento traduzido aceita o equivalente nativo sem montar o asset de origem;
 - falha de commit mantém fonte e destino intactos;
 - IDs duplicados, destino inválido e thread errada rejeitados.
 

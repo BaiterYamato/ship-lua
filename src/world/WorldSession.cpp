@@ -190,10 +190,19 @@ Result<void> WorldSession::ValidatePreview(const PortablePlayerState& state,
                                            const IWorldAdapter& target) const {
     std::set<std::string> accepted(preview.acceptedItemIds.begin(), preview.acceptedItemIds.end());
     std::set<std::string> deferred(preview.deferredItemIds.begin(), preview.deferredItemIds.end());
+    std::set<std::string> translated(preview.translatedItemIds.begin(),
+                                     preview.translatedItemIds.end());
     if (accepted.size() != preview.acceptedItemIds.size() ||
-        deferred.size() != preview.deferredItemIds.size()) {
+        deferred.size() != preview.deferredItemIds.size() ||
+        translated.size() != preview.translatedItemIds.size()) {
         return Result<void>::err(ErrorCode::InvalidState,
                                  "world adapter returned duplicate item decisions");
+    }
+    for (const std::string& id : translated) {
+        if (!accepted.contains(id)) {
+            return Result<void>::err(ErrorCode::InvalidState,
+                                     "translated item must also be accepted");
+        }
     }
 
     for (const PortableItem& item : state.items) {
@@ -203,7 +212,7 @@ Result<void> WorldSession::ValidatePreview(const PortablePlayerState& state,
             return Result<void>::err(ErrorCode::InvalidState,
                                      "world adapter must accept or defer every portable item exactly once");
         }
-        if (isAccepted && item.equipped && item.visualAsset &&
+        if (isAccepted && !translated.contains(item.id) && item.equipped && item.visualAsset &&
             !target.CanResolveAsset(*item.visualAsset)) {
             return Result<void>::err(ErrorCode::Unsupported,
                                      "destination accepted equipped item without resolving its asset");
@@ -281,6 +290,7 @@ Result<WorldTravelResult> WorldSession::Travel(const WorldDestination& destinati
     result.destination = destination;
     result.acceptedItemIds = preview.value->acceptedItemIds;
     result.deferredItemIds = preview.value->deferredItemIds;
+    result.translatedItemIds = preview.value->translatedItemIds;
     mCanonicalState = std::move(*canonical.value);
     mActiveWorld = destination.world;
     mActiveAcceptedItems = std::set<std::string>(result.acceptedItemIds.begin(),

@@ -69,11 +69,16 @@ class FakeWorldAdapter final : public ShipLua::IWorldAdapter {
         for (const ShipLua::PortableItem& item : state.items) {
             if (supportedItems.contains(item.id)) {
                 preview.acceptedItemIds.push_back(item.id);
+                if (translatedItems.contains(item.id)) {
+                    preview.translatedItemIds.push_back(item.id);
+                }
                 next.items.push_back(item);
             } else {
                 preview.deferredItemIds.push_back(item.id);
             }
         }
+        preview.translatedItemIds.insert(preview.translatedItemIds.end(), extraTranslatedItems.begin(),
+                                         extraTranslatedItems.end());
         pendingState = std::move(next);
         pendingDestination = destination;
         return ShipLua::Result<ShipLua::WorldImportPreview>::ok(std::move(preview));
@@ -106,6 +111,8 @@ class FakeWorldAdapter final : public ShipLua::IWorldAdapter {
     ShipLua::PortablePlayerState liveState;
     std::set<std::string> destinations;
     std::set<std::string> supportedItems;
+    std::set<std::string> translatedItems;
+    std::set<std::string> extraTranslatedItems;
     std::set<ShipLua::WorldId> mountedAssetWorlds;
     std::optional<ShipLua::WorldDestination> lastDestination;
     bool failCapture = false;
@@ -218,6 +225,36 @@ void TestAcceptedEquipmentRequiresResolvableAsset() {
           "asset validation failure must abort before changing active world");
 }
 
+void TestTranslatedEquipmentUsesNativeAsset() {
+    auto oot = MakeOotAdapter();
+    auto mm = MakeMmAdapter();
+    mm->mountedAssetWorlds.clear();
+    mm->translatedItems.insert("shared.sword");
+    ShipLua::WorldSession session;
+    session.RegisterAdapter(oot);
+    session.RegisterAdapter(mm);
+    session.SetActiveWorld(ShipLua::WorldId::Oot);
+
+    const auto travel = session.Travel({ ShipLua::WorldId::Mm, "mm.clock_town" });
+    Check(travel.isOk() && travel.value &&
+              travel.value->translatedItemIds == std::vector<std::string>{ "shared.sword" },
+          "translated equipment should use a target-native asset without mounting the source asset");
+}
+
+void TestTranslatedDecisionMustAlsoBeAccepted() {
+    auto oot = MakeOotAdapter();
+    auto mm = MakeMmAdapter();
+    mm->extraTranslatedItems.insert("oot.hookshot");
+    ShipLua::WorldSession session;
+    session.RegisterAdapter(oot);
+    session.RegisterAdapter(mm);
+    session.SetActiveWorld(ShipLua::WorldId::Oot);
+
+    const auto travel = session.Travel({ ShipLua::WorldId::Mm, "mm.clock_town" });
+    Check(!travel.isOk() && travel.code == ShipLua::ErrorCode::InvalidState,
+          "adapter cannot mark a deferred item as translated");
+}
+
 void TestWorldAcceptingZeroItemsStillPreservesCanonicalInventory() {
     auto oot = MakeOotAdapter();
     auto mm = MakeMmAdapter();
@@ -260,6 +297,8 @@ int main() {
     TestRoundTripPreservesDeferredEquipmentAndCrossWorldAsset();
     TestFailedCommitLeavesSourceActiveAndDestinationUnchanged();
     TestAcceptedEquipmentRequiresResolvableAsset();
+    TestTranslatedEquipmentUsesNativeAsset();
+    TestTranslatedDecisionMustAlsoBeAccepted();
     TestWorldAcceptingZeroItemsStillPreservesCanonicalInventory();
     TestValidationAndOwnerThread();
     if (failures != 0) {
