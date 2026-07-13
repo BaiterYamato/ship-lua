@@ -5,9 +5,11 @@
 
 ## Estado de `main`
 
-- Tip integrado: `c92d0e7` (merge de HOST-001 — coordenação OOT-001/MM-001).
-- Build/teste: idêntico a `64a76fa` (HOST-001 não alterou código): 20/20 verdes.
-- Lua v5.4.7 (FetchContent) + toml++ v3.4.0 (FetchContent).
+- Tip integrado: `18c9397` (merge de HOST-002 — coordenação OOT-002/MM-002).
+- Build/teste: idêntico a `1a1856a` (só coordenação): 20/20 verdes.
+- **CI Linux (`core-linux.yml`): verde** — run 29228265961 concluída com sucesso
+  (critério v0.1.0 §16 "CI Linux verde" atendido).
+- Lua v5.4.7 + toml++ v3.4.0 + miniz 3.1.2 (FetchContent).
 
 ## PRs abertos nos forks (Fase 4) — pendentes de decisão do owner
 
@@ -22,6 +24,14 @@
   governança (opcional — não afeta o build).
 
 ## Histórico
+
+### 2026-07-13 (5) — CI Linux verde + HOST-002
+
+- CI `core-linux` (run 29228265961): **success**. `main` verificado em Ubuntu.
+- Merge `--no-ff` de `agent/HOST-002-bootstrap` (`1a1856a` → `18c9397`):
+  coordenação OOT-002/MM-002 (bootstrap dos hosts, em review nos forks). Sem código.
+- PR ship-lua#15 fechado (merged) pelo push.
+- HOST-003 (shutdown OOT-003/MM-003) ainda em claim — não integrado.
 
 ### 2026-07-13 (4) — CI Linux do núcleo
 
