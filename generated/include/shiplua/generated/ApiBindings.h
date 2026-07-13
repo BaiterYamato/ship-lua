@@ -37,7 +37,7 @@ struct ActorSnapshot {
 };
 
 struct HotkeyOptions {
-    std::optional<std::string> default;
+    std::optional<std::string> default_;
     std::optional<std::string> label;
 };
 

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "shiplua/events/EventDispatcher.h"
+#include "shiplua/input/HotkeyRegistry.h"
 #include "shiplua/runtime/Logger.h"
 #include "shiplua/runtime/LuaRuntime.h"
 #include "shiplua/runtime/Result.h"
@@ -19,8 +20,9 @@ namespace ShipLua {
 struct LuaApiHostContext {
     std::string gameId;
     std::string hostVersion;
-    std::string runtimeVersion = "0.1.0";
+    std::string runtimeVersion = "0.2.0";
     std::vector<std::string> capabilities;
+    std::shared_ptr<HotkeyRegistry> hotkeys;  // nullable; null = host without hotkey support
 };
 
 class LuaApiBinding {
@@ -55,6 +57,7 @@ class LuaApiBinding {
     static int CapabilityList(lua_State* state) noexcept;
     static int EventsOn(lua_State* state) noexcept;
     static int EventsOff(lua_State* state) noexcept;
+    static int HotkeysRegister(lua_State* state) noexcept;
     static int LogDebug(lua_State* state) noexcept;
     static int LogInfo(lua_State* state) noexcept;
     static int LogWarn(lua_State* state) noexcept;
@@ -73,6 +76,8 @@ class LuaApiBinding {
     EventDispatcher& mEvents;
     Logger mLogger;
     LuaApiHostContext mHostContext;
+    std::shared_ptr<HotkeyRegistry> mHotkeys;
+    std::vector<int> mHotkeyRefs;
     std::size_t mModLoadOrder = 0;
     int mModPriority = 50;
     std::size_t mMaxConsecutiveFailures = 3;
