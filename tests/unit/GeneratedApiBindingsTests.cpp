@@ -21,11 +21,11 @@ int main() {
     using namespace ShipLua::Generated;
     static_assert(std::is_same_v<Subscription, std::uint64_t>);
     static_assert(std::is_same_v<decltype(ActorHandle::game), GameId>);
-    static_assert(kFunctions.size() == 12);
+    static_assert(kFunctions.size() == 13);
     static_assert(kEvents.size() == 11);
     static_assert(kCapabilities.size() == 12);
 
-    Check(kApiVersion == "0.1.0", "API version should derive from the schema");
+    Check(kApiVersion == "0.2.0", "API version should derive from the schema");
     Check(kFunctions.front().name == "ship.game.id", "first function should preserve schema order");
     Check(kFunctions[6].arguments.size() == 3 && !kFunctions[6].arguments[2].required,
           "optional callback metadata should be generated");
