@@ -6,7 +6,7 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + core-runtime/manifesto/mod-host/discovery em review
+bootstrap-done + runtime/modloader até SemVer em review
 
 ## Repositórios
 
@@ -21,7 +21,7 @@ bootstrap-done + core-runtime/manifesto/mod-host/discovery em review
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar PR #1; depois revisar o PR empilhado de `MOD-003`/`TEST-002`.
+Revisar e integrar PRs empilhados #1, #2 e o PR de `MOD-004`.
 
 ## Progresso
 
@@ -33,6 +33,7 @@ Revisar e integrar PR #1; depois revisar o PR empilhado de `MOD-003`/`TEST-002`.
 - `CORE-002` — review (ModHost multi-mod isolado, rollback e unload).
 - `TEST-002` — review (fixtures TOML válidas e inválidas).
 - `MOD-003` — review (discovery + extração ZIP limitada/transacional + carga pelo ModHost).
+- `MOD-004` — review (SemVer 2.0.0, ranges conjuntivos e validação no manifesto).
 
 ## Bloqueios
 
@@ -44,6 +45,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar PR #1 e o PR empilhado de MOD-003/TEST-002. Depois, seguir para
-MOD-004 (SemVer). Baseline de build dos jogos (CI-001/CI-002) e submódulo
+Integrar os PRs empilhados em ordem. Depois, seguir para MOD-005 (grafo de
+dependências). Baseline de build dos jogos (CI-001/CI-002) e submódulo
 `extern/ship-lua` nos forks ficam para a Fase 4.
