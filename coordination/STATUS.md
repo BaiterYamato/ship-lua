@@ -13,15 +13,15 @@ bootstrap-done + Fases 2 e 3 em review + ciclo de vida dos hosts em review
 | Repositório | Estado | Branch de integração | Baseline |
 |---|---|---|---|
 | BaiterYamato/ship-lua | criado + push (origin) | main | — |
-| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001/002/003 em review (PRs #5, #6 e #7) | lua/main | `fb3259f7` |
-| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001/002/003 em review (PRs #1, #2 e #3) | lua/main | `b3cc3662` |
+| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001/002/003/004 em review (PRs #5 a #8) | lua/main | `fb3259f7` |
+| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001/002/003/004 em review (PRs #1 a #4) | lua/main | `b3cc3662` |
 
 > Nota: o fork do Shipwright foi renomeado para `Shipwright-HyliaFoundry`.
 > Ambos os forks têm default `develop` e branch de integração `lua/main` já criada.
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar, em ordem, OOT-001 → OOT-002 → OOT-003 e MM-001 → MM-002 → MM-003.
+Revisar e integrar, em ordem, OOT-001 → OOT-002 → OOT-003 → OOT-004 e MM-001 → MM-002 → MM-003 → MM-004.
 
 ## Progresso
 
@@ -57,6 +57,8 @@ Revisar e integrar, em ordem, OOT-001 → OOT-002 → OOT-003 e MM-001 → MM-00
 - `MM-002` — review (bootstrap idempotente + logger + CRT estático; `2ship.exe` gerado; PR #2).
 - `OOT-003` — review (shutdown idempotente antes dos serviços do host; `soh.exe` gerado; PR #7).
 - `MM-003` — review (shutdown idempotente antes dos serviços do host; `2ship.exe` gerado; PR #3).
+- `OOT-004` — review (`oot`, versão 9.1.2 e commit real injetados/detectados; PR #8).
+- `MM-004` — review (`mm`, versão 4.0.2 e commit real injetados/detectados; PR #4).
 
 ## Bloqueios
 
@@ -68,7 +70,7 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar OOT-004/MM-004 em branches
-próprias para expor versão e commit dos hosts ao runtime. Os builds completos
-Windows/MSVC estão verdes nos dois hosts; execução com ativos legítimos, Linux
-e macOS continuam pendentes.
+Integrar os PRs empilhados em ordem. Depois, iniciar OOT-005/MM-005 em branches
+próprias para localizar o diretório de mods com segurança. Os builds Windows/MSVC
+estão verdes nos dois hosts; execução com ativos legítimos, Linux e macOS
+continuam pendentes.
