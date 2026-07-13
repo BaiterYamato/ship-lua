@@ -1,6 +1,6 @@
 # OOT-HOTKEY-001
 
-- Status: claimed
+- Status: review
 - Agent: codex-windows-01
 - Platform: Windows 11 / Codex / Visual Studio 2022
 - Repository: BaiterYamato/Shipwright-HyliaFoundry

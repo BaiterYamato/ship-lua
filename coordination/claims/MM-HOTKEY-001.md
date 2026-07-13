@@ -1,6 +1,6 @@
 # MM-HOTKEY-001
 
-- Status: claimed
+- Status: review
 - Agent: codex-windows-01
 - Platform: Windows 11 / Codex / Visual Studio 2022
 - Repository: BaiterYamato/2ship2harkinian
@@ -14,6 +14,7 @@
   - mm/2s2h/ShipLuaBootstrap.h
   - mm/2s2h/ShipLuaBootstrap.cpp
   - mm/2s2h/BenPort.cpp
+  - mm/CMakeLists.txt
   - coordination/handoffs/MM-HOTKEY-001.md
 - Goal:
   - Injetar o registry comum no 2Ship2Harkinian.

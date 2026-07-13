@@ -1,6 +1,6 @@
 # HOTKEY-001
 
-- Status: claimed
+- Status: review
 - Agent: codex-windows-01
 - Platform: Windows 11 / Codex / CMake + Ninja
 - Repository: BaiterYamato/ship-lua
@@ -23,7 +23,6 @@
   - tests/unit/GeneratedApiBindingsTests.cpp
   - tests/unit/ModRootLoaderTests.cpp
   - examples/dog-spawner/**
-  - examples/jump/**
   - coordination/claims/HOTKEY-001.md
   - coordination/handoffs/HOTKEY-001.md
   - coordination/STATUS.md
