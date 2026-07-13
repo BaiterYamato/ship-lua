@@ -10,6 +10,10 @@ bool NullHotkeyRegistry::Register(const HotkeyBinding& binding, std::function<vo
     return false;
 }
 
+void NullHotkeyRegistry::UnregisterMod(const std::string& modId) {
+    (void)modId;
+}
+
 void NullHotkeyRegistry::Fire(const std::string& modId, const std::string& id) {
     (void)modId;
     (void)id;
