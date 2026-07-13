@@ -1,0 +1,70 @@
+name: package-examples
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/**"
+      - "tests/conformance/**"
+      - "CMakeLists.txt"
+      - "tests/CMakeLists.txt"
+      - ".github/workflows/package-examples.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "examples/**"
+      - "tests/conformance/**"
+      - "CMakeLists.txt"
+      - "tests/CMakeLists.txt"
+      - ".github/workflows/package-examples.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: validar e empacotar exemplos
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar ferramentas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ python3
+
+      - name: Configurar
+        run: >-
+          cmake -S . -B build -G Ninja
+          -DCMAKE_C_COMPILER=gcc
+          -DCMAKE_CXX_COMPILER=g++
+
+      - name: Compilar pacote e validadores
+        run: >-
+          cmake --build build
+          --target package_examples shiplua_manifest_validator hello_world_conformance_tests
+
+      - name: Validar o pacote gerado
+        run: build/shiplua_manifest_validator build/examples/hello-world.shipmod
+
+      - name: Executar testes focais
+        run: >-
+          ctest --test-dir build
+          -R "hello_world_(conformance_tests|package_validation|packaging_tests)"
+          --output-on-failure
+
+      - name: Gerar checksum SHA-256
+        working-directory: build/examples
+        run: sha256sum hello-world.shipmod > hello-world.shipmod.sha256
+
+      - name: Publicar pacote validado
+        uses: actions/upload-artifact@v4
+        with:
+          name: shiplua-example-packages
+          path: |
+            build/examples/hello-world.shipmod
+            build/examples/hello-world.shipmod.sha256
+          if-no-files-found: error

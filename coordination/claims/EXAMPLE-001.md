@@ -1,6 +1,6 @@
 # EXAMPLE-001
 
-- Status: review
+- Status: claimed
 - Agent: codex-windows-01
 - Platform: Windows 11 / Codex / CMake + MinGW
 - Repository: BaiterYamato/ship-lua
@@ -12,6 +12,7 @@
   - tests/conformance/**
   - tests/CMakeLists.txt
   - CMakeLists.txt
+  - .github/workflows/package-examples.yml
   - coordination/claims/EXAMPLE-001.md
   - coordination/handoffs/EXAMPLE-001.md
   - coordination/STATUS.md
@@ -20,3 +21,4 @@
   - Gerar `hello-world.shipmod` sem incluir artefato binário no Git.
   - Carregar o mesmo pacote pelos contextos OoT e MM.
   - Provar `game.ready`, log de identidade e unload sem callbacks residuais.
+  - Publicar o pacote validado com checksum como artefato de CI.
