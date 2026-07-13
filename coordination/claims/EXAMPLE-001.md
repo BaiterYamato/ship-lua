@@ -1,0 +1,22 @@
+# EXAMPLE-001
+
+- Status: review
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / CMake + MinGW
+- Repository: BaiterYamato/ship-lua
+- Branch: agent/EXAMPLE-001-hello-world
+- Started: 2026-07-13T05:07:30-03:00
+- Depends on: MOD-008, BIND-001
+- Files:
+  - examples/hello-world/**
+  - tests/conformance/**
+  - tests/CMakeLists.txt
+  - CMakeLists.txt
+  - coordination/claims/EXAMPLE-001.md
+  - coordination/handoffs/EXAMPLE-001.md
+  - coordination/STATUS.md
+- Goal:
+  - Versionar o primeiro mod comum com manifesto e entrypoint reais.
+  - Gerar `hello-world.shipmod` sem incluir artefato binário no Git.
+  - Carregar o mesmo pacote pelos contextos OoT e MM.
+  - Provar `game.ready`, log de identidade e unload sem callbacks residuais.

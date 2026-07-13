@@ -55,6 +55,19 @@ target_link_libraries(lua_api_binding_tests PRIVATE shiplua)
 
 add_test(NAME lua_api_binding_tests COMMAND lua_api_binding_tests)
 
+add_executable(hello_world_conformance_tests conformance/HelloWorldConformanceTests.cpp)
+target_link_libraries(hello_world_conformance_tests PRIVATE shiplua)
+target_compile_definitions(hello_world_conformance_tests PRIVATE
+    SHIPLUA_HELLO_WORLD_PACKAGE="${SHIPLUA_HELLO_WORLD_PACKAGE}")
+add_dependencies(hello_world_conformance_tests package_examples)
+
+add_test(NAME hello_world_conformance_tests COMMAND hello_world_conformance_tests)
+add_test(NAME hello_world_package_validation
+    COMMAND shiplua_manifest_validator "${SHIPLUA_HELLO_WORLD_PACKAGE}")
+add_test(NAME hello_world_packaging_tests
+    COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/conformance/test_package_hello_world.py")
+
 add_test(NAME validator_valid_file
     COMMAND shiplua_manifest_validator
         "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/manifest/valid-minimal.toml")
@@ -68,7 +81,6 @@ set_tests_properties(validator_invalid_manifest PROPERTIES WILL_FAIL TRUE)
 add_test(NAME validator_usage COMMAND shiplua_manifest_validator)
 set_tests_properties(validator_usage PROPERTIES WILL_FAIL TRUE)
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
 add_test(NAME api_schema_validation
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/validate_api_schemas.py")
 add_test(NAME api_schema_validation_tests

@@ -66,6 +66,27 @@ add_executable(shiplua_manifest_validator tools/manifest_validator.cpp)
 target_link_libraries(shiplua_manifest_validator PRIVATE shiplua)
 
 # ---------------------------------------------------------------------------
+# Example packages
+# ---------------------------------------------------------------------------
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(SHIPLUA_EXAMPLE_OUTPUT_DIR "${CMAKE_BINARY_DIR}/examples")
+set(SHIPLUA_HELLO_WORLD_PACKAGE "${SHIPLUA_EXAMPLE_OUTPUT_DIR}/hello-world.shipmod")
+add_custom_command(
+    OUTPUT "${SHIPLUA_HELLO_WORLD_PACKAGE}"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${SHIPLUA_EXAMPLE_OUTPUT_DIR}"
+    COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/conformance/PackageHelloWorld.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/examples/hello-world"
+            "${SHIPLUA_HELLO_WORLD_PACKAGE}"
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/examples/hello-world/manifest.toml"
+        "${CMAKE_CURRENT_SOURCE_DIR}/examples/hello-world/main.lua"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/conformance/PackageHelloWorld.py"
+    COMMENT "Empacotando hello-world.shipmod"
+    VERBATIM)
+add_custom_target(package_examples DEPENDS "${SHIPLUA_HELLO_WORLD_PACKAGE}")
+
+# ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
 enable_testing()
