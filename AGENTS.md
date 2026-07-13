@@ -100,7 +100,10 @@ No repositório `ship-lua`, use `main` como integração estável e branches `ag
 
 ### Regras Git
 
-- Nunca faça commits diretamente em `develop`, `lua/main` ou `main`.
+- Commits são permitidos quando o usuário os autorizar explicitamente.
+- Mesmo com autorização para commits, não faça commits diretamente em `develop`,
+  `lua/main` ou `main`, salvo quando o usuário autorizar explicitamente também a
+  branch de integração nomeada. Por padrão, use uma branch `agent/<TASK-ID>-<slug>`.
 - Nunca use `git push --force` em branch compartilhada.
 - Não rebase uma branch depois que outro agente passou a depender dela.
 - Prefira PR pequeno, revisável e com uma única finalidade.
