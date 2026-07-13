@@ -1,0 +1,25 @@
+# WORLD-001
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / CMake + Ninja + MSVC
+- Repository: BaiterYamato/ship-lua
+- Branch: agent/WORLD-001-portable-session
+- Started: 2026-07-13T17:00:00-03:00
+- Depends on: ARCH-002, MOD-008, BIND-001
+- Files:
+  - PLAN.md
+  - rfcs/0004-cross-world-session.md
+  - include/shiplua/world/**
+  - src/world/**
+  - tests/unit/WorldSessionTests.cpp
+  - tests/CMakeLists.txt
+  - coordination/claims/WORLD-001.md
+  - coordination/handoffs/WORLD-001.md
+  - coordination/STATUS.md
+- Goal:
+  - Definir o contrato transacional para uma sessão que contenha OoT e MM.
+  - Representar estado portátil de jogador, inventário, equipamentos e referências de assets sem expor structs dos hosts.
+  - Registrar dois adaptadores simultaneamente e transferir entre destinos com rollback determinístico.
+  - Preservar itens não suportados pelo destino no estado compartilhado, sem descartá-los ou fingir suporte.
+  - Provar a primeira viagem OoT para MM e retorno com adaptadores sintéticos.
