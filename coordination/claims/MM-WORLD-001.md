@@ -1,0 +1,21 @@
+# MM-WORLD-001
+
+- Status: review
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex
+- Branch: agent/MM-WORLD-001-portable-save
+- Started: 2026-07-13T17:19:15-03:00
+- Depends on: MM-JUMP-001, WORLD-003, OOT-WORLD-001
+- Files:
+  - extern/ship-lua/coordination/claims/MM-WORLD-001.md
+  - extern/ship-lua/coordination/handoffs/MM-WORLD-001.md
+  - extern/ship-lua/coordination/STATUS.md
+  - mm/2s2h/MmWorldAdapter.h
+  - mm/2s2h/MmWorldAdapter.cpp
+  - mm/2s2h/ShipLuaBootstrap.h
+  - mm/2s2h/ShipLuaBootstrap.cpp
+- Goal:
+  - Capturar vida, capacidade, rupees, inventário e equipamento do save MM em IDs canônicos.
+  - Preparar e aplicar importação validada sem expor enums internos ao núcleo.
+  - Resolver destinos principais de MM por IDs estáveis.
+  - Preservar o mod e o bridge de hotkey existentes na linha MM-005/MM-JUMP-001.
