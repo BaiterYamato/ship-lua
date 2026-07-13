@@ -6,7 +6,7 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + runtime/modloader até SemVer em review
+bootstrap-done + runtime/modloader Fase 2 em review
 
 ## Repositórios
 
@@ -21,7 +21,7 @@ bootstrap-done + runtime/modloader até SemVer em review
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar PRs empilhados #1, #2 e o PR de `MOD-004`.
+Revisar e integrar a pilha de PRs da Fase 2 em ordem.
 
 ## Progresso
 
@@ -34,6 +34,9 @@ Revisar e integrar PRs empilhados #1, #2 e o PR de `MOD-004`.
 - `TEST-002` — review (fixtures TOML válidas e inválidas).
 - `MOD-003` — review (discovery + extração ZIP limitada/transacional + carga pelo ModHost).
 - `MOD-004` — review (SemVer 2.0.0, ranges conjuntivos e validação no manifesto).
+- `MOD-005` — review (grafo e validação de dependências).
+- `MOD-006` — review (ordem determinística por grafo, prioridade e ID).
+- `MOD-007` — review (ciclos, incompatibilidades e IDs duplicados).
 
 ## Bloqueios
 
@@ -45,6 +48,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, seguir para MOD-005 (grafo de
-dependências). Baseline de build dos jogos (CI-001/CI-002) e submódulo
-`extern/ship-lua` nos forks ficam para a Fase 4.
+Integrar os PRs empilhados em ordem. Depois, concluir TOOL-001 ou iniciar a
+Fase 3 por API-001/RFC. Baseline de build dos jogos (CI-001/CI-002) e
+submódulo `extern/ship-lua` nos forks ficam para a Fase 4.
