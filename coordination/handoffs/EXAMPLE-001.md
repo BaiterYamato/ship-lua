@@ -17,6 +17,7 @@ review
 
 - `6e42d36` — feat(example): add reproducible hello-world package
 - `af004a5` — ci(examples): publish validated shipmod artifact
+- `134c2c8` — ci(examples): use Node 24 artifact actions
 
 ## Arquivos alterados
 
@@ -48,11 +49,12 @@ ctest --test-dir build -R "hello_world_(conformance_tests|package_validation|pac
 - O validador aceitou o `.shipmod` gerado.
 - Os três testes focais do pacote passaram após a inclusão do workflow.
 - O pacote local manteve SHA-256 `b6275f720c93129e53dfc0a455f7b6109af45cc94f956a71230384808b16a3ed`.
+- GitHub Actions: `package-examples` e `core-linux` passaram no PR #20.
+- O pacote e o checksum foram publicados pelo `actions/upload-artifact@v7` sem o aviso de Node.js 20.
 
 ## Pendências
 
 - Copiar o pacote para os diretórios reais dos dois hosts e observar os logs com ativos legítimos.
-- Confirmar a execução do novo workflow no GitHub Actions.
 - Validar macOS.
 
 ## Riscos

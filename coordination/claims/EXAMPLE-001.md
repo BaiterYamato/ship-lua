@@ -1,6 +1,6 @@
 # EXAMPLE-001
 
-- Status: claimed
+- Status: review
 - Agent: codex-windows-01
 - Platform: Windows 11 / Codex / CMake + MinGW
 - Repository: BaiterYamato/ship-lua
