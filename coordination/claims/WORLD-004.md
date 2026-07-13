@@ -10,7 +10,9 @@
 - Files:
   - rfcs/0007-cross-world-assets.md
   - include/shiplua/world/WorldAssetCatalog.h
+  - include/shiplua/world/WorldSession.h
   - src/world/WorldAssetCatalog.cpp
+  - src/world/WorldSession.cpp
   - tests/unit/WorldAssetCatalogTests.cpp
   - tests/CMakeLists.txt
   - coordination/claims/WORLD-004.md

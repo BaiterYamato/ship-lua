@@ -51,6 +51,20 @@ const char* WorldIdName(WorldId world) noexcept {
     return "unknown";
 }
 
+Result<void> ValidateAssetReference(const AssetReference& asset) {
+    if (!IsPortableId(asset.id)) {
+        return Result<void>::err(ErrorCode::InvalidArgument,
+                                 "asset reference has an invalid canonical id");
+    }
+    const std::string prefix = asset.owner == WorldId::Oot ? "oot." : "mm.";
+    if ((asset.owner != WorldId::Oot && asset.owner != WorldId::Mm) ||
+        asset.id.rfind(prefix, 0) != 0) {
+        return Result<void>::err(ErrorCode::InvalidArgument,
+                                 "asset reference does not match its owner namespace");
+    }
+    return Result<void>::ok();
+}
+
 Result<void> ValidatePortablePlayerState(const PortablePlayerState& state) {
     if (state.healthCapacity == 0 || state.healthCapacity > kMaxHealth || state.health > state.healthCapacity) {
         return Result<void>::err(ErrorCode::InvalidArgument,
@@ -79,9 +93,11 @@ Result<void> ValidatePortablePlayerState(const PortablePlayerState& state) {
             return Result<void>::err(ErrorCode::InvalidArgument,
                                      "portable item quantity is outside the supported range");
         }
-        if (item.visualAsset && !IsPortableId(item.visualAsset->id)) {
-            return Result<void>::err(ErrorCode::InvalidArgument,
-                                     "portable item has an invalid asset id");
+        if (item.visualAsset) {
+            const auto asset = ValidateAssetReference(*item.visualAsset);
+            if (!asset.isOk()) {
+                return asset;
+            }
         }
     }
     return Result<void>::ok();

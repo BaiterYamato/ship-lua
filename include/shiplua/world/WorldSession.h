@@ -117,6 +117,7 @@ class WorldSession {
 };
 
 Result<void> ValidatePortablePlayerState(const PortablePlayerState& state);
+Result<void> ValidateAssetReference(const AssetReference& asset);
 Result<void> ValidateWorldDestination(const WorldDestination& destination);
 
 } // namespace ShipLua

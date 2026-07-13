@@ -65,6 +65,11 @@ target_link_libraries(world_handoff_tests PRIVATE shiplua)
 
 add_test(NAME world_handoff_tests COMMAND world_handoff_tests)
 
+add_executable(world_asset_catalog_tests unit/WorldAssetCatalogTests.cpp)
+target_link_libraries(world_asset_catalog_tests PRIVATE shiplua)
+
+add_test(NAME world_asset_catalog_tests COMMAND world_asset_catalog_tests)
+
 add_executable(generated_api_bindings_tests unit/GeneratedApiBindingsTests.cpp)
 target_link_libraries(generated_api_bindings_tests PRIVATE shiplua)
 
