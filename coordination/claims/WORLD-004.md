@@ -1,6 +1,6 @@
 # WORLD-004
 
-- Status: claimed
+- Status: review
 - Agent: codex-windows-01
 - Platform: Windows 11 / Codex / CMake + Ninja + MSVC
 - Repository: BaiterYamato/ship-lua

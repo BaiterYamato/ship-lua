@@ -13,17 +13,17 @@ bootstrap-done + Fases 2 e 3 em review + carga de mods nos hosts em review
 | Repositório | Estado | Branch de integração | Baseline |
 |---|---|---|---|
 | BaiterYamato/ship-lua | criado + push (origin) | main | — |
-| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001 a OOT-005 + OOT-HOTKEY-001 em review (PRs #5 a #10) | lua/main | `fb3259f7` |
-| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001 a MM-005 + hotkey e pulo MM em review (PRs #1 a #7) | lua/main | `b3cc3662` |
+| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001 a OOT-005 + hotkey + mundo/assets em review (PRs #5 a #12) | lua/main | `fb3259f7` |
+| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001 a MM-005 + hotkey + pulo + mundo/assets em review (PRs #1 a #9) | lua/main | `b3cc3662` |
 
 > Nota: o fork do Shipwright foi renomeado para `Shipwright-HyliaFoundry`.
 > Ambos os forks têm default `develop` e branch de integração `lua/main` já criada.
 
 ## Tarefa ativa recomendada
 
-Revisar HOTKEY-001 e, depois, os bridges empilhados OOT-HOTKEY-001 e
-MM-HOTKEY-001. Para o exemplo de pulo, revisar MM-JUMP-001 após o hotkey MM;
-a ação permanece exclusiva de MM e capability-gated.
+Integrar a pilha WORLD-001 a WORLD-004 no núcleo e os adaptadores de mundo/assets
+nos hosts. Em seguida, implementar o supervisor autenticado para ativar o host de
+destino e validar o round-trip OoT/MM com o mesmo pacote de mod.
 
 ## Progresso
 
@@ -73,6 +73,9 @@ a ação permanece exclusiva de MM e capability-gated.
 - `WORLD-003` — review (catálogo canônico extensível, tradução explícita de equipamento e adiamento de itens exclusivos; 26/26 testes MinGW/MSVC).
 - `STORE-003` — review (substituição atômica interna, sincronização e testes de concorrência; 25/25 testes verdes em MinGW e MSVC).
 - `WORLD-002` — review (envelope v1 com HMAC-SHA-256, anti-replay e publicação atômica; 28/28 testes MinGW/MSVC).
+- `WORLD-004` — review (catálogo de assets por owner/contrato, sondas autenticadas e 29/29 testes MinGW/MSVC).
+- `OOT-WORLD-002` — review (sonda de três espadas nativas, resolução fail-closed; `soh.exe` gerado; PR #12).
+- `MM-WORLD-002` — review (sonda de três espadas nativas, resolução fail-closed; `2ship.exe` gerado; PR #9).
 
 ## Bloqueios
 
@@ -84,8 +87,7 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar HOTKEY-001 antes dos dois bridges de host e confirmar o workflow de
-pacote do EXAMPLE-001. Depois de MM-HOTKEY-001, revisar MM-JUMP-001. Em paralelo,
-revisar WORLD-001 e WORLD-003 antes de iniciar OOT-WORLD-001 e MM-WORLD-001.
-Os builds Windows/MSVC estão verdes; execução com ativos legítimos, Linux
-e macOS continuam pendentes.
+Integrar as branches empilhadas do núcleo em `main`, atualizar os submódulos dos
+hosts para esse topo e validar o pacote comum. Depois, implementar o supervisor
+do handoff autenticado. Os builds Windows/MSVC estão verdes; execução com ativos
+legítimos, Linux e macOS continuam pendentes.
