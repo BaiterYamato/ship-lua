@@ -53,6 +53,12 @@ class SchemaValidationTests(unittest.TestCase):
         events["events"][0]["support"] = ["mm"]
         self.assertTrue(any("ainda não contratada" in error for error in self.validate(events=events)))
 
+    def test_specific_function_cannot_exceed_capability_hosts(self):
+        api = copy.deepcopy(self.api)
+        jump = next(item for item in api["functions"] if item["name"] == "ship.mm.player.jump")
+        jump["availability"] = "oot"
+        self.assertTrue(any("availability excede" in error for error in self.validate(api=api)))
+
     def test_unknown_payload_type_is_rejected(self):
         events = copy.deepcopy(self.events)
         events["events"][0]["payload"][0]["type"] = "internal_layout"

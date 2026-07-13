@@ -21,9 +21,9 @@ int main() {
     using namespace ShipLua::Generated;
     static_assert(std::is_same_v<Subscription, std::uint64_t>);
     static_assert(std::is_same_v<decltype(ActorHandle::game), GameId>);
-    static_assert(kFunctions.size() == 13);
+    static_assert(kFunctions.size() == 14);
     static_assert(kEvents.size() == 11);
-    static_assert(kCapabilities.size() == 12);
+    static_assert(kCapabilities.size() == 13);
 
     Check(kApiVersion == "0.2.0", "API version should derive from the schema");
     Check(kFunctions.front().name == "ship.game.id", "first function should preserve schema order");
@@ -34,6 +34,9 @@ int main() {
     Check(kCapabilities[5].name == "mm.room.events" && !kCapabilities[5].supportsOot &&
               kCapabilities[5].supportsMm,
           "host-specific capability support should be generated");
+    Check(kFunctions[9].name == "ship.mm.player.jump" && kFunctions[9].availability == "mm" &&
+              kFunctions[9].capability == "mm.player.jump",
+          "MM jump should retain its host and capability contract");
 
     if (failures != 0) {
         std::cerr << failures << " check(s) failed\n";

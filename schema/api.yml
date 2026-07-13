@@ -32,6 +32,7 @@
     {"name": "ship.events.on", "arguments": [{"name": "event", "type": "string"}, {"name": "options_or_callback", "type": "any"}, {"name": "callback", "type": "callback", "required": false}], "returns": "subscription", "availability": "common", "capability": null, "errors": ["invalid_argument", "unsupported"]},
     {"name": "ship.events.off", "arguments": [{"name": "subscription", "type": "subscription"}], "returns": "boolean", "availability": "common", "capability": null, "errors": ["invalid_handle"]},
     {"name": "ship.hotkeys.register", "arguments": [{"name": "id", "type": "string"}, {"name": "options", "type": "hotkey_options", "required": false}, {"name": "callback", "type": "callback"}], "returns": "boolean", "availability": "common", "capability": null, "errors": ["invalid_argument", "unsupported"]},
+    {"name": "ship.mm.player.jump", "arguments": [], "returns": "boolean", "availability": "mm", "capability": "mm.player.jump", "errors": []},
     {"name": "ship.log.debug", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
     {"name": "ship.log.info", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
     {"name": "ship.log.warn", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},

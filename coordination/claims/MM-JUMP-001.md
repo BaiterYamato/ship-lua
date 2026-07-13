@@ -1,0 +1,31 @@
+# MM-JUMP-001
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / Visual Studio 2022
+- Repositories:
+  - BaiterYamato/ship-lua
+  - BaiterYamato/2ship2harkinian
+- Branches:
+  - agent/MM-JUMP-001-jump-api
+  - agent/MM-JUMP-001-jump-adapter
+- Started: 2026-07-13T09:00:00-03:00
+- Depends on: HOTKEY-001, MM-HOTKEY-001
+- Files:
+  - rfcs/0003-mm-player-jump.md
+  - schema/api.yml
+  - schema/capabilities.yml
+  - generated/**
+  - examples/jump/**
+  - tests/**
+  - coordination/claims/MM-JUMP-001.md
+  - coordination/handoffs/MM-JUMP-001.md
+  - coordination/STATUS.md
+  - extern/ship-lua
+  - mm/2s2h/ShipLuaBootstrap.cpp
+  - mm/2s2h/ShipLuaBootstrap.h
+- Goal:
+  - Formalizar uma ação de pulo exclusiva de Majora's Mask.
+  - Expor a ação por `ship.mm.*` somente quando a capability MM estiver presente.
+  - Manter `ship.hotkeys` como infraestrutura comum sem simular o recurso no OoT.
+  - Validar schema, geração, testes do núcleo e build Windows/MSVC do host MM.

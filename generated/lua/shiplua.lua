@@ -75,7 +75,9 @@ ship.events = ship.events or {}
 ship.game = ship.game or {}
 ship.hotkeys = ship.hotkeys or {}
 ship.log = ship.log or {}
+ship.mm = ship.mm or {}
 ship.runtime = ship.runtime or {}
+ship.mm.player = ship.mm.player or {}
 
 --- API common; capability: comum; erros: nenhum.
 ---@return ShipLuaGameId
@@ -120,6 +122,10 @@ function ship.events.off(subscription) end
 ---@param callback function
 ---@return boolean
 function ship.hotkeys.register(id, options, callback) end
+
+--- API mm; capability: mm.player.jump; erros: nenhum.
+---@return boolean
+function ship.mm.player.jump() end
 
 --- API common; capability: comum; erros: invalid_argument.
 ---@param message string

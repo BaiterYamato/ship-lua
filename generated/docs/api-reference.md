@@ -27,6 +27,7 @@ Versão da API: `0.2.0`. Versão do schema: `1`.
 | `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | — | `invalid_argument`, `unsupported` |
 | `ship.events.off` | `subscription: subscription` | `boolean` | `common` | — | `invalid_handle` |
 | `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | — | `invalid_argument`, `unsupported` |
+| `ship.mm.player.jump` | — | `boolean` | `mm` | `mm.player.jump` | — |
 | `ship.log.debug` | `message: string` | `nil` | `common` | — | `invalid_argument` |
 | `ship.log.info` | `message: string` | `nil` | `common` | — | `invalid_argument` |
 | `ship.log.warn` | `message: string` | `nil` | `common` | — | `invalid_argument` |
@@ -61,6 +62,7 @@ Versão da API: `0.2.0`. Versão do schema: `1`.
 | `mm.cycle` | `planned` | `mm` | Lifecycle do ciclo de três dias. |
 | `mm.owl_save` | `planned` | `mm` | Semântica de owl save. |
 | `mm.clock` | `planned` | `mm` | Leitura estável do relógio de MM. |
+| `mm.player.jump` | `contract` | `mm` | Aplica um impulso vertical validado ao jogador de Majora's Mask quando ele está no chão. |
 | `oot.ocarina` | `planned` | `oot` | Eventos e estado de ocarina de OoT. |
 | `oot.dungeon_keys` | `planned` | `oot` | Estado de chaves de dungeon de OoT. |
 | `oot.equipment` | `planned` | `oot` | Equipamento específico de OoT. |
