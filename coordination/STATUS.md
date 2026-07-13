@@ -6,7 +6,7 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + Fase 2, arquitetura e schemas da API em review
+bootstrap-done + Fase 2, arquitetura, schemas da API e event bus em review
 
 ## Repositórios
 
@@ -43,6 +43,9 @@ Revisar e integrar a pilha de PRs da Fase 2 em ordem.
 - `API-001` — review (`schema/api.yml` com tipos, funções e erros).
 - `API-002` — review (`schema/events.yml` com payloads, suporte e fases).
 - `API-003` — review (`schema/capabilities.yml` com status e hosts).
+- `EVENT-001` — review (dispatcher independente de host/Lua e thread proprietária).
+- `EVENT-002` — review (ordem por carga, prioridades, mod e registro).
+- `EVENT-003` — review (`observe`, `filter`, `transform`, `consume` e isolamento de falhas).
 
 ## Bloqueios
 
@@ -54,6 +57,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar EVENT-001.
+Integrar os PRs empilhados em ordem. Depois, iniciar TIMER-001.
 Baseline de build dos jogos (CI-001/CI-002) e
 submódulo `extern/ship-lua` nos forks ficam para a Fase 4.

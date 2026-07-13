@@ -1,0 +1,24 @@
+# EVENT-001 / EVENT-002 / EVENT-003
+
+- Status: review
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / MinGW g++ 15.2 + Ninja
+- Branch: agent/EVENT-001-dispatcher
+- Started: 2026-07-13T00:00:00-03:00
+- Depends on: API-002 (PR #7; branch empilhada)
+- Files:
+  - include/shiplua/events/EventDispatcher.h
+  - src/events/EventDispatcher.cpp
+  - tests/unit/EventDispatcherTests.cpp
+  - tests/CMakeLists.txt
+  - docs/api/event-dispatcher.md
+  - coordination/claims/EVENT-001.md
+  - coordination/handoffs/EVENT-001.md
+  - coordination/STATUS.md
+- Goal:
+  - Despachar eventos em ordem determinística sem depender do host ou de Lua.
+  - Suportar unsubscribe e mudanças durante dispatch sem invalidar iteração.
+  - Implementar `observe`, `filter`, `transform` e `consume`.
+  - Isolar callback com exceção e preservar callbacks/mods saudáveis.
+  - Restringir o dispatcher à thread proprietária.
+- Completed: 2026-07-13T01:27:06-03:00
