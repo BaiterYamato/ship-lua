@@ -72,6 +72,7 @@ a ação permanece exclusiva de MM e capability-gated.
 - `WORLD-001` — review (sessão transacional OoT/MM, inventário canônico, assets lógicos e round-trip sintético; 25/25 testes MinGW/MSVC).
 - `WORLD-003` — review (catálogo canônico extensível, tradução explícita de equipamento e adiamento de itens exclusivos; 26/26 testes MinGW/MSVC).
 - `STORE-003` — review (substituição atômica interna, sincronização e testes de concorrência; 25/25 testes verdes em MinGW e MSVC).
+- `WORLD-002` — review (envelope v1 com HMAC-SHA-256, anti-replay e publicação atômica; 28/28 testes MinGW/MSVC).
 
 ## Bloqueios
 
