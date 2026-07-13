@@ -1,0 +1,8 @@
+id = "community.jump"
+name = "Jump"
+version = "0.1.0"
+api = ">=0.2 <0.3"
+entrypoint = "main.lua"
+description = "Aperte K (rebindável em Settings → ShipLua Hotkeys) para fazer o Link pular."
+authors = ["BaiterYamato"]
+games = ["mm"]
