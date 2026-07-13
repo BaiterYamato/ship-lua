@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiplua.dev/schema/manifest.schema.json",
+  "title": "ShipLua mod manifest (manifest.toml)",
+  "description": "Schema for the manifest.toml every ShipLua mod ships at its root. This is a documentation/validation reference; the runtime parser (ManifestParser) implements the same rules in C++. Unknown/extra keys are ignored by the runtime for forward compatibility.",
+  "type": "object",
+  "required": ["id", "name", "version", "api", "entrypoint"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Globally unique mod identifier, reverse-DNS style recommended.",
+      "examples": ["community.low_gravity"]
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable display name.",
+      "examples": ["Low Gravity"]
+    },
+    "version": {
+      "type": "string",
+      "description": "Mod version as a semver string.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$",
+      "examples": ["1.2.0"]
+    },
+    "api": {
+      "type": "string",
+      "description": "ShipLua API version range this mod is compatible with.",
+      "examples": [">=0.1 <1.0"]
+    },
+    "entrypoint": {
+      "type": "string",
+      "description": "Lua entrypoint file, relative to the mod directory.",
+      "examples": ["main.lua"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional short description of the mod."
+    },
+    "authors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional list of author names/handles."
+    },
+    "games": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["oot", "mm"] },
+      "uniqueItems": true,
+      "description": "Games the mod targets. Omitted or empty means both."
+    },
+    "host": {
+      "type": "object",
+      "description": "Optional per-host version ranges.",
+      "properties": {
+        "shipwright": {
+          "type": "string",
+          "description": "Version range for Ship of Harkinian (OoT).",
+          "examples": [">=9.0"]
+        },
+        "two_ship": {
+          "type": "string",
+          "description": "Version range for 2Ship2Harkinian (MM).",
+          "examples": [">=2.0"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "Host capabilities the mod uses.",
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Capabilities that must be present or the mod fails to load."
+        },
+        "optional": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Capabilities used opportunistically when present."
+        }
+      },
+      "additionalProperties": true
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "Map of dependency mod id -> version range.",
+      "additionalProperties": { "type": "string" },
+      "examples": [{ "community.mod_menu": ">=2.0" }]
+    },
+    "load": {
+      "type": "object",
+      "description": "Load-order hints. Full ordering resolution is a later milestone.",
+      "properties": {
+        "priority": {
+          "type": "integer",
+          "default": 50,
+          "description": "Load priority; lower loads earlier. Default 50."
+        },
+        "after": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Mod ids this mod must load after."
+        },
+        "before": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Mod ids this mod must load before."
+        }
+      },
+      "additionalProperties": true
+    },
+    "permissions": {
+      "type": "object",
+      "description": "Sandbox permissions requested by the mod. All default to false.",
+      "properties": {
+        "storage": { "type": "boolean", "default": false },
+        "network": { "type": "boolean", "default": false },
+        "clipboard": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
