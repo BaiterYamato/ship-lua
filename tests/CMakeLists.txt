@@ -60,6 +60,11 @@ target_link_libraries(atomic_file_tests PRIVATE shiplua)
 
 add_test(NAME atomic_file_tests COMMAND atomic_file_tests)
 
+add_executable(world_handoff_tests unit/WorldHandoffTests.cpp)
+target_link_libraries(world_handoff_tests PRIVATE shiplua)
+
+add_test(NAME world_handoff_tests COMMAND world_handoff_tests)
+
 add_executable(generated_api_bindings_tests unit/GeneratedApiBindingsTests.cpp)
 target_link_libraries(generated_api_bindings_tests PRIVATE shiplua)
 
