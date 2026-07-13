@@ -1072,9 +1072,9 @@ A cada grupo pequeno de tarefas:
 - [x] `API-002` — eventos;
 - [x] `API-003` — capabilities;
 - [x] `EVENT-001` — dispatcher;
-- [ ] `CODEGEN-001` — C++;
-- [ ] `CODEGEN-002` — LuaDoc;
-- [ ] `CODEGEN-003` — docs.
+- [x] `CODEGEN-001` — C++;
+- [x] `CODEGEN-002` — LuaDoc;
+- [x] `CODEGEN-003` — docs.
 
 ### Hosts
 

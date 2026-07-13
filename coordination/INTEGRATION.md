@@ -5,12 +5,23 @@
 
 ## Estado de `main`
 
-- Tip integrado: `a16df3b` (EVENT-001 + TIMER-001).
+- Tip integrado: `64a76fa` (merge de CODEGEN-001/002/003 + BIND-001).
 - Validação: Windows 11 / MinGW g++ 15.2 / Ninja / C++20.
-  `100% tests passed, 0 tests failed out of 14` (ctest, timeout 60s).
+  `100% tests passed, 0 tests failed out of 20` (ctest, timeout 60s).
 - Lua v5.4.7 (FetchContent) + toml++ v3.4.0 (FetchContent).
 
 ## Histórico
+
+### 2026-07-13 (2) — Codegen + binding Lua
+
+- Merge `--no-ff` de `agent/BIND-001-lua-api` em `main` (`a62a0de` → `64a76fa`),
+  trazendo a cadeia CODEGEN-001 (bindings C++), CODEGEN-002/003 (LuaDoc + Markdown)
+  e BIND-001 (binding do runtime Lua aos serviços `ship.*`).
+- Merge limpo — nenhuma sobreposição de arquivos com os docs de governança
+  (a exclusividade de §17 funcionou).
+- Núcleo verificado: nenhum header de jogo em `src/**` ou `include/**`.
+- Build/teste isolados: 20/20 verdes.
+- Marcados no PLAN §13: CODEGEN-001/002/003.
 
 ### 2026-07-13 — Integração da Fase 2/3 + timers
 
