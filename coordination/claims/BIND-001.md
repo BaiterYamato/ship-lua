@@ -1,0 +1,26 @@
+# BIND-001
+
+- Status: review
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / MinGW g++ 15.2 + Ninja
+- Branch: agent/BIND-001-lua-api
+- Started: 2026-07-13T01:46:42-03:00
+- Depends on: CODEGEN-001/002/003 (PRs #10 e #12; branch empilhada)
+- Files:
+  - include/shiplua/api/LuaApiBinding.h
+  - src/api/LuaApiBinding.cpp
+  - include/shiplua/host/ModHost.h
+  - src/host/ModHost.cpp
+  - tests/unit/LuaApiBindingTests.cpp
+  - tests/CMakeLists.txt
+  - docs/api/lua-binding.md
+  - coordination/claims/BIND-001.md
+  - coordination/handoffs/BIND-001.md
+  - coordination/STATUS.md
+- Goal:
+  - Instalar `require("ship")` sem abrir `package`, filesystem ou carregamento nativo.
+  - Expor jogo/versões, capabilities, eventos e logging do schema 0.1.0.
+  - Executar callbacks Lua protegidos pelo dispatcher e isolá-los por mod.
+  - Remover inscrições e referências Lua no unload.
+  - Provar o primeiro vertical slice em memória sem ROM nem host específico.
+- Completed: 2026-07-13T01:57:28-03:00

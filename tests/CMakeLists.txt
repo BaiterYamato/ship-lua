@@ -40,6 +40,16 @@ target_link_libraries(frame_timer_scheduler_tests PRIVATE shiplua)
 
 add_test(NAME frame_timer_scheduler_tests COMMAND frame_timer_scheduler_tests)
 
+add_executable(generated_api_bindings_tests unit/GeneratedApiBindingsTests.cpp)
+target_link_libraries(generated_api_bindings_tests PRIVATE shiplua)
+
+add_test(NAME generated_api_bindings_tests COMMAND generated_api_bindings_tests)
+
+add_executable(lua_api_binding_tests unit/LuaApiBindingTests.cpp)
+target_link_libraries(lua_api_binding_tests PRIVATE shiplua)
+
+add_test(NAME lua_api_binding_tests COMMAND lua_api_binding_tests)
+
 add_test(NAME validator_valid_file
     COMMAND shiplua_manifest_validator
         "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/manifest/valid-minimal.toml")
@@ -58,3 +68,11 @@ add_test(NAME api_schema_validation
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/validate_api_schemas.py")
 add_test(NAME api_schema_validation_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_validate_api_schemas.py")
+add_test(NAME api_cpp_codegen_check
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_cpp_api.py" --check)
+add_test(NAME api_cpp_codegen_tests
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_cpp_api.py")
+add_test(NAME api_docs_codegen_check
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_api_docs.py" --check)
+add_test(NAME api_docs_codegen_tests
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_api_docs.py")

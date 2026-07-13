@@ -1,0 +1,24 @@
+# CODEGEN-002 / CODEGEN-003
+
+- Status: review
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / Python 3.14
+- Branch: agent/CODEGEN-002-003-api-docs
+- Started: 2026-07-13T01:39:58-03:00
+- Depends on: CODEGEN-001 (PR #10; branch empilhada)
+- Files:
+  - tools/generate_api_docs.py
+  - generated/lua/shiplua.lua
+  - generated/docs/api-reference.md
+  - tests/schema/test_generate_api_docs.py
+  - tests/CMakeLists.txt
+  - docs/api/generated-docs.md
+  - coordination/claims/CODEGEN-002-003.md
+  - coordination/handoffs/CODEGEN-002-003.md
+  - coordination/STATUS.md
+- Goal:
+  - Gerar LuaDoc consumível pelo Lua Language Server.
+  - Gerar referência Markdown em português do Brasil.
+  - Derivar ambos exclusivamente dos schemas canônicos validados.
+  - Detectar drift dos dois artefatos no CTest.
+- Completed: 2026-07-13T01:42:42-03:00

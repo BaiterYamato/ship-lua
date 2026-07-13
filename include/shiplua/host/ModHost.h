@@ -6,6 +6,8 @@
 #include <memory>
 #include <string>
 
+#include "shiplua/api/LuaApiBinding.h"
+#include "shiplua/events/EventDispatcher.h"
 #include "shiplua/manifest/Manifest.h"
 #include "shiplua/manifest/PackageExtractor.h"
 #include "shiplua/runtime/Logger.h"
@@ -22,6 +24,7 @@ namespace ShipLua {
 class ModHost {
   public:
     explicit ModHost(Logger logger = {});
+    ModHost(LuaApiHostContext hostContext, Logger logger = {});
     ~ModHost();
 
     ModHost(const ModHost&) = delete;
@@ -50,6 +53,9 @@ class ModHost {
 
     bool IsLoaded(const std::string& id) const;
     std::size_t Count() const;
+    std::size_t SubscriptionCount() const;
+
+    Result<DispatchOutcome> DispatchEvent(const std::string& name, EventPayload& payload);
 
     // Destroys the mod's LuaRuntime (releasing all of its resources) and
     // removes it. ErrorCode::InvalidHandle if no such mod is loaded.
@@ -64,10 +70,14 @@ class ModHost {
     struct LoadedMod {
         Manifest manifest;
         std::unique_ptr<LuaRuntime> runtime;
+        std::unique_ptr<LuaApiBinding> binding;
         std::filesystem::path ownedDirectory;
     };
 
     Logger mLogger;
+    LuaApiHostContext mHostContext;
+    std::unique_ptr<EventDispatcher> mEvents;
+    std::size_t mNextModLoadOrder = 0;
     std::map<std::string, LoadedMod> mMods;
 };
 

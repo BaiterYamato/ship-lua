@@ -1,0 +1,25 @@
+# CODEGEN-001
+
+- Status: review
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / Python 3.14 / MinGW g++ 15.2
+- Branch: agent/CODEGEN-001-cpp-bindings
+- Started: 2026-07-13T01:34:03-03:00
+- Depends on: API-001/API-002/API-003 (PR #7), TIMER-001 (stack base PR #9)
+- Files:
+  - tools/generate_cpp_api.py
+  - generated/include/shiplua/generated/ApiBindings.h
+  - tests/schema/test_generate_cpp_api.py
+  - tests/unit/GeneratedApiBindingsTests.cpp
+  - tests/CMakeLists.txt
+  - CMakeLists.txt
+  - docs/api/cpp-codegen.md
+  - coordination/claims/CODEGEN-001.md
+  - coordination/handoffs/CODEGEN-001.md
+  - coordination/STATUS.md
+- Goal:
+  - Gerar tipos e metadados C++ determinísticos a partir dos schemas canônicos.
+  - Reusar a validação sem duplicar regras de contrato.
+  - Detectar drift entre schemas e artefato versionado no CTest.
+  - Produzir saída portátil, sem ponteiros ou estruturas dos hosts.
+- Completed: 2026-07-13T01:37:29-03:00

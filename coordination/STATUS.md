@@ -6,7 +6,7 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + Fase 2, arquitetura e base da Fase 3 em review
+bootstrap-done + Fase 2 e núcleo da Fase 3 em review
 
 ## Repositórios
 
@@ -47,6 +47,10 @@ Revisar e integrar a pilha de PRs da Fase 2 em ordem.
 - `EVENT-002` — review (ordem por carga, prioridades, mod e registro).
 - `EVENT-003` — review (`observe`, `filter`, `transform`, `consume` e isolamento de falhas).
 - `TIMER-001` — review (`after`/`every` por frame, cancelamento e isolamento de falhas).
+- `CODEGEN-001` — review (tipos e metadados C++ gerados dos schemas com gate de drift).
+- `CODEGEN-002` — review (LuaDoc gerado com tipos, assinaturas e nomes de eventos).
+- `CODEGEN-003` — review (referência Markdown em pt-BR gerada dos schemas).
+- `BIND-001` — review (`require("ship")`, jogo/versões, capabilities, eventos e log).
 
 ## Bloqueios
 
@@ -58,6 +62,7 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar CODEGEN-001.
+Integrar os PRs empilhados em ordem. Depois, iniciar OOT-001/MM-001 e o bootstrap
+do primeiro vertical slice nos dois hosts.
 Baseline de build dos jogos (CI-001/CI-002) e
 submódulo `extern/ship-lua` nos forks ficam para a Fase 4.

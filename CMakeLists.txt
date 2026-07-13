@@ -57,7 +57,9 @@ file(GLOB_RECURSE SHIPLUA_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_library(shiplua STATIC ${SHIPLUA_SOURCES})
-target_include_directories(shiplua PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(shiplua PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/generated/include")
 target_link_libraries(shiplua PRIVATE lua_static tomlplusplus::tomlplusplus miniz)
 
 add_executable(shiplua_manifest_validator tools/manifest_validator.cpp)
