@@ -38,6 +38,7 @@ Detalhes de integração em [`coordination/INTEGRATION.md`](coordination/INTEGRA
 ## Comece aqui
 
 - **Quer escrever um mod?** → **[Guia: Escrevendo mods](docs/writing-mods.md)**
+- **Quer adicionar o ShipLua ao source do seu jogo e compilar?** → **[Guia: Integração no host](docs/host-integration.md)**
 - **Referência da API** (gerada dos schemas) → [`generated/docs/api-reference.md`](generated/docs/api-reference.md)
 - **Exemplos** → [`examples/`](examples/)
   - [`hello-world`](examples/hello-world/) — o mod mínimo (loga a identidade do host).
