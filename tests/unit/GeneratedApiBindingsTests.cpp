@@ -22,7 +22,7 @@ int main() {
     static_assert(std::is_same_v<Subscription, std::uint64_t>);
     static_assert(std::is_same_v<decltype(ActorHandle::game), GameId>);
     static_assert(kFunctions.size() == 12);
-    static_assert(kEvents.size() == 10);
+    static_assert(kEvents.size() == 11);
     static_assert(kCapabilities.size() == 12);
 
     Check(kApiVersion == "0.1.0", "API version should derive from the schema");

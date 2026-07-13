@@ -61,6 +61,10 @@ target_include_directories(shiplua PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/generated/include")
 target_link_libraries(shiplua PRIVATE lua_static tomlplusplus::tomlplusplus miniz)
+# Expose Lua headers to privileged consumers (host adapters) so they can install
+# host-specific bindings (e.g. ship.mm.*) directly on a runtime's lua_State.
+# Mods never see this: it is a build-time include path for the C++ adapter only.
+target_include_directories(shiplua PUBLIC "${lua_SOURCE_DIR}")
 
 add_executable(shiplua_manifest_validator tools/manifest_validator.cpp)
 target_link_libraries(shiplua_manifest_validator PRIVATE shiplua)

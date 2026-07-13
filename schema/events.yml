@@ -33,6 +33,10 @@
     {"name": "audio.sequence_started", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": "audio.sequence.events", "payload": [
       {"name": "player_index", "type": "integer", "required": true},
       {"name": "sequence_id", "type": "integer", "required": true}
+    ]},
+    {"name": "input.hotkey", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": null, "payload": [
+      {"name": "action", "type": "string", "required": true},
+      {"name": "key", "type": "string", "required": true}
     ]}
   ]
 }

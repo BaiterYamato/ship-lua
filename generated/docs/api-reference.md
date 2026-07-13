@@ -44,6 +44,7 @@ Versão da API: `0.1.0`. Versão do schema: `1`.
 | `save.loaded` | `observe` | `host_bridge` | `oot`, `mm` | não | `save.events` | `slot: integer` |
 | `text.open` | `observe` | `host_bridge` | `oot`, `mm` | não | `text.events` | `text_id: integer` |
 | `audio.sequence_started` | `observe` | `host_bridge` | `oot`, `mm` | não | `audio.sequence.events` | `player_index: integer`, `sequence_id: integer` |
+| `input.hotkey` | `observe` | `host_bridge` | `oot`, `mm` | não | — | `action: string`, `key: string` |
 
 ## Capabilities
 

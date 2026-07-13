@@ -205,8 +205,12 @@ inline constexpr std::array<FieldBinding, 2> kAudioSequenceStartedPayload{{
     {"player_index", "integer", true},
     {"sequence_id", "integer", true},
 }};
+inline constexpr std::array<FieldBinding, 2> kInputHotkeyPayload{{
+    {"action", "string", true},
+    {"key", "string", true},
+}};
 
-inline constexpr std::array<EventBinding, 10> kEvents{{
+inline constexpr std::array<EventBinding, 11> kEvents{{
     {"game.ready", EventKind::Observe, "mvp", false, true, true, {}, kGameReadyPayload},
     {"game.frame", EventKind::Observe, "mvp", false, true, true, {}, kGameFramePayload},
     {"game.shutdown", EventKind::Observe, "mvp", false, true, true, {}, kGameShutdownPayload},
@@ -217,6 +221,7 @@ inline constexpr std::array<EventBinding, 10> kEvents{{
     {"save.loaded", EventKind::Observe, "host_bridge", false, true, true, "save.events", kSaveLoadedPayload},
     {"text.open", EventKind::Observe, "host_bridge", false, true, true, "text.events", kTextOpenPayload},
     {"audio.sequence_started", EventKind::Observe, "host_bridge", false, true, true, "audio.sequence.events", kAudioSequenceStartedPayload},
+    {"input.hotkey", EventKind::Observe, "host_bridge", false, true, true, {}, kInputHotkeyPayload},
 }};
 
 struct CapabilityBinding {
