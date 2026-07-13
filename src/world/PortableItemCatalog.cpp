@@ -163,11 +163,11 @@ Result<PortableItemCatalog> PortableItemCatalog::CreateDefault() {
   PortableItemCatalog catalog;
   std::vector<PortableItemDefinition> definitions;
   definitions.push_back(
-      Shared("shared.bow", PortableItemCategory::Weapon, 999));
+      Shared("shared.bow", PortableItemCategory::Weapon, 99));
   definitions.push_back(
-      Shared("shared.bombs", PortableItemCategory::Consumable, 999));
+      Shared("shared.bombs", PortableItemCategory::Consumable, 99));
   definitions.push_back(
-      Shared("shared.bombchu", PortableItemCategory::Consumable, 999));
+      Shared("shared.bombchu", PortableItemCategory::Consumable, 99));
   definitions.push_back(
       Shared("shared.hookshot", PortableItemCategory::Tool, 1));
   definitions.push_back(
