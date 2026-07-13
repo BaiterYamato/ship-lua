@@ -8,7 +8,7 @@
 - Started: 2026-07-13T17:54:23-03:00
 - Depends on: WORLD-001, STORE-003
 - Files:
-  - rfcs/0005-authenticated-world-handoff.md
+  - rfcs/0006-authenticated-world-handoff.md
   - include/shiplua/world/WorldHandoff.h
   - src/world/WorldHandoff.cpp
   - tests/unit/WorldHandoffTests.cpp

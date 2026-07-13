@@ -19,7 +19,7 @@ review
 
 ## Arquivos alterados
 
-- `rfcs/0005-authenticated-world-handoff.md`
+- `rfcs/0006-authenticated-world-handoff.md`
 - `include/shiplua/world/WorldHandoff.h`
 - `src/world/WorldHandoff.cpp`
 - `tests/unit/WorldHandoffTests.cpp`

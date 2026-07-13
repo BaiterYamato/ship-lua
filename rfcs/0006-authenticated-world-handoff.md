@@ -1,4 +1,4 @@
-# RFC 0005 — Handoff autenticado entre processos
+# RFC 0006 — Handoff autenticado entre processos
 
 - Status: primeira fatia implementável
 - API alvo: interna no ciclo 0.2; sem superfície Lua
