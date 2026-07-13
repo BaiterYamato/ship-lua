@@ -5,11 +5,19 @@
 
 ## Estado de `main`
 
-- Tip integrado: `18c9397` (merge de HOST-002 — coordenação OOT-002/MM-002).
-- Build/teste: idêntico a `1a1856a` (só coordenação): 20/20 verdes.
-- **CI Linux (`core-linux.yml`): verde** — run 29228265961 concluída com sucesso
-  (critério v0.1.0 §16 "CI Linux verde" atendido).
+- Tip integrado: `ee0004f` (merge de HOST-003 — coordenação OOT-003/MM-003).
+- Build/teste: 20/20 verdes (só coordenação desde `1a1856a`).
+- **CI Linux (`core-linux.yml`): verde** em cada push a `main` (critério v0.1.0 §16).
 - Lua v5.4.7 + toml++ v3.4.0 + miniz 3.1.2 (FetchContent).
+
+### Fase 4 (bootstrap dos hosts nos forks) — coordenação integrada em `main`
+
+| Task | Estado | Onde está o código |
+|---|---|---|
+| OOT-001 / MM-001 (submódulo + CMake) | review | forks (PRs #5 / #1) |
+| OOT-002 / MM-002 (bootstrap) | review | forks |
+| OOT-003 / MM-003 (shutdown) | review | forks |
+| OOT-004 / MM-004 (identity) | claim (em andamento) | forks |
 
 ## PRs abertos nos forks (Fase 4) — pendentes de decisão do owner
 
