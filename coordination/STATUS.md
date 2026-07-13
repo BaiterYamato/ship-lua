@@ -6,7 +6,7 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done (repos criados) + core-runtime/manifesto/mod-host em review
+bootstrap-done + core-runtime/manifesto/mod-host/discovery em review
 
 ## Repositórios
 
@@ -21,7 +21,7 @@ bootstrap-done (repos criados) + core-runtime/manifesto/mod-host em review
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar `CORE-002` + `MOD-001`/`MOD-002`.
+Revisar e integrar PR #1; depois revisar o PR empilhado de `MOD-003`/`TEST-002`.
 
 ## Progresso
 
@@ -31,6 +31,8 @@ Revisar e integrar `CORE-002` + `MOD-001`/`MOD-002`.
 - `MOD-001` — review (struct C++ + JSON Schema do manifesto).
 - `MOD-002` — review (parser TOML com erros estruturados).
 - `CORE-002` — review (ModHost multi-mod isolado, rollback e unload).
+- `TEST-002` — review (fixtures TOML válidas e inválidas).
+- `MOD-003` — review parcial (discovery de diretórios e pacotes; extração fica pendente).
 
 ## Bloqueios
 
@@ -42,6 +44,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Revisar o PR de CORE-002/MOD-001/MOD-002. Depois, seguir para TEST-002 e
-MOD-003. Baseline de build dos jogos (CI-001/CI-002) e submódulo
-`extern/ship-lua` nos forks ficam para a Fase 4.
+Integrar PR #1 e o PR empilhado de MOD-003/TEST-002. Depois, completar a
+extração segura de `.shipmod` antes de MOD-004. Baseline de build dos jogos
+(CI-001/CI-002) e submódulo `extern/ship-lua` nos forks ficam para a Fase 4.
