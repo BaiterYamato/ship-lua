@@ -1,14 +1,20 @@
 #include "shiplua/host/ModHost.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <atomic>
 #include <chrono>
+#include <map>
 #include <sstream>
 #include <utility>
+#include <vector>
 
 #include "shiplua/generated/ApiBindings.h"
+#include "shiplua/manifest/DependencyResolver.h"
 #include "shiplua/manifest/ManifestParser.h"
+#include "shiplua/manifest/ModDiscovery.h"
+#include "shiplua/manifest/SemVersion.h"
 
 namespace ShipLua {
 
@@ -72,6 +78,60 @@ std::filesystem::path MakePackageDirectory(const std::filesystem::path& root) {
     const auto ticks = std::chrono::steady_clock::now().time_since_epoch().count();
     return root / (".shiplua-package-" + std::to_string(ticks) + "-" +
                    std::to_string(counter.fetch_add(1, std::memory_order_relaxed)));
+}
+
+Result<void> EnsureDirectory(const std::filesystem::path& path, const std::string& label) {
+    std::error_code error;
+    std::filesystem::create_directories(path, error);
+    if (error) {
+        return Result<void>::err(ErrorCode::HostFailure,
+                                 "cannot create " + label + " '" + path.string() +
+                                     "': " + error.message());
+    }
+    const auto status = std::filesystem::symlink_status(path, error);
+    if (error || !std::filesystem::is_directory(status) || std::filesystem::is_symlink(status)) {
+        return Result<void>::err(
+            ErrorCode::PermissionDenied,
+            label + " must be a real directory without symbolic links: '" + path.string() + "'");
+    }
+    return Result<void>::ok();
+}
+
+Result<void> ValidateCompatibility(const Manifest& manifest, const LuaApiHostContext& context) {
+    if (context.gameId != "oot" && context.gameId != "mm") {
+        return Result<void>::err(ErrorCode::InvalidState,
+                                 "host game id must be 'oot' or 'mm' before loading mods");
+    }
+    if (!manifest.games.empty() &&
+        std::find(manifest.games.begin(), manifest.games.end(), context.gameId) ==
+            manifest.games.end()) {
+        return Result<void>::err(ErrorCode::Unsupported,
+                                 "mod does not support game '" + context.gameId + "'");
+    }
+
+    auto apiVersion = SemVersion::Parse(std::string(Generated::kApiVersion));
+    auto apiRange = VersionRange::Parse(manifest.apiRange);
+    if (!apiVersion.isOk() || !apiRange.isOk() ||
+        !apiRange.value->Contains(*apiVersion.value)) {
+        return Result<void>::err(ErrorCode::Unsupported,
+                                 "mod API range '" + manifest.apiRange +
+                                     "' does not include ShipLua API " +
+                                     std::string(Generated::kApiVersion));
+    }
+
+    const std::optional<std::string>& hostRange =
+        context.gameId == "oot" ? manifest.hostShipwright : manifest.hostTwoShip;
+    if (hostRange) {
+        auto hostVersion = SemVersion::Parse(context.hostVersion);
+        auto range = VersionRange::Parse(*hostRange);
+        if (!hostVersion.isOk() || !range.isOk() ||
+            !range.value->Contains(*hostVersion.value)) {
+            return Result<void>::err(ErrorCode::Unsupported,
+                                     "mod host range '" + *hostRange + "' does not include " +
+                                         context.hostVersion);
+        }
+    }
+    return Result<void>::ok();
 }
 
 EventKind ToEventKind(Generated::EventKind kind) {
@@ -222,6 +282,131 @@ Result<void> ModHost::LoadModFromPackage(const std::string& package,
     }
     it->second.ownedDirectory = destination;
     return Result<void>::ok();
+}
+
+Result<ModLoadReport> ModHost::LoadModsFromRoot(const std::filesystem::path& root,
+                                                const std::filesystem::path& extractionRoot,
+                                                const PackageLimits& limits,
+                                                std::size_t memoryLimitBytes) {
+    auto discovered = DiscoverMods(root);
+    if (!discovered.isOk()) {
+        return Result<ModLoadReport>::err(discovered.code, discovered.message);
+    }
+
+    struct Candidate {
+        Manifest manifest;
+        std::filesystem::path directory;
+        std::filesystem::path ownedDirectory;
+    };
+    std::vector<Candidate> candidates;
+    std::vector<Manifest> manifests;
+    ModLoadReport report;
+    bool cacheReady = false;
+
+    auto cleanupOwnedDirectories = [&candidates]() {
+        for (Candidate& candidate : candidates) {
+            if (!candidate.ownedDirectory.empty()) {
+                std::error_code ignored;
+                std::filesystem::remove_all(candidate.ownedDirectory, ignored);
+            }
+        }
+    };
+
+    for (const DiscoveredMod& source : *discovered.value) {
+        std::filesystem::path directory = source.path;
+        std::filesystem::path ownedDirectory;
+        if (source.kind == ModSourceKind::Package) {
+            if (!cacheReady) {
+                auto ensured = EnsureDirectory(extractionRoot, "package extraction root");
+                if (!ensured.isOk()) {
+                    cleanupOwnedDirectories();
+                    return Result<ModLoadReport>::err(ensured.code, ensured.message);
+                }
+                cacheReady = true;
+            }
+            ownedDirectory = MakePackageDirectory(extractionRoot);
+            auto extracted = ExtractShipmod(source.path, ownedDirectory, limits);
+            if (!extracted.isOk()) {
+                report.rejected[source.path.generic_string()] = extracted.message;
+                continue;
+            }
+            directory = ownedDirectory;
+        }
+
+        auto parsed = ParseManifestFile((directory / "manifest.toml").string());
+        if (!parsed.isOk()) {
+            report.rejected[source.path.generic_string()] = parsed.message;
+            if (!ownedDirectory.empty()) {
+                std::error_code ignored;
+                std::filesystem::remove_all(ownedDirectory, ignored);
+            }
+            continue;
+        }
+        auto compatible = ValidateCompatibility(*parsed.value, mHostContext);
+        if (!compatible.isOk()) {
+            report.rejected[parsed.value->id] = compatible.message;
+            if (!ownedDirectory.empty()) {
+                std::error_code ignored;
+                std::filesystem::remove_all(ownedDirectory, ignored);
+            }
+            continue;
+        }
+
+        manifests.push_back(*parsed.value);
+        candidates.push_back({std::move(*parsed.value), std::move(directory),
+                              std::move(ownedDirectory)});
+    }
+
+    auto resolution = ResolveMods(manifests);
+    if (!resolution.isOk()) {
+        cleanupOwnedDirectories();
+        return Result<ModLoadReport>::err(resolution.code, resolution.message);
+    }
+    report.rejected.insert(resolution.value->rejected.begin(),
+                           resolution.value->rejected.end());
+
+    for (const std::string& id : resolution.value->orderedIds) {
+        auto candidate = std::find_if(candidates.begin(), candidates.end(),
+                                      [&id](const Candidate& item) {
+                                          return item.manifest.id == id;
+                                      });
+        if (candidate == candidates.end()) {
+            report.rejected[id] = "resolved mod source is unavailable";
+            continue;
+        }
+
+        std::string unavailableDependency;
+        for (const auto& [dependencyId, range] : candidate->manifest.dependencies) {
+            (void)range;
+            if (!IsLoaded(dependencyId)) {
+                unavailableDependency = dependencyId;
+                break;
+            }
+        }
+        if (!unavailableDependency.empty()) {
+            report.rejected[id] = "dependency '" + unavailableDependency + "' failed to load";
+            continue;
+        }
+
+        auto loaded = LoadModFromDirectory(candidate->directory.string(), memoryLimitBytes);
+        if (!loaded.isOk()) {
+            report.rejected[id] = loaded.message;
+            continue;
+        }
+        if (!candidate->ownedDirectory.empty()) {
+            auto stored = mMods.find(id);
+            if (stored == mMods.end()) {
+                report.rejected[id] = "loaded mod was not registered by its manifest id";
+                continue;
+            }
+            stored->second.ownedDirectory = std::move(candidate->ownedDirectory);
+            candidate->ownedDirectory.clear();
+        }
+        report.loadedIds.push_back(id);
+    }
+
+    cleanupOwnedDirectories();
+    return Result<ModLoadReport>::ok(std::move(report));
 }
 
 bool ModHost::IsLoaded(const std::string& id) const {

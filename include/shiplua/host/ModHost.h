@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "shiplua/api/LuaApiBinding.h"
 #include "shiplua/events/EventDispatcher.h"
@@ -16,11 +17,16 @@
 
 namespace ShipLua {
 
+struct ModLoadReport {
+    std::vector<std::string> loadedIds;
+    std::map<std::string, std::string> rejected;
+};
+
 // Owns a collection of loaded mods, each running in its own isolated
 // LuaRuntime (separate lua_State per mod). Keyed by manifest id.
 //
-// Dependency/order resolution (MOD-004..007) is out of scope: dependencies
-// declared in a manifest are stored but not resolved.
+// Root loading resolves dependency order and isolates per-mod failures while
+// direct load methods remain available to tests and integration layers.
 class ModHost {
   public:
     explicit ModHost(Logger logger = {});
@@ -50,6 +56,15 @@ class ModHost {
                                     const std::string& extractionRoot,
                                     const PackageLimits& limits = {},
                                     std::size_t memoryLimitBytes = 0);
+
+    // Discovers direct children of `root`, validates host/API compatibility,
+    // resolves dependencies and loads healthy mods in deterministic order.
+    // Per-mod failures are returned in the report without aborting independent
+    // mods. A top-level error means the root/cache itself could not be used.
+    Result<ModLoadReport> LoadModsFromRoot(const std::filesystem::path& root,
+                                           const std::filesystem::path& extractionRoot,
+                                           const PackageLimits& limits = {},
+                                           std::size_t memoryLimitBytes = 0);
 
     bool IsLoaded(const std::string& id) const;
     std::size_t Count() const;
