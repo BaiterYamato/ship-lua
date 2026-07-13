@@ -6,22 +6,22 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + Fase 2 e núcleo da Fase 3 em review
+bootstrap-done + Fases 2 e 3 em review + CMake dos hosts em review
 
 ## Repositórios
 
 | Repositório | Estado | Branch de integração | Baseline |
 |---|---|---|---|
 | BaiterYamato/ship-lua | criado + push (origin) | main | — |
-| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | fork ok, lua/main existe | lua/main | registrar SHA |
-| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | fork ok, lua/main existe | lua/main | registrar SHA |
+| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001 em review (PR #5) | lua/main | `fb3259f7` |
+| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001 em review (PR #1) | lua/main | `b3cc3662` |
 
 > Nota: o fork do Shipwright foi renomeado para `Shipwright-HyliaFoundry`.
 > Ambos os forks têm default `develop` e branch de integração `lua/main` já criada.
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar a pilha de PRs da Fase 2 em ordem.
+Revisar e integrar a pilha do ShipLua em ordem e os PRs OOT-001/MM-001.
 
 ## Progresso
 
@@ -51,6 +51,8 @@ Revisar e integrar a pilha de PRs da Fase 2 em ordem.
 - `CODEGEN-002` — review (LuaDoc gerado com tipos, assinaturas e nomes de eventos).
 - `CODEGEN-003` — review (referência Markdown em pt-BR gerada dos schemas).
 - `BIND-001` — review (`require("ship")`, jogo/versões, capabilities, eventos e log).
+- `OOT-001` — review (submódulo/CMake; `soh.exe` gerado no Windows/MSVC; PR #5).
+- `MM-001` — review (submódulo/CMake; `2ship.exe` gerado no Windows/MSVC; PR #1).
 
 ## Bloqueios
 
@@ -62,7 +64,7 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar OOT-001/MM-001 e o bootstrap
-do primeiro vertical slice nos dois hosts.
-Baseline de build dos jogos (CI-001/CI-002) e
-submódulo `extern/ship-lua` nos forks ficam para a Fase 4.
+Integrar os PRs empilhados em ordem e revisar OOT-001/MM-001. Depois, iniciar
+OOT-002/MM-002 em branches próprias para o bootstrap do primeiro vertical slice.
+Os builds completos Windows/MSVC estão verdes nos dois hosts; Linux e macOS
+continuam pendentes.
