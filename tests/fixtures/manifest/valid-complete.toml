@@ -1,0 +1,28 @@
+id = "example.complete"
+name = "Complete Example"
+version = "1.2.3"
+api = ">=0.1 <1.0"
+entrypoint = "scripts/main.lua"
+description = "Fixture completa"
+authors = ["Example Author"]
+games = ["oot", "mm"]
+
+[host]
+shipwright = ">=9.0"
+two_ship = ">=4.0"
+
+[capabilities]
+required = ["scene.events"]
+optional = ["mm.cycle"]
+
+[dependencies]
+"example.core" = ">=1.0 <2.0"
+
+[load]
+priority = 25
+after = ["example.core"]
+
+[permissions]
+storage = true
+network = false
+clipboard = false

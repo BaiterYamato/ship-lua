@@ -1,0 +1,4 @@
+id = "example.invalid"
+version = "0.1.0"
+api = ">=0.1 <0.2"
+entrypoint = "main.lua"
