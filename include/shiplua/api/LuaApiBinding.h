@@ -72,7 +72,7 @@ class LuaApiBinding {
     Result<Subscription> RegisterEvent(lua_State* state, const std::string& eventName,
                                        int callbackIndex, int callbackPriority);
     Result<void> RemoveEvent(Subscription subscription);
-    int RegisterHotkey(lua_State* state);
+    int RegisterHotkey(lua_State* state, const char*& error);
     EventFlow InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
                              EventPayload& payload);
     int WriteLog(lua_State* state, LogLevel level) noexcept;

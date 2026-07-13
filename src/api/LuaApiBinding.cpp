@@ -542,29 +542,36 @@ int LuaApiBinding::HotkeysRegister(lua_State* state) noexcept {
     if (binding == nullptr) {
         return Fail(state, "contexto da API ship indisponível");
     }
+    const char* error = nullptr;
+    int result = 0;
     try {
-        return binding->RegisterHotkey(state);
+        result = binding->RegisterHotkey(state, error);
     } catch (...) {
-        return Fail(state, "exceção C++ durante registro de hotkey");
+        error = "exceção C++ durante registro de hotkey";
     }
+    return error != nullptr ? Fail(state, error) : result;
 }
 
-int LuaApiBinding::RegisterHotkey(lua_State* state) {
+int LuaApiBinding::RegisterHotkey(lua_State* state, const char*& error) {
     LuaApiBinding* binding = this;
     if (mHotkeys == nullptr) {
-        return Fail(state, ErrorMessage(ErrorCode::Unsupported));
+        error = ErrorMessage(ErrorCode::Unsupported);
+        return 0;
     }
     if (lua_type(state, 1) != LUA_TSTRING) {
-        return Fail(state, "ship.hotkeys.register exige um id textual");
+        error = "ship.hotkeys.register exige um id textual";
+        return 0;
     }
     std::size_t idLen = 0;
     const char* idRaw = lua_tolstring(state, 1, &idLen);
     if (idRaw == nullptr || idLen == 0) {
-        return Fail(state, "ship.hotkeys.register exige um id não vazio");
+        error = "ship.hotkeys.register exige um id não vazio";
+        return 0;
     }
     const std::string id(idRaw, idLen);
     if (!IsValidHotkeyId(id)) {
-        return Fail(state, "id de hotkey deve corresponder a [a-z][a-z0-9_.-]{0,63}");
+        error = "id de hotkey deve corresponder a [a-z][a-z0-9_.-]{0,63}";
+        return 0;
     }
 
     // Optional options table at arg 2 ({default=, label=}), callback at arg 3.
@@ -577,7 +584,8 @@ int LuaApiBinding::RegisterHotkey(lua_State* state) {
         lua_getfield(state, 2, "default");
         if (!lua_isnil(state, -1) && lua_type(state, -1) != LUA_TSTRING) {
             lua_pop(state, 1);
-            return Fail(state, "default de hotkey deve ser textual");
+            error = "default de hotkey deve ser textual";
+            return 0;
         }
         if (lua_type(state, -1) == LUA_TSTRING) {
             std::size_t n = 0;
@@ -590,7 +598,8 @@ int LuaApiBinding::RegisterHotkey(lua_State* state) {
         lua_getfield(state, 2, "label");
         if (!lua_isnil(state, -1) && lua_type(state, -1) != LUA_TSTRING) {
             lua_pop(state, 1);
-            return Fail(state, "label de hotkey deve ser textual");
+            error = "label de hotkey deve ser textual";
+            return 0;
         }
         if (lua_type(state, -1) == LUA_TSTRING) {
             std::size_t n = 0;
@@ -603,13 +612,16 @@ int LuaApiBinding::RegisterHotkey(lua_State* state) {
     } else if (lua_isfunction(state, 2)) {
         callbackIndex = 2;
     } else {
-        return Fail(state, "ship.hotkeys.register exige callback ou opções e callback");
+        error = "ship.hotkeys.register exige callback ou opções e callback";
+        return 0;
     }
     if (defaultKey.size() > 32) {
-        return Fail(state, "default de hotkey excede 32 bytes");
+        error = "default de hotkey excede 32 bytes";
+        return 0;
     }
     if (label.size() > 128) {
-        return Fail(state, "label de hotkey excede 128 bytes");
+        error = "label de hotkey excede 128 bytes";
+        return 0;
     }
 
     auto callback = std::make_shared<HotkeyCallback>();
@@ -618,7 +630,8 @@ int LuaApiBinding::RegisterHotkey(lua_State* state) {
     lua_pushvalue(state, callbackIndex);
     const int reference = luaL_ref(state, LUA_REGISTRYINDEX);
     if (reference == LUA_NOREF) {
-        return Fail(state, "não foi possível reter o callback de hotkey");
+        error = "não foi possível reter o callback de hotkey";
+        return 0;
     }
 
     callback->registryReference = reference;
