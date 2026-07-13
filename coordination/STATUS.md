@@ -6,22 +6,22 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + Fases 2 e 3 em review + ciclo de vida dos hosts em review
+bootstrap-done + Fases 2 e 3 em review + carga de mods nos hosts em review
 
 ## Repositórios
 
 | Repositório | Estado | Branch de integração | Baseline |
 |---|---|---|---|
 | BaiterYamato/ship-lua | criado + push (origin) | main | — |
-| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001/002/003/004 em review (PRs #5 a #8) | lua/main | `fb3259f7` |
-| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001/002/003/004 em review (PRs #1 a #4) | lua/main | `b3cc3662` |
+| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001 a OOT-005 em review (PRs #5 a #9) | lua/main | `fb3259f7` |
+| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001 a MM-005 em review (PRs #1 a #5) | lua/main | `b3cc3662` |
 
 > Nota: o fork do Shipwright foi renomeado para `Shipwright-HyliaFoundry`.
 > Ambos os forks têm default `develop` e branch de integração `lua/main` já criada.
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar, em ordem, OOT-001 → OOT-002 → OOT-003 → OOT-004 e MM-001 → MM-002 → MM-003 → MM-004.
+Revisar e integrar os PRs empilhados dos dois hosts e o PR #19 de coordenação.
 
 ## Progresso
 
@@ -59,6 +59,9 @@ Revisar e integrar, em ordem, OOT-001 → OOT-002 → OOT-003 → OOT-004 e MM-0
 - `MM-003` — review (shutdown idempotente antes dos serviços do host; `2ship.exe` gerado; PR #3).
 - `OOT-004` — review (`oot`, versão 9.1.2 e commit real injetados/detectados; PR #8).
 - `MM-004` — review (`mm`, versão 4.0.2 e commit real injetados/detectados; PR #4).
+- `MOD-008` — done (descoberta da raiz, compatibilidade, dependências, isolamento e cache de `.shipmod`; integrado em `main`).
+- `OOT-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `soh.exe` gerado; PR #9).
+- `MM-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `2ship.exe` gerado; PR #5).
 
 ## Bloqueios
 
@@ -70,7 +73,7 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar OOT-005/MM-005 em branches
-próprias para localizar o diretório de mods com segurança. Os builds Windows/MSVC
-estão verdes nos dois hosts; execução com ativos legítimos, Linux e macOS
-continuam pendentes.
+Integrar os PRs empilhados em ordem, incluindo OOT-005 e MM-005. Depois,
+executar um mod comum de conformidade nos dois hosts com ativos legítimos. Os builds
+Windows/MSVC estão verdes; execução com ativos legítimos, Linux e macOS continuam
+pendentes.
