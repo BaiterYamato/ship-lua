@@ -45,6 +45,16 @@ target_link_libraries(frame_timer_scheduler_tests PRIVATE shiplua)
 
 add_test(NAME frame_timer_scheduler_tests COMMAND frame_timer_scheduler_tests)
 
+add_executable(world_session_tests unit/WorldSessionTests.cpp)
+target_link_libraries(world_session_tests PRIVATE shiplua)
+
+add_test(NAME world_session_tests COMMAND world_session_tests)
+
+add_executable(portable_item_catalog_tests unit/PortableItemCatalogTests.cpp)
+target_link_libraries(portable_item_catalog_tests PRIVATE shiplua)
+
+add_test(NAME portable_item_catalog_tests COMMAND portable_item_catalog_tests)
+
 add_executable(generated_api_bindings_tests unit/GeneratedApiBindingsTests.cpp)
 target_link_libraries(generated_api_bindings_tests PRIVATE shiplua)
 
