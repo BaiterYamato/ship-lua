@@ -1,0 +1,22 @@
+# MM-HOTKEY-001
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex / Visual Studio 2022
+- Repository: BaiterYamato/2ship2harkinian
+- Branch: agent/MM-HOTKEY-001-hotkey-bridge
+- Started: 2026-07-13T07:20:00-03:00
+- Depends on: MM-005, HOTKEY-001
+- Files:
+  - extern/ship-lua
+  - mm/2s2h/MmHotkeyRegistry.h
+  - mm/2s2h/MmHotkeyRegistry.cpp
+  - mm/2s2h/ShipLuaBootstrap.h
+  - mm/2s2h/ShipLuaBootstrap.cpp
+  - mm/2s2h/BenPort.cpp
+  - coordination/handoffs/MM-HOTKEY-001.md
+- Goal:
+  - Injetar o registry comum no 2Ship2Harkinian.
+  - Despachar keydowns no thread principal com configuração por mod.
+  - Preservar a separação entre hotkey comum e ações exclusivas de MM.
+  - Remover bindings no unload e compilar o host MM.
