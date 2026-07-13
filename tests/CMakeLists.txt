@@ -45,6 +45,11 @@ target_link_libraries(frame_timer_scheduler_tests PRIVATE shiplua)
 
 add_test(NAME frame_timer_scheduler_tests COMMAND frame_timer_scheduler_tests)
 
+add_executable(atomic_file_tests unit/AtomicFileTests.cpp)
+target_link_libraries(atomic_file_tests PRIVATE shiplua)
+
+add_test(NAME atomic_file_tests COMMAND atomic_file_tests)
+
 add_executable(generated_api_bindings_tests unit/GeneratedApiBindingsTests.cpp)
 target_link_libraries(generated_api_bindings_tests PRIVATE shiplua)
 
