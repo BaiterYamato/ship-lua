@@ -1,6 +1,6 @@
 # CORE-001
 
-- Status: claimed
+- Status: review
 - Agent: claude-opus-windows-01 (coordenador) + fable-5 (implementação de código)
 - Platform: Windows 11 / Claude Code / MinGW g++ 15.2 + Ninja
 - Branch: main (repo local ship-lua recém-iniciado; ainda sem remote)
