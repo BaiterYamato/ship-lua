@@ -6,7 +6,7 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + runtime/modloader Fase 2 em review
+bootstrap-done + Fase 2 e arquitetura base em review
 
 ## Repositórios
 
@@ -38,6 +38,8 @@ Revisar e integrar a pilha de PRs da Fase 2 em ordem.
 - `MOD-006` — review (ordem determinística por grafo, prioridade e ID).
 - `MOD-007` — review (ciclos, incompatibilidades e IDs duplicados).
 - `TOOL-001` — review (validador CLI para manifesto, diretório e `.shipmod`).
+- `ARCH-001` — review (inventário de hooks nos commits atuais dos dois hosts).
+- `ARCH-002` — review (RFC 0001 da arquitetura núcleo/adaptadores).
 
 ## Bloqueios
 
@@ -49,6 +51,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar a Fase 3 por
-ARCH-001/ARCH-002 e API-001. Baseline de build dos jogos (CI-001/CI-002) e
+Integrar os PRs empilhados em ordem. Depois, iniciar a Fase 3 por API-001.
+Baseline de build dos jogos (CI-001/CI-002) e
 submódulo `extern/ship-lua` nos forks ficam para a Fase 4.
