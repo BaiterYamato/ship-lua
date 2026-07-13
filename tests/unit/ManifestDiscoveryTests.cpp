@@ -35,6 +35,36 @@ void TestManifestFixtures() {
     const auto syntax = ShipLua::ParseManifestFile((fixtures / "invalid-syntax.toml").string());
     Check(!syntax.isOk() && syntax.message.find("line") != std::string::npos,
           "syntax fixture should fail with a source location");
+
+    const auto version = ShipLua::ParseManifestFile((fixtures / "invalid-version.toml").string());
+    Check(!version.isOk() && version.message.find("version") != std::string::npos,
+          "invalid-version fixture should fail with a readable field name");
+}
+
+void TestManifestVersionRanges() {
+    const std::string prefix =
+        "id = \"example.ranges\"\nname = \"Ranges\"\nversion = \"1.0.0\"\n"
+        "entrypoint = \"main.lua\"\n";
+
+    const auto invalidApi = ShipLua::ParseManifestString(prefix + "api = \"^1.0\"\n");
+    Check(!invalidApi.isOk() && invalidApi.message.find("api") != std::string::npos,
+          "invalid API range should name its manifest field");
+
+    const auto invalidHost = ShipLua::ParseManifestString(
+        prefix + "api = \">=0.1 <1.0\"\n[host]\nshipwright = \">=bad\"\n");
+    Check(!invalidHost.isOk() && invalidHost.message.find("host.shipwright") != std::string::npos,
+          "invalid host range should name its manifest field");
+
+    const auto invalidDependency = ShipLua::ParseManifestString(
+        prefix + "api = \">=0.1 <1.0\"\n[dependencies]\n\"example.core\" = \"||\"\n");
+    Check(!invalidDependency.isOk() && invalidDependency.message.find("example.core") != std::string::npos,
+          "invalid dependency range should name its dependency");
+
+    const auto emptyId = ShipLua::ParseManifestString(
+        "id = \"\"\nname = \"Empty\"\nversion = \"1.0.0\"\n"
+        "api = \">=0.1 <1.0\"\nentrypoint = \"main.lua\"\n");
+    Check(!emptyId.isOk() && emptyId.message.find("id") != std::string::npos,
+          "empty required field should be rejected");
 }
 
 void WriteZipSignature(const std::filesystem::path& path) {
@@ -84,6 +114,7 @@ void TestMissingRoot() {
 
 int main() {
     TestManifestFixtures();
+    TestManifestVersionRanges();
     TestDiscovery();
     TestMissingRoot();
 

@@ -19,3 +19,8 @@ add_executable(package_extractor_tests unit/PackageExtractorTests.cpp)
 target_link_libraries(package_extractor_tests PRIVATE shiplua miniz)
 
 add_test(NAME package_extractor_tests COMMAND package_extractor_tests)
+
+add_executable(semver_tests unit/SemVersionTests.cpp)
+target_link_libraries(semver_tests PRIVATE shiplua)
+
+add_test(NAME semver_tests COMMAND semver_tests)

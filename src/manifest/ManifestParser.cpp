@@ -8,6 +8,8 @@
 
 #include <toml++/toml.hpp>
 
+#include "shiplua/manifest/SemVersion.h"
+
 namespace ShipLua {
 
 namespace {
@@ -28,7 +30,7 @@ void ReadStringArray(const toml::table& table, std::string_view key, std::vector
 // or not a string.
 std::string ReadRequiredString(const toml::table& table, std::string_view key,
                                std::vector<std::string>& missing) {
-    if (auto str = table[key].value<std::string>()) {
+    if (auto str = table[key].value<std::string>(); str && !str->empty()) {
         return std::move(*str);
     }
     missing.emplace_back(key);
@@ -57,6 +59,15 @@ Result<Manifest> ParseTable(const toml::table& table, const std::string& sourceN
         return Result<Manifest>::err(ErrorCode::InvalidArgument, oss.str());
     }
 
+    if (auto version = SemVersion::Parse(manifest.version); !version.isOk()) {
+        return Result<Manifest>::err(ErrorCode::InvalidArgument,
+                                     sourceName + ": invalid field 'version': " + version.message);
+    }
+    if (auto api = VersionRange::Parse(manifest.apiRange); !api.isOk()) {
+        return Result<Manifest>::err(ErrorCode::InvalidArgument,
+                                     sourceName + ": invalid field 'api': " + api.message);
+    }
+
     manifest.description = table["description"].value_or(std::string{});
     ReadStringArray(table, "authors", manifest.authors);
     ReadStringArray(table, "games", manifest.games);
@@ -69,6 +80,20 @@ Result<Manifest> ParseTable(const toml::table& table, const std::string& sourceN
             manifest.hostTwoShip = std::move(*v);
         }
     }
+    if (manifest.hostShipwright) {
+        if (auto range = VersionRange::Parse(*manifest.hostShipwright); !range.isOk()) {
+            return Result<Manifest>::err(ErrorCode::InvalidArgument,
+                                         sourceName + ": invalid field 'host.shipwright': " +
+                                             range.message);
+        }
+    }
+    if (manifest.hostTwoShip) {
+        if (auto range = VersionRange::Parse(*manifest.hostTwoShip); !range.isOk()) {
+            return Result<Manifest>::err(ErrorCode::InvalidArgument,
+                                         sourceName + ": invalid field 'host.two_ship': " +
+                                             range.message);
+        }
+    }
 
     if (const toml::table* caps = table["capabilities"].as_table()) {
         ReadStringArray(*caps, "required", manifest.capabilitiesRequired);
@@ -78,6 +103,12 @@ Result<Manifest> ParseTable(const toml::table& table, const std::string& sourceN
     if (const toml::table* deps = table["dependencies"].as_table()) {
         for (const auto& [depId, node] : *deps) {
             if (auto range = node.value<std::string>()) {
+                if (auto parsedRange = VersionRange::Parse(*range); !parsedRange.isOk()) {
+                    return Result<Manifest>::err(
+                        ErrorCode::InvalidArgument,
+                        sourceName + ": invalid dependency range for '" +
+                            std::string(depId.str()) + "': " + parsedRange.message);
+                }
                 manifest.dependencies.emplace_back(std::string(depId.str()), std::move(*range));
             }
         }
