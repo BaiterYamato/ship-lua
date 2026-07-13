@@ -14,3 +14,8 @@ target_compile_definitions(manifest_discovery_tests PRIVATE
     SHIPLUA_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_test(NAME manifest_discovery_tests COMMAND manifest_discovery_tests)
+
+add_executable(package_extractor_tests unit/PackageExtractorTests.cpp)
+target_link_libraries(package_extractor_tests PRIVATE shiplua miniz)
+
+add_test(NAME package_extractor_tests COMMAND package_extractor_tests)

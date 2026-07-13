@@ -1,11 +1,13 @@
 #pragma once
 
 #include <cstddef>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <string>
 
 #include "shiplua/manifest/Manifest.h"
+#include "shiplua/manifest/PackageExtractor.h"
 #include "shiplua/runtime/Logger.h"
 #include "shiplua/runtime/LuaRuntime.h"
 #include "shiplua/runtime/Result.h"
@@ -20,11 +22,12 @@ namespace ShipLua {
 class ModHost {
   public:
     explicit ModHost(Logger logger = {});
+    ~ModHost();
 
     ModHost(const ModHost&) = delete;
     ModHost& operator=(const ModHost&) = delete;
-    ModHost(ModHost&&) noexcept = default;
-    ModHost& operator=(ModHost&&) noexcept = default;
+    ModHost(ModHost&& other) noexcept;
+    ModHost& operator=(ModHost&& other) noexcept;
 
     // Loads a mod from `dir`: parses <dir>/manifest.toml, reads the
     // entrypoint file and runs it in a fresh isolated runtime. On any
@@ -37,6 +40,13 @@ class ModHost {
     Result<void> LoadModFromManifestAndSource(const Manifest& manifest,
                                               const std::string& luaSource,
                                               std::size_t memoryLimitBytes = 0);
+
+    // Safely extracts a .shipmod into an owned cache directory, loads it, and
+    // removes the extracted files on unload or failure.
+    Result<void> LoadModFromPackage(const std::string& package,
+                                    const std::string& extractionRoot,
+                                    const PackageLimits& limits = {},
+                                    std::size_t memoryLimitBytes = 0);
 
     bool IsLoaded(const std::string& id) const;
     std::size_t Count() const;
@@ -54,6 +64,7 @@ class ModHost {
     struct LoadedMod {
         Manifest manifest;
         std::unique_ptr<LuaRuntime> runtime;
+        std::filesystem::path ownedDirectory;
     };
 
     Logger mLogger;

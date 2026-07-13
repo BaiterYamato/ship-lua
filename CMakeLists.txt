@@ -26,6 +26,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(tomlplusplus)
 
+FetchContent_Declare(
+    miniz
+    GIT_REPOSITORY https://github.com/richgel999/miniz.git
+    GIT_TAG 3.1.2
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(miniz)
+
 if(NOT EXISTS "${lua_SOURCE_DIR}/lua.h")
     message(FATAL_ERROR
         "Lua sources were not fetched (network problem?). "
@@ -50,7 +58,7 @@ file(GLOB_RECURSE SHIPLUA_SOURCES CONFIGURE_DEPENDS
 
 add_library(shiplua STATIC ${SHIPLUA_SOURCES})
 target_include_directories(shiplua PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(shiplua PRIVATE lua_static tomlplusplus::tomlplusplus)
+target_link_libraries(shiplua PRIVATE lua_static tomlplusplus::tomlplusplus miniz)
 
 # ---------------------------------------------------------------------------
 # Tests

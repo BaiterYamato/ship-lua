@@ -2,6 +2,8 @@
 
 #include <filesystem>
 #include <fstream>
+#include <atomic>
+#include <chrono>
 #include <sstream>
 #include <utility>
 
@@ -64,9 +66,32 @@ Result<std::filesystem::path> ResolveEntrypoint(const std::filesystem::path& mod
     return Result<std::filesystem::path>::ok(std::move(current));
 }
 
+std::filesystem::path MakePackageDirectory(const std::filesystem::path& root) {
+    static std::atomic<std::uint64_t> counter{0};
+    const auto ticks = std::chrono::steady_clock::now().time_since_epoch().count();
+    return root / (".shiplua-package-" + std::to_string(ticks) + "-" +
+                   std::to_string(counter.fetch_add(1, std::memory_order_relaxed)));
+}
+
 } // namespace
 
 ModHost::ModHost(Logger logger) : mLogger(std::move(logger)) {}
+
+ModHost::~ModHost() {
+    UnloadAll();
+}
+
+ModHost::ModHost(ModHost&& other) noexcept
+    : mLogger(std::move(other.mLogger)), mMods(std::move(other.mMods)) {}
+
+ModHost& ModHost::operator=(ModHost&& other) noexcept {
+    if (this != &other) {
+        UnloadAll();
+        mLogger = std::move(other.mLogger);
+        mMods = std::move(other.mMods);
+    }
+    return *this;
+}
 
 Result<void> ModHost::LoadModFromDirectory(const std::string& dir, std::size_t memoryLimitBytes) {
     const std::filesystem::path modDir(dir);
@@ -118,7 +143,43 @@ Result<void> ModHost::LoadModFromManifestAndSource(const Manifest& manifest,
     }
 
     mLogger.info(manifest.id, "loaded mod '" + manifest.name + "' v" + manifest.version);
-    mMods.emplace(manifest.id, LoadedMod{manifest, std::move(runtime)});
+    mMods.emplace(manifest.id, LoadedMod{manifest, std::move(runtime), {}});
+    return Result<void>::ok();
+}
+
+Result<void> ModHost::LoadModFromPackage(const std::string& package,
+                                         const std::string& extractionRoot,
+                                         const PackageLimits& limits,
+                                         std::size_t memoryLimitBytes) {
+    const std::filesystem::path destination = MakePackageDirectory(extractionRoot);
+    Result<void> extracted = ExtractShipmod(package, destination, limits);
+    if (!extracted.isOk()) {
+        return extracted;
+    }
+
+    auto cleanup = [&destination]() {
+        std::error_code ignored;
+        std::filesystem::remove_all(destination, ignored);
+    };
+    Result<Manifest> parsed = ParseManifestFile((destination / "manifest.toml").string());
+    if (!parsed.isOk()) {
+        cleanup();
+        return Result<void>::err(parsed.code, parsed.message);
+    }
+
+    const std::string id = parsed.value->id;
+    Result<void> loaded = LoadModFromDirectory(destination.string(), memoryLimitBytes);
+    if (!loaded.isOk()) {
+        cleanup();
+        return loaded;
+    }
+    auto it = mMods.find(id);
+    if (it == mMods.end()) {
+        cleanup();
+        return Result<void>::err(ErrorCode::HostFailure,
+                                 "loaded package was not registered by its manifest id");
+    }
+    it->second.ownedDirectory = destination;
     return Result<void>::ok();
 }
 
@@ -135,13 +196,25 @@ Result<void> ModHost::UnloadMod(const std::string& id) {
     if (it == mMods.end()) {
         return Result<void>::err(ErrorCode::InvalidHandle, "mod '" + id + "' is not loaded");
     }
+    const std::filesystem::path ownedDirectory = std::move(it->second.ownedDirectory);
     mMods.erase(it); // destroys the LuaRuntime (closes its lua_State)
+    if (!ownedDirectory.empty()) {
+        std::error_code error;
+        std::filesystem::remove_all(ownedDirectory, error);
+        if (error) {
+            return Result<void>::err(ErrorCode::HostFailure,
+                                     "mod unloaded but extracted package cleanup failed: " +
+                                         error.message());
+        }
+    }
     mLogger.info(id, "unloaded mod");
     return Result<void>::ok();
 }
 
 void ModHost::UnloadAll() {
-    mMods.clear();
+    while (!mMods.empty()) {
+        UnloadMod(mMods.begin()->first);
+    }
 }
 
 LuaRuntime* ModHost::GetRuntime(const std::string& id) {
