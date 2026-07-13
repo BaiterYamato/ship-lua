@@ -6,22 +6,22 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + Fases 2 e 3 em review + bootstrap dos hosts em review
+bootstrap-done + Fases 2 e 3 em review + ciclo de vida dos hosts em review
 
 ## Repositórios
 
 | Repositório | Estado | Branch de integração | Baseline |
 |---|---|---|---|
 | BaiterYamato/ship-lua | criado + push (origin) | main | — |
-| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001/002 em review (PRs #5 e #6) | lua/main | `fb3259f7` |
-| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001/002 em review (PRs #1 e #2) | lua/main | `b3cc3662` |
+| BaiterYamato/Shipwright-HyliaFoundry (fork de HarbourMasters/Shipwright) | OOT-001/002/003 em review (PRs #5, #6 e #7) | lua/main | `fb3259f7` |
+| BaiterYamato/2ship2harkinian (fork de HarbourMasters/2ship2harkinian) | MM-001/002/003 em review (PRs #1, #2 e #3) | lua/main | `b3cc3662` |
 
 > Nota: o fork do Shipwright foi renomeado para `Shipwright-HyliaFoundry`.
 > Ambos os forks têm default `develop` e branch de integração `lua/main` já criada.
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar, em ordem, OOT-001 → OOT-002 e MM-001 → MM-002.
+Revisar e integrar, em ordem, OOT-001 → OOT-002 → OOT-003 e MM-001 → MM-002 → MM-003.
 
 ## Progresso
 
@@ -55,6 +55,8 @@ Revisar e integrar, em ordem, OOT-001 → OOT-002 e MM-001 → MM-002.
 - `MM-001` — review (submódulo/CMake; `2ship.exe` gerado no Windows/MSVC; PR #1).
 - `OOT-002` — review (bootstrap idempotente + logger + CRT estático; `soh.exe` gerado; PR #6).
 - `MM-002` — review (bootstrap idempotente + logger + CRT estático; `2ship.exe` gerado; PR #2).
+- `OOT-003` — review (shutdown idempotente antes dos serviços do host; `soh.exe` gerado; PR #7).
+- `MM-003` — review (shutdown idempotente antes dos serviços do host; `2ship.exe` gerado; PR #3).
 
 ## Bloqueios
 
@@ -66,7 +68,7 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar OOT-003/MM-003 em branches
-próprias para o shutdown seguro do runtime. Os builds completos Windows/MSVC
-estão verdes nos dois hosts; execução com ativos legítimos, Linux e macOS
-continuam pendentes.
+Integrar os PRs empilhados em ordem. Depois, iniciar OOT-004/MM-004 em branches
+próprias para expor versão e commit dos hosts ao runtime. Os builds completos
+Windows/MSVC estão verdes nos dois hosts; execução com ativos legítimos, Linux
+e macOS continuam pendentes.
