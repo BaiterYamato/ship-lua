@@ -24,3 +24,8 @@ add_executable(semver_tests unit/SemVersionTests.cpp)
 target_link_libraries(semver_tests PRIVATE shiplua)
 
 add_test(NAME semver_tests COMMAND semver_tests)
+
+add_executable(dependency_resolver_tests unit/DependencyResolverTests.cpp)
+target_link_libraries(dependency_resolver_tests PRIVATE shiplua)
+
+add_test(NAME dependency_resolver_tests COMMAND dependency_resolver_tests)
