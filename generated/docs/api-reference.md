@@ -1,7 +1,7 @@
 <!-- Gerado por tools/generate_api_docs.py. Não edite manualmente. -->
 # Referência da API ShipLua
 
-Versão da API: `0.1.0`. Versão do schema: `1`.
+Versão da API: `0.2.0`. Versão do schema: `1`.
 
 ## Tipos
 
@@ -12,6 +12,7 @@ Versão da API: `0.1.0`. Versão do schema: `1`.
 | `event_options` | `object` | `priority: integer?` | Opções determinísticas de inscrição. |
 | `actor_handle` | `object` | `slot: integer`, `generation: integer`, `game: game_id` | Handle validado por slot, geração e host. |
 | `actor_snapshot` | `object` | `handle: actor_handle`, `actor_id: integer`, `category: integer` | Snapshot mínimo e estável de ator. |
+| `hotkey_options` | `object` | `default: string?`, `label: string?` | Opções de registro de hotkey (tecla default e rótulo). |
 
 ## Funções
 
@@ -25,6 +26,7 @@ Versão da API: `0.1.0`. Versão do schema: `1`.
 | `ship.capabilities.list` | — | `array<string>` | `common` | — | — |
 | `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | — | `invalid_argument`, `unsupported` |
 | `ship.events.off` | `subscription: subscription` | `boolean` | `common` | — | `invalid_handle` |
+| `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | — | `invalid_argument`, `unsupported` |
 | `ship.log.debug` | `message: string` | `nil` | `common` | — | `invalid_argument` |
 | `ship.log.info` | `message: string` | `nil` | `common` | — | `invalid_argument` |
 | `ship.log.warn` | `message: string` | `nil` | `common` | — | `invalid_argument` |

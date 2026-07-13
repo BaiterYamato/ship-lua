@@ -1,6 +1,6 @@
 ---@meta ShipLua
 -- Gerado por tools/generate_api_docs.py. Não edite manualmente.
--- API 0.1.0 / schema 1
+-- API 0.2.0 / schema 1
 
 --- Identificador público do jogo host.
 ---@alias ShipLuaGameId "oot"|"mm"
@@ -23,6 +23,11 @@
 ---@field handle ShipLuaActorHandle
 ---@field actor_id integer
 ---@field category integer
+
+--- Opções de registro de hotkey (tecla default e rótulo).
+---@class ShipLuaHotkeyOptions
+---@field default? string
+---@field label? string
 
 ---@class ShipLuaEventGameReady
 ---@field game_id ShipLuaGameId
@@ -68,6 +73,7 @@ ship.api = ship.api or {}
 ship.capabilities = ship.capabilities or {}
 ship.events = ship.events or {}
 ship.game = ship.game or {}
+ship.hotkeys = ship.hotkeys or {}
 ship.log = ship.log or {}
 ship.runtime = ship.runtime or {}
 
@@ -107,6 +113,13 @@ function ship.events.on(event, options_or_callback, callback) end
 ---@param subscription ShipLuaSubscription
 ---@return boolean
 function ship.events.off(subscription) end
+
+--- API common; capability: comum; erros: invalid_argument, unsupported.
+---@param id string
+---@param options? ShipLuaHotkeyOptions
+---@param callback function
+---@return boolean
+function ship.hotkeys.register(id, options, callback) end
 
 --- API common; capability: comum; erros: invalid_argument.
 ---@param message string

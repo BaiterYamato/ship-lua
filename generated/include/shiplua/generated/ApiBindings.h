@@ -10,7 +10,7 @@
 
 namespace ShipLua::Generated {
 
-inline constexpr std::string_view kApiVersion = "0.1.0";
+inline constexpr std::string_view kApiVersion = "0.2.0";
 inline constexpr std::uint32_t kSchemaVersion = 1;
 
 enum class GameId {
@@ -34,6 +34,11 @@ struct ActorSnapshot {
     ActorHandle handle;
     std::int64_t actor_id;
     std::int64_t category;
+};
+
+struct HotkeyOptions {
+    std::optional<std::string> default;
+    std::optional<std::string> label;
 };
 
 enum class ApiError {
@@ -64,6 +69,7 @@ enum class FunctionId {
     ShipCapabilitiesList,
     ShipEventsOn,
     ShipEventsOff,
+    ShipHotkeysRegister,
     ShipLogDebug,
     ShipLogInfo,
     ShipLogWarn,
@@ -121,6 +127,15 @@ inline constexpr std::array<FieldBinding, 1> kShipEventsOffArguments{{
 inline constexpr std::array<std::string_view, 1> kShipEventsOffErrors{{
     "invalid_handle",
 }};
+inline constexpr std::array<FieldBinding, 3> kShipHotkeysRegisterArguments{{
+    {"id", "string", true},
+    {"options", "hotkey_options", false},
+    {"callback", "callback", true},
+}};
+inline constexpr std::array<std::string_view, 2> kShipHotkeysRegisterErrors{{
+    "invalid_argument",
+    "unsupported",
+}};
 inline constexpr std::array<FieldBinding, 1> kShipLogDebugArguments{{
     {"message", "string", true},
 }};
@@ -146,7 +161,7 @@ inline constexpr std::array<std::string_view, 1> kShipLogErrorErrors{{
     "invalid_argument",
 }};
 
-inline constexpr std::array<FunctionBinding, 12> kFunctions{{
+inline constexpr std::array<FunctionBinding, 13> kFunctions{{
     {FunctionId::ShipGameId, "ship.game.id", "game_id", "common", {}, kShipGameIdArguments, kShipGameIdErrors},
     {FunctionId::ShipGameHostVersion, "ship.game.host_version", "string", "common", {}, kShipGameHostVersionArguments, kShipGameHostVersionErrors},
     {FunctionId::ShipRuntimeVersion, "ship.runtime.version", "string", "common", {}, kShipRuntimeVersionArguments, kShipRuntimeVersionErrors},
@@ -155,6 +170,7 @@ inline constexpr std::array<FunctionBinding, 12> kFunctions{{
     {FunctionId::ShipCapabilitiesList, "ship.capabilities.list", "array<string>", "common", {}, kShipCapabilitiesListArguments, kShipCapabilitiesListErrors},
     {FunctionId::ShipEventsOn, "ship.events.on", "subscription", "common", {}, kShipEventsOnArguments, kShipEventsOnErrors},
     {FunctionId::ShipEventsOff, "ship.events.off", "boolean", "common", {}, kShipEventsOffArguments, kShipEventsOffErrors},
+    {FunctionId::ShipHotkeysRegister, "ship.hotkeys.register", "boolean", "common", {}, kShipHotkeysRegisterArguments, kShipHotkeysRegisterErrors},
     {FunctionId::ShipLogDebug, "ship.log.debug", "nil", "common", {}, kShipLogDebugArguments, kShipLogDebugErrors},
     {FunctionId::ShipLogInfo, "ship.log.info", "nil", "common", {}, kShipLogInfoArguments, kShipLogInfoErrors},
     {FunctionId::ShipLogWarn, "ship.log.warn", "nil", "common", {}, kShipLogWarnArguments, kShipLogWarnErrors},

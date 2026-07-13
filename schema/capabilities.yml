@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "api_version": "0.1.0",
+  "api_version": "0.2.0",
   "capabilities": [
     {"name": "scene.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de cena."},
     {"name": "actor.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de ator com handles e snapshots."},
