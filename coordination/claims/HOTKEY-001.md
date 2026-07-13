@@ -8,6 +8,7 @@
 - Started: 2026-07-13T07:00:00-03:00
 - Depends on: BIND-001, EVENT-001, MOD-008
 - Files:
+  - .gitignore
   - rfcs/0002-common-hotkey-registration.md
   - include/shiplua/input/**
   - include/shiplua/api/LuaApiBinding.h
@@ -31,3 +32,4 @@
   - Remover registros e callbacks de forma segura no unload de cada mod.
   - Permitir adaptadores OoT e MM equivalentes sem headers de jogo no núcleo.
   - Provar registro, disparo, substituição e descarregamento sem callback residual.
+  - Manter diretórios locais de build fora do controle de versão.
