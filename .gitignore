@@ -1,0 +1,30 @@
+# Build
+/build/
+/build-*/
+/out/
+/generated/**/*.tmp
+
+# Lua bytecode
+*.luac
+
+# Protected assets — NUNCA versionar (AGENTS §3)
+*.z64
+*.n64
+*.v64
+*.o2r
+*.otr
+*.rom
+*.sav
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+/CMakeUserPresets.json
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake

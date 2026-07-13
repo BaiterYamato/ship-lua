@@ -1,0 +1,22 @@
+# CORE-001
+
+- Status: claimed
+- Agent: claude-opus-windows-01 (coordenador) + fable-5 (implementação de código)
+- Platform: Windows 11 / Claude Code / MinGW g++ 15.2 + Ninja
+- Branch: main (repo local ship-lua recém-iniciado; ainda sem remote)
+- Started: 2026-07-12
+- Depends on: ARCH-002 (dispensado no bootstrap local — decisões de arquitetura seguem PLAN.md §5-6)
+- Files:
+  - CMakeLists.txt
+  - cmake/**
+  - include/shiplua/runtime/**
+  - src/runtime/**
+  - tests/unit/**
+  - .gitignore
+- Goal:
+  - Integrar Lua 5.4 e criar `LuaRuntime`: inicializar e encerrar um estado Lua isolado.
+  - Sandbox inicial (CORE-003): remover `io`, `os.execute`, `debug`, `package.loadlib`, FFI.
+  - Logging estruturado por mod (CORE-004) e tratamento protegido de erros (CORE-005).
+  - Teste unitário provando estados isolados + ausência de libs perigosas (TEST-001).
+- Notas:
+  - GOV-001/GOV-002 (forks e repo público no GitHub) NÃO reivindicados — aguardando confirmação do owner.
