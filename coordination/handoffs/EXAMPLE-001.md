@@ -11,10 +11,12 @@ review
 - A geração fixa ordem, timestamp e permissões e é byte a byte reproduzível.
 - O mesmo pacote carrega pelos contextos `oot` e `mm`, recebe `game.ready` e registra a identidade do host.
 - `UnloadAll` remove o mod, o callback e a extração temporária.
+- O workflow `package-examples` recompila, valida e publica o `.shipmod` acompanhado do checksum SHA-256.
 
 ## Commits
 
 - `6e42d36` — feat(example): add reproducible hello-world package
+- `af004a5` — ci(examples): publish validated shipmod artifact
 
 ## Arquivos alterados
 
@@ -26,6 +28,7 @@ review
 - `tests/conformance/HelloWorldConformanceTests.cpp`
 - `tests/conformance/PackageHelloWorld.py`
 - `tests/conformance/test_package_hello_world.py`
+- `.github/workflows/package-examples.yml`
 
 ## Validação executada
 
@@ -33,6 +36,8 @@ review
 cmake -S . -B build -G Ninja
 cmake --build build -j 2
 ctest --test-dir build --output-on-failure
+cmake --build build --target package_examples shiplua_manifest_validator hello_world_conformance_tests -j 2
+ctest --test-dir build -R "hello_world_(conformance_tests|package_validation|packaging_tests)" --output-on-failure
 ```
 
 ## Resultado da validação
@@ -41,11 +46,14 @@ ctest --test-dir build --output-on-failure
 - 24 de 24 testes passaram.
 - Dois empacotamentos independentes produziram SHA-256 idêntico.
 - O validador aceitou o `.shipmod` gerado.
+- Os três testes focais do pacote passaram após a inclusão do workflow.
+- O pacote local manteve SHA-256 `b6275f720c93129e53dfc0a455f7b6109af45cc94f956a71230384808b16a3ed`.
 
 ## Pendências
 
 - Copiar o pacote para os diretórios reais dos dois hosts e observar os logs com ativos legítimos.
-- Validar Linux e macOS.
+- Confirmar a execução do novo workflow no GitHub Actions.
+- Validar macOS.
 
 ## Riscos
 

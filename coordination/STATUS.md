@@ -6,7 +6,7 @@ ShipLua
 
 ## Estado global
 
-bootstrap-done + Fases 2 e 3 em review + ciclo de vida dos hosts em review
+bootstrap-done + Fases 2 e 3 em review + ciclo de vida e descoberta dos hosts em review
 
 ## Repositórios
 
@@ -21,7 +21,8 @@ bootstrap-done + Fases 2 e 3 em review + ciclo de vida dos hosts em review
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar, em ordem, OOT-001 → OOT-002 → OOT-003 → OOT-004 e MM-001 → MM-002 → MM-003 → MM-004.
+Revisar e integrar, em ordem, as pilhas OOT-001 → OOT-005 e MM-001 → MM-005;
+em paralelo, revisar o pacote comum do EXAMPLE-001.
 
 ## Progresso
 
@@ -59,6 +60,9 @@ Revisar e integrar, em ordem, OOT-001 → OOT-002 → OOT-003 → OOT-004 e MM-0
 - `MM-003` — review (shutdown idempotente antes dos serviços do host; `2ship.exe` gerado; PR #3).
 - `OOT-004` — review (`oot`, versão 9.1.2 e commit real injetados/detectados; PR #8).
 - `MM-004` — review (`mm`, versão 4.0.2 e commit real injetados/detectados; PR #4).
+- `OOT-005` — review (diretório de mods do usuário localizado com segurança; PR #9).
+- `MM-005` — review (diretório de mods do usuário localizado com segurança; PR #5).
+- `EXAMPLE-001` — review (pacote comum reproduzível, conformidade OoT/MM e artefato de CI; PR #20).
 
 ## Bloqueios
 
@@ -70,7 +74,6 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem. Depois, iniciar OOT-005/MM-005 em branches
-próprias para localizar o diretório de mods com segurança. Os builds Windows/MSVC
-estão verdes nos dois hosts; execução com ativos legítimos, Linux e macOS
-continuam pendentes.
+Integrar os PRs empilhados em ordem e confirmar o workflow de pacote do
+EXAMPLE-001. Os builds Windows/MSVC estão verdes nos dois hosts; execução com
+ativos legítimos e validação macOS continuam pendentes.
