@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "api_version": "0.1.0",
+  "events": [
+    {"name": "game.ready", "kind": "observe", "phase": "mvp", "cancellable": false, "support": ["oot", "mm"], "capability": null, "payload": [
+      {"name": "game_id", "type": "game_id", "required": true},
+      {"name": "host_version", "type": "string", "required": true},
+      {"name": "runtime_version", "type": "string", "required": true},
+      {"name": "api_version", "type": "string", "required": true}
+    ]},
+    {"name": "game.frame", "kind": "observe", "phase": "mvp", "cancellable": false, "support": ["oot", "mm"], "capability": null, "payload": [
+      {"name": "frame", "type": "integer", "required": true}
+    ]},
+    {"name": "game.shutdown", "kind": "observe", "phase": "mvp", "cancellable": false, "support": ["oot", "mm"], "capability": null, "payload": []},
+    {"name": "scene.enter", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": "scene.events", "payload": [
+      {"name": "scene_id", "type": "integer", "required": true}
+    ]},
+    {"name": "actor.init", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": "actor.events", "payload": [
+      {"name": "actor", "type": "actor_snapshot", "required": true}
+    ]},
+    {"name": "actor.update", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": "actor.events", "payload": [
+      {"name": "actor", "type": "actor_snapshot", "required": true}
+    ]},
+    {"name": "actor.destroy", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": "actor.events", "payload": [
+      {"name": "handle", "type": "actor_handle", "required": true}
+    ]},
+    {"name": "save.loaded", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": "save.events", "payload": [
+      {"name": "slot", "type": "integer", "required": true}
+    ]},
+    {"name": "text.open", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": "text.events", "payload": [
+      {"name": "text_id", "type": "integer", "required": true}
+    ]},
+    {"name": "audio.sequence_started", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": "audio.sequence.events", "payload": [
+      {"name": "player_index", "type": "integer", "required": true},
+      {"name": "sequence_id", "type": "integer", "required": true}
+    ]}
+  ]
+}

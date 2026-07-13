@@ -24,6 +24,10 @@ Thumbs.db
 .idea/
 /CMakeUserPresets.json
 
+# Python
+__pycache__/
+*.py[cod]
+
 # CMake
 CMakeCache.txt
 CMakeFiles/

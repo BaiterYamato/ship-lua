@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "api_version": "0.1.0",
+  "types": [
+    {"name": "game_id", "kind": "enum", "values": ["oot", "mm"], "description": "Identificador público do jogo host."},
+    {"name": "subscription", "kind": "opaque", "lua_type": "integer", "description": "Identificador opaco de inscrição em evento."},
+    {"name": "event_options", "kind": "object", "fields": [
+      {"name": "priority", "type": "integer", "required": false}
+    ], "description": "Opções determinísticas de inscrição."},
+    {"name": "actor_handle", "kind": "object", "fields": [
+      {"name": "slot", "type": "integer", "required": true},
+      {"name": "generation", "type": "integer", "required": true},
+      {"name": "game", "type": "game_id", "required": true}
+    ], "description": "Handle validado por slot, geração e host."},
+    {"name": "actor_snapshot", "kind": "object", "fields": [
+      {"name": "handle", "type": "actor_handle", "required": true},
+      {"name": "actor_id", "type": "integer", "required": true},
+      {"name": "category", "type": "integer", "required": true}
+    ], "description": "Snapshot mínimo e estável de ator."}
+  ],
+  "functions": [
+    {"name": "ship.game.id", "arguments": [], "returns": "game_id", "availability": "common", "capability": null, "errors": []},
+    {"name": "ship.game.host_version", "arguments": [], "returns": "string", "availability": "common", "capability": null, "errors": []},
+    {"name": "ship.runtime.version", "arguments": [], "returns": "string", "availability": "common", "capability": null, "errors": []},
+    {"name": "ship.api.version", "arguments": [], "returns": "string", "availability": "common", "capability": null, "errors": []},
+    {"name": "ship.capabilities.has", "arguments": [{"name": "name", "type": "string"}], "returns": "boolean", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
+    {"name": "ship.capabilities.list", "arguments": [], "returns": "array<string>", "availability": "common", "capability": null, "errors": []},
+    {"name": "ship.events.on", "arguments": [{"name": "event", "type": "string"}, {"name": "options_or_callback", "type": "any"}, {"name": "callback", "type": "callback", "required": false}], "returns": "subscription", "availability": "common", "capability": null, "errors": ["invalid_argument", "unsupported"]},
+    {"name": "ship.events.off", "arguments": [{"name": "subscription", "type": "subscription"}], "returns": "boolean", "availability": "common", "capability": null, "errors": ["invalid_handle"]},
+    {"name": "ship.log.debug", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
+    {"name": "ship.log.info", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
+    {"name": "ship.log.warn", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
+    {"name": "ship.log.error", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]}
+  ],
+  "error_codes": ["unsupported", "invalid_argument", "invalid_handle", "invalid_state", "permission_denied", "resource_limit", "host_failure", "script_failure"]
+}

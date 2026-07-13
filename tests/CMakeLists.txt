@@ -42,3 +42,9 @@ add_test(NAME validator_invalid_manifest
 set_tests_properties(validator_invalid_manifest PROPERTIES WILL_FAIL TRUE)
 add_test(NAME validator_usage COMMAND shiplua_manifest_validator)
 set_tests_properties(validator_usage PROPERTIES WILL_FAIL TRUE)
+
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+add_test(NAME api_schema_validation
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/validate_api_schemas.py")
+add_test(NAME api_schema_validation_tests
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_validate_api_schemas.py")

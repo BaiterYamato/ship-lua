@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "api_version": "0.1.0",
+  "capabilities": [
+    {"name": "scene.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de cena."},
+    {"name": "actor.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de ator com handles e snapshots."},
+    {"name": "save.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de carregamento de save."},
+    {"name": "text.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de texto somente leitura."},
+    {"name": "audio.sequence.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos de início de sequência de áudio."},
+    {"name": "mm.room.events", "status": "planned", "hosts": ["mm"], "description": "Eventos de room exclusivos de Majora's Mask."},
+    {"name": "mm.cycle", "status": "planned", "hosts": ["mm"], "description": "Lifecycle do ciclo de três dias."},
+    {"name": "mm.owl_save", "status": "planned", "hosts": ["mm"], "description": "Semântica de owl save."},
+    {"name": "mm.clock", "status": "planned", "hosts": ["mm"], "description": "Leitura estável do relógio de MM."},
+    {"name": "oot.ocarina", "status": "planned", "hosts": ["oot"], "description": "Eventos e estado de ocarina de OoT."},
+    {"name": "oot.dungeon_keys", "status": "planned", "hosts": ["oot"], "description": "Estado de chaves de dungeon de OoT."},
+    {"name": "oot.equipment", "status": "planned", "hosts": ["oot"], "description": "Equipamento específico de OoT."}
+  ]
+}
