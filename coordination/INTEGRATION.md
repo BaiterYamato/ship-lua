@@ -34,6 +34,16 @@
 
 ## Histórico
 
+### 2026-07-13 (8) — CI Windows/MSVC (builder ocioso)
+
+- Adicionado `.github/workflows/core-windows.yml` (governança): windows-latest,
+  gerador VS 2022 x64, `--config Release`, `ctest --timeout 120`. Sem actions de
+  terceiros. De-risco: o CMake não usa flags GCC-específicas e o núcleo já compilou
+  sob MSVC 19.44 na integração dos forks (handoff OOT-001).
+- Objetivo: fechar o critério §16 "CI Windows verde". Resultado da 1ª run é
+  verificado no próximo ciclo.
+- Nada do builder para integrar neste ciclo (ocioso; `main` já em dia).
+
 ### 2026-07-13 (7) — EXAMPLE-001 hello-world + vertical slice (§14) provado no núcleo
 
 - Fast-forward de `main` (`1adebb2` → `e6dcf6c`): EXAMPLE-001.
