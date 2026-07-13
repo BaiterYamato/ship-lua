@@ -7,6 +7,7 @@
 #include <sstream>
 #include <utility>
 
+#include "shiplua/generated/ApiBindings.h"
 #include "shiplua/manifest/ManifestParser.h"
 
 namespace ShipLua {
@@ -73,21 +74,51 @@ std::filesystem::path MakePackageDirectory(const std::filesystem::path& root) {
                    std::to_string(counter.fetch_add(1, std::memory_order_relaxed)));
 }
 
+EventKind ToEventKind(Generated::EventKind kind) {
+    switch (kind) {
+        case Generated::EventKind::Observe: return EventKind::Observe;
+        case Generated::EventKind::Filter: return EventKind::Filter;
+        case Generated::EventKind::Transform: return EventKind::Transform;
+        case Generated::EventKind::Consume: return EventKind::Consume;
+    }
+    return EventKind::Observe;
+}
+
 } // namespace
 
-ModHost::ModHost(Logger logger) : mLogger(std::move(logger)) {}
+ModHost::ModHost(Logger logger) : ModHost(LuaApiHostContext{}, std::move(logger)) {}
+
+ModHost::ModHost(LuaApiHostContext hostContext, Logger logger)
+    : mLogger(std::move(logger)),
+      mHostContext(std::move(hostContext)),
+      mEvents(std::make_unique<EventDispatcher>()) {
+    for (const Generated::EventBinding& event : Generated::kEvents) {
+        const auto defined = mEvents->DefineEvent(std::string(event.name), ToEventKind(event.kind));
+        if (!defined.isOk()) {
+            mLogger.error("host", "failed to define generated event '" + std::string(event.name) +
+                                      "': " + defined.message);
+        }
+    }
+}
 
 ModHost::~ModHost() {
     UnloadAll();
 }
 
 ModHost::ModHost(ModHost&& other) noexcept
-    : mLogger(std::move(other.mLogger)), mMods(std::move(other.mMods)) {}
+    : mLogger(std::move(other.mLogger)),
+      mHostContext(std::move(other.mHostContext)),
+      mEvents(std::move(other.mEvents)),
+      mNextModLoadOrder(other.mNextModLoadOrder),
+      mMods(std::move(other.mMods)) {}
 
 ModHost& ModHost::operator=(ModHost&& other) noexcept {
     if (this != &other) {
         UnloadAll();
         mLogger = std::move(other.mLogger);
+        mHostContext = std::move(other.mHostContext);
+        mEvents = std::move(other.mEvents);
+        mNextModLoadOrder = other.mNextModLoadOrder;
         mMods = std::move(other.mMods);
     }
     return *this;
@@ -135,6 +166,14 @@ Result<void> ModHost::LoadModFromManifestAndSource(const Manifest& manifest,
                                  "mod '" + manifest.id + "': failed to create Lua runtime");
     }
 
+    auto binding = std::make_unique<LuaApiBinding>(*runtime, *mEvents, mLogger, mHostContext,
+                                                   mNextModLoadOrder, manifest.loadPriority);
+    const auto installed = binding->Install();
+    if (!installed.isOk()) {
+        return Result<void>::err(installed.code,
+                                 "mod '" + manifest.id + "': " + installed.message);
+    }
+
     const std::string chunkName = manifest.id + "/" + manifest.entrypoint;
     Result<void> run = runtime->DoString(luaSource, chunkName);
     if (!run.isOk()) {
@@ -143,7 +182,9 @@ Result<void> ModHost::LoadModFromManifestAndSource(const Manifest& manifest,
     }
 
     mLogger.info(manifest.id, "loaded mod '" + manifest.name + "' v" + manifest.version);
-    mMods.emplace(manifest.id, LoadedMod{manifest, std::move(runtime), {}});
+    mMods.emplace(manifest.id,
+                  LoadedMod{manifest, std::move(runtime), std::move(binding), {}});
+    ++mNextModLoadOrder;
     return Result<void>::ok();
 }
 
@@ -191,10 +232,25 @@ std::size_t ModHost::Count() const {
     return mMods.size();
 }
 
+std::size_t ModHost::SubscriptionCount() const {
+    return mEvents != nullptr ? mEvents->SubscriptionCount() : 0;
+}
+
+Result<DispatchOutcome> ModHost::DispatchEvent(const std::string& name,
+                                               EventPayload& payload) {
+    if (mEvents == nullptr) {
+        return Result<DispatchOutcome>::err(ErrorCode::InvalidState,
+                                            "mod host has no event dispatcher");
+    }
+    return mEvents->Dispatch(name, payload);
+}
+
 Result<void> ModHost::UnloadMod(const std::string& id) {
-    auto it = mMods.find(id);
+    const std::string modId = id;
+    auto it = mMods.find(modId);
     if (it == mMods.end()) {
-        return Result<void>::err(ErrorCode::InvalidHandle, "mod '" + id + "' is not loaded");
+        return Result<void>::err(ErrorCode::InvalidHandle,
+                                 "mod '" + modId + "' is not loaded");
     }
     const std::filesystem::path ownedDirectory = std::move(it->second.ownedDirectory);
     mMods.erase(it); // destroys the LuaRuntime (closes its lua_State)
@@ -207,13 +263,14 @@ Result<void> ModHost::UnloadMod(const std::string& id) {
                                          error.message());
         }
     }
-    mLogger.info(id, "unloaded mod");
+    mLogger.info(modId, "unloaded mod");
     return Result<void>::ok();
 }
 
 void ModHost::UnloadAll() {
     while (!mMods.empty()) {
-        UnloadMod(mMods.begin()->first);
+        const std::string id = mMods.begin()->first;
+        UnloadMod(id);
     }
 }
 

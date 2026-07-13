@@ -1,0 +1,84 @@
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "shiplua/events/EventDispatcher.h"
+#include "shiplua/runtime/Logger.h"
+#include "shiplua/runtime/LuaRuntime.h"
+#include "shiplua/runtime/Result.h"
+
+struct lua_State;
+
+namespace ShipLua {
+
+struct LuaApiHostContext {
+    std::string gameId;
+    std::string hostVersion;
+    std::string runtimeVersion = "0.1.0";
+    std::vector<std::string> capabilities;
+};
+
+class LuaApiBinding {
+  public:
+    LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logger logger,
+                  LuaApiHostContext hostContext, std::size_t modLoadOrder,
+                  int modPriority, std::size_t maxConsecutiveFailures = 3);
+    ~LuaApiBinding();
+
+    LuaApiBinding(const LuaApiBinding&) = delete;
+    LuaApiBinding& operator=(const LuaApiBinding&) = delete;
+
+    Result<void> Install();
+    std::size_t SubscriptionCount() const;
+
+  private:
+    struct LuaCallback {
+        int registryReference = -2;
+        Subscription subscription;
+        std::size_t consecutiveFailures = 0;
+        bool active = true;
+    };
+
+    static LuaApiBinding* FromUpvalue(lua_State* state);
+    static int InstallProtected(lua_State* state) noexcept;
+    static int Require(lua_State* state) noexcept;
+    static int GameId(lua_State* state) noexcept;
+    static int HostVersion(lua_State* state) noexcept;
+    static int RuntimeVersion(lua_State* state) noexcept;
+    static int ApiVersion(lua_State* state) noexcept;
+    static int CapabilityHas(lua_State* state) noexcept;
+    static int CapabilityList(lua_State* state) noexcept;
+    static int EventsOn(lua_State* state) noexcept;
+    static int EventsOff(lua_State* state) noexcept;
+    static int LogDebug(lua_State* state) noexcept;
+    static int LogInfo(lua_State* state) noexcept;
+    static int LogWarn(lua_State* state) noexcept;
+    static int LogError(lua_State* state) noexcept;
+
+    Result<Subscription> RegisterEvent(lua_State* state, const std::string& eventName,
+                                       int callbackIndex, int callbackPriority);
+    Result<void> RemoveEvent(Subscription subscription);
+    EventFlow InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
+                             EventPayload& payload);
+    int WriteLog(lua_State* state, LogLevel level) noexcept;
+    void BuildModule(lua_State* state);
+    void Uninstall() noexcept;
+
+    LuaRuntime& mRuntime;
+    EventDispatcher& mEvents;
+    Logger mLogger;
+    LuaApiHostContext mHostContext;
+    std::size_t mModLoadOrder = 0;
+    int mModPriority = 50;
+    std::size_t mMaxConsecutiveFailures = 3;
+    std::map<std::uint64_t, std::shared_ptr<LuaCallback>> mCallbacks;
+    int mShipReference = -2;
+    bool mInstalled = false;
+};
+
+} // namespace ShipLua

@@ -45,6 +45,11 @@ target_link_libraries(generated_api_bindings_tests PRIVATE shiplua)
 
 add_test(NAME generated_api_bindings_tests COMMAND generated_api_bindings_tests)
 
+add_executable(lua_api_binding_tests unit/LuaApiBindingTests.cpp)
+target_link_libraries(lua_api_binding_tests PRIVATE shiplua)
+
+add_test(NAME lua_api_binding_tests COMMAND lua_api_binding_tests)
+
 add_test(NAME validator_valid_file
     COMMAND shiplua_manifest_validator
         "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/manifest/valid-minimal.toml")
