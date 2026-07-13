@@ -5,8 +5,8 @@
 
 ## Estado de `main`
 
-- Tip integrado: `ee0004f` (merge de HOST-003 — coordenação OOT-003/MM-003).
-- Build/teste: 20/20 verdes (só coordenação desde `1a1856a`).
+- Tip integrado: `265a200` (merge de HOST-004 coord + MOD-008 root loader).
+- Build/teste: **21/21 verdes** (rebuild limpo; inclui `mod_root_loader_tests`).
 - **CI Linux (`core-linux.yml`): verde** em cada push a `main` (critério v0.1.0 §16).
 - Lua v5.4.7 + toml++ v3.4.0 + miniz 3.1.2 (FetchContent).
 
@@ -32,6 +32,21 @@
   governança (opcional — não afeta o build).
 
 ## Histórico
+
+### 2026-07-13 (6) — HOST-004 + MOD-008 root loader (código)
+
+- Merge `--no-ff` de `agent/MOD-008-root-loader` (`ee0004f` → `265a200`), trazendo:
+  - HOST-004 (OOT-004/MM-004 identity, coordenação fork-side);
+  - **MOD-008** (código): `ModHost::LoadModsFromRoot` — descobre mods de um
+    diretório raiz, valida compatibilidade host/API/jogo, resolve ordem de
+    dependências e isola falhas por mod (retorna `ModLoadReport` com
+    `loadedIds`/`rejected`); `LoadModFromPackage` (.shipmod); `DispatchEvent`
+    conectando o EventDispatcher ao host.
+- Validação: **rebuild limpo**, 21/21 verdes (novo `mod_root_loader_tests`:
+  ordem determinística, rejeição por incompatibilidade, isolamento de falhas,
+  ownership/cache de pacote). Sem headers de jogo.
+- Nota operacional: um `taskkill cmake.exe` global (para destravar reconfigure)
+  pode ter atingido um cmake do builder — evitar kill por nome; usar PID.
 
 ### 2026-07-13 (5) — CI Linux verde + HOST-002
 
