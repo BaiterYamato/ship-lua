@@ -1,67 +1,73 @@
 # ShipLua
 
-**Um modloader Lua compartilhado para [Shipwright](https://github.com/HarbourMasters/Shipwright) (Ocarina of Time) e [2Ship2Harkinian](https://github.com/HarbourMasters/2ship2harkinian) (Majora's Mask).**
+**English** · [Português](README.pt-BR.md)
 
-Escreva um mod em Lua **uma vez** e rode nos dois jogos. Recursos exclusivos de cada jogo ficam atrás de capacidades e namespaces (`ship.mm.*`, `ship.oot.*`), então nada é simulado artificialmente.
+**A shared Lua modloader for [Shipwright](https://github.com/HarbourMasters/Shipwright) (Ocarina of Time) and [2Ship2Harkinian](https://github.com/HarbourMasters/2ship2harkinian) (Majora's Mask).**
+
+Write a Lua mod **once** and run it in both games. Game-exclusive features sit behind capabilities and namespaces (`ship.mm.*`, `ship.oot.*`), so nothing is faked when a feature doesn't exist in the other game.
 
 ```lua
 local ship = require("ship")
 
 ship.events.on("game.ready", function()
-    ship.log.info("Olá de " .. ship.game.id() .. " host=" .. ship.game.host_version())
+    ship.log.info("Hello from " .. ship.game.id() .. " host=" .. ship.game.host_version())
 end)
 ```
 
-Esse mesmo arquivo imprime `Olá de mm ...` no 2Ship e `Olá de oot ...` no Shipwright.
+That same file prints `Hello from mm ...` in 2Ship and `Hello from oot ...` in Shipwright.
 
 ---
 
-## Estado
+## Status
 
-| Parte | Estado |
+| Piece | State |
 |---|---|
-| Runtime Lua 5.4 isolado por mod + sandbox | ✅ |
-| Manifesto, descoberta, SemVer, grafo de dependências | ✅ |
+| Isolated, sandboxed Lua 5.4 runtime per mod | ✅ |
+| Manifest, discovery, SemVer, dependency graph | ✅ |
 | Event dispatcher (observe/filter/transform/consume) + timers | ✅ |
-| API `ship.*` + codegen (bindings C++ + LuaDoc) | ✅ |
-| Root loader (`.shipmod`, compatibilidade, ordem de deps, isolamento de falhas) | ✅ |
-| CI Linux + Windows verde | ✅ |
-| Adaptador **2Ship (MM)** carregando mods in-game | ✅ (`hello-world`, `dog-spawner`) |
-| Adaptador **Shipwright (OoT)** | em progresso |
+| `ship.*` API + codegen (C++ bindings + LuaDoc) | ✅ |
+| Root loader (`.shipmod`, compatibility, dep ordering, failure isolation) | ✅ |
+| Green CI on Linux + Windows | ✅ |
+| **2Ship (MM)** adapter loading mods in-game | ✅ (`hello-world`, `dog-spawner`) |
+| **Shipwright (OoT)** adapter | in progress |
 
-Detalhes de integração em [`coordination/INTEGRATION.md`](coordination/INTEGRATION.md).
+Integration details in [`coordination/INTEGRATION.md`](coordination/INTEGRATION.md).
 
 ---
 
-## Comece aqui
+## Start here
 
-- **Quer escrever um mod?** → **[Guia: Escrevendo mods](docs/writing-mods.md)**
-- **Referência da API** (gerada dos schemas) → [`generated/docs/api-reference.md`](generated/docs/api-reference.md)
-- **Exemplos** → [`examples/`](examples/)
-  - [`hello-world`](examples/hello-world/) — o mod mínimo (loga a identidade do host).
-  - [`dog-spawner`](examples/dog-spawner/) — hotkey **F** que spawna um cachorro no MM (usa `ship.mm.*`).
+- **Want to write a mod?** → **[Guide: Writing mods](docs/writing-mods.md)**
+- **API reference** (generated from the schemas) → [`generated/docs/api-reference.md`](generated/docs/api-reference.md)
+- **Examples** → [`examples/`](examples/)
+  - [`hello-world`](examples/hello-world/) — the minimal mod (logs the host identity).
+  - [`dog-spawner`](examples/dog-spawner/) — an **F** hotkey that spawns a dog in MM (uses `ship.mm.*`).
 
-## Instalando um mod no jogo
+## Installing a mod in the game
 
-Os mods ficam numa pasta `mods/` ao lado do executável do jogo. Cada mod é:
+Mods live in a `mods/` folder next to the game executable. Each mod is either:
 
-- uma **pasta** com `manifest.toml` + `main.lua` (mais fácil para desenvolver), ou
-- um arquivo **`.shipmod`** (um ZIP com os mesmos arquivos).
+- a **folder** with `manifest.toml` + `main.lua` (easiest while developing), or
+- a **`.shipmod`** file (a ZIP with the same files).
 
 ```text
-<pasta-do-jogo>/
+<game-folder>/
 └── mods/
     ├── hello-world.shipmod
-    └── meu-mod/
+    └── my-mod/
         ├── manifest.toml
         └── main.lua
 ```
 
-Abra o jogo: os mods são descobertos, validados (jogo/versão/API), carregados em ordem de dependência, e o evento `game.ready` é disparado. Falhas de um mod não derrubam os outros. Os logs saem no console e no arquivo de log do jogo (ex.: `logs/2 Ship 2 Harkinian.log`).
+Launch the game: mods are discovered, validated (game/version/API), loaded in
+dependency order, and the `game.ready` event fires. One mod failing never takes
+down the others. Logs go to the console and to the game's log file
+(e.g. `logs/2 Ship 2 Harkinian.log`).
 
-## Buildando o núcleo (desenvolvimento)
+## Building the core (development)
 
-Requer CMake ≥ 3.20, Ninja e um compilador C++20. Lua 5.4, toml++ e miniz são baixados via FetchContent.
+Requires CMake ≥ 3.20, Ninja and a C++20 compiler. Lua 5.4, toml++ and miniz are
+fetched via FetchContent.
 
 ```bash
 cmake -S . -B build -G Ninja
@@ -69,32 +75,38 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-No Windows com MinGW, garanta o runtime no `PATH` (senão os testes travam num diálogo de DLL):
+On Windows with MinGW, make sure the runtime is on `PATH` (otherwise the test
+executables hang on a missing-DLL dialog):
 
 ```powershell
 $env:Path = "C:\ProgramData\mingw64\mingw64\bin;$env:Path"
 ```
 
-## Arquitetura (resumo)
+## Architecture (overview)
 
 ```text
-Mod Lua
+Lua mod
    ↓
-API pública versionada (ship.*)   ← gerada de schema/*.yml
+versioned public API (ship.*)     ← generated from schema/*.yml
    ↓
-runtime + serviços compartilhados (este repositório)
+shared runtime + services (this repository)
    ↓
 IGameAdapter
    ├── ShipwrightAdapter (OoT)
-   └── TwoShipAdapter (MM)   ← carrega mods, dispara eventos, expõe ship.mm.*
+   └── TwoShipAdapter (MM)   ← loads mods, dispatches events, exposes ship.mm.*
 ```
 
-O núcleo **nunca** inclui headers dos jogos. Cada adaptador (dentro do fork de cada jogo) traduz estruturas internas em snapshots/handles/eventos e pode instalar bindings específicos do host (`ship.mm.*`, `ship.oot.*`).
+The core **never** includes game headers. Each adapter (inside each game's fork)
+translates internal structures into snapshots/handles/events and may install
+host-specific bindings (`ship.mm.*`, `ship.oot.*`).
 
-## Contribuindo
+## Contributing
 
-Leia [`AGENTS.md`](AGENTS.md) (contrato de trabalho) e [`PLAN.md`](PLAN.md) (roteiro). Mudanças na API pública exigem uma RFC em [`rfcs/`](rfcs/). O estado de coordenação vive em [`coordination/`](coordination/).
+Read [`AGENTS.md`](AGENTS.md) (working contract) and [`PLAN.md`](PLAN.md) (roadmap).
+Changes to the public API require an RFC in [`rfcs/`](rfcs/). Coordination state
+lives in [`coordination/`](coordination/).
 
-## Licença
+## License
 
-Núcleo do ShipLua sob a licença do repositório. **Nunca** versione ROMs, `.z64`/`.n64`/`.o2r` ou qualquer asset protegido.
+The ShipLua core is under the repository license. **Never** commit ROMs,
+`.z64`/`.n64`/`.o2r` files, or any copyrighted assets.
