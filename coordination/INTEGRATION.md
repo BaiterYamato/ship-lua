@@ -5,9 +5,9 @@
 
 ## Estado de `main`
 
-- Tip integrado: `e6dcf6c` (EXAMPLE-001 hello-world + conformidade).
+- Tip integrado: `af85476` (núcleo + EXAMPLE-001; CI Linux+Windows verdes).
 - Build/teste: **24/24 verdes** (rebuild limpo; inclui conformidade hello-world).
-- **CI Linux (`core-linux.yml`): verde** em cada push a `main` (critério v0.1.0 §16).
+- **CI Linux + Windows + package-examples: verdes** (critério v0.1.0 §16 fechado).
 - Lua v5.4.7 + toml++ v3.4.0 + miniz 3.1.2 (FetchContent).
 
 ### Fase 4 (bootstrap dos hosts nos forks) — coordenação integrada em `main`
@@ -32,7 +32,34 @@
   do merge nos forks, bump do pin para o tip de `main` para incluir os docs de
   governança (opcional — não afeta o build).
 
+## Critérios v0.1.0 (§16) — panorama de governança
+
+| Critério | Estado |
+|---|---|
+| Shipwright e 2Ship compilam com ShipLua | parcial — submódulo nos forks validado em MSVC (PRs #5/#1), aguardando merge do owner |
+| hello-world / scene-logger / player rodam nos dois | parcial — hello-world provado por conformidade no núcleo; scene-logger/player pendentes |
+| manifesto e dependências funcionam | ✅ |
+| runtime isola mods | ✅ |
+| storage bloqueia traversal | parcial — root loader valida entrypoint; VFS/quotas (STORE-*) pendentes |
+| hot reload não duplica hooks | pendente (RELOAD-*) |
+| documentação é gerada (codegen) | ✅ |
+| API com SemVer | ✅ |
+| CI Linux e Windows verde | ✅ (core-linux + core-windows + package-examples) |
+| nenhuma ROM/asset protegido | ✅ (.gitignore + varredura; núcleo sem assets) |
+| release com checksums | pendente (sem release ainda) |
+| limitações conhecidas documentadas | parcial (INTEGRATION.md + handoffs) |
+
+**Resumo:** o núcleo da API do modloader Lua está concluído e comprovado
+(vertical slice §14, 24 testes, CI Linux+Windows verdes). O restante do v0.1.0 é
+in-game (adaptadores nos forks) e fases posteriores (STORE/RELOAD/mais exemplos/
+release), dependendo do builder e da decisão do owner sobre os PRs #5/#1.
+
 ## Histórico
+
+### 2026-07-13 (9) — CI Windows verde (§16 fechado)
+
+- `core-windows` corrigido (VS generator não achava o VS → `ilammy/msvc-dev-cmd`
+  + Ninja): run **success**. Linux + Windows agora verdes.
 
 ### 2026-07-13 (8) — CI Windows/MSVC (builder ocioso)
 
