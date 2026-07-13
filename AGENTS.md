@@ -618,3 +618,47 @@ Uma tarefa só está pronta quando:
 - revisão do agente integrador concluída.
 
 A conclusão do projeto exige que o mesmo pacote de mod comum seja carregado pelos dois hosts sem alteração de código.
+
+---
+
+## 17. Modelo operacional paralelo: builder + governança
+
+Neste ciclo o trabalho é dividido entre dois papéis que operam ao mesmo tempo:
+
+| Papel | Quem | Responsabilidade |
+|---|---|---|
+| Builder | agente de código (codex) | implementa tarefas em branches `agent/<TASK-ID>-<slug>`, escreve testes, atualiza `coordination/STATUS.md`, claims e handoffs |
+| Governança/Integrator | agente de governança (Claude) | integra branches concluídas em `main`, gere PRs, valida build/testes de forma isolada, mantém `PLAN.md`, `AGENTS.md` e o log de integração |
+
+### Regra de diretório único
+
+O builder é o dono do working tree em `D:/Desenvolvimento/2ShipHarkinian-MoonLoader`.
+A governança **nunca** edita arquivos nem faz checkout nesse diretório; opera num
+`git worktree` separado (`../2ShipHarkinian-MoonLoader-gov`). Isso cumpre §4.
+
+### Exclusividade de arquivos entre os papéis
+
+Para evitar conflitos de merge, cada papel escreve apenas nos seus arquivos:
+
+- **Builder escreve:** `src/**`, `include/**`, `tests/**`, `schema/**`, `tools/**`,
+  `generated/**`, `docs/**`, `rfcs/**`, `coordination/claims/**`,
+  `coordination/handoffs/**`, `coordination/STATUS.md`.
+- **Governança escreve:** `PLAN.md`, `AGENTS.md`, `coordination/INTEGRATION.md`,
+  e realiza a integração em `main` (fast-forward dos topos validados do builder,
+  com commits de documentação por cima).
+
+Se um papel precisar tocar um arquivo do outro, registre antes na sua reivindicação
+ou no log de integração.
+
+### Protocolo de integração da governança
+
+A cada ciclo, a governança:
+
+1. lê o estado (`git log`, branches, `STATUS.md`) sem alterar o working tree do builder;
+2. seleciona branches `agent/*` concluídas (código + handoff, builder já seguiu adiante);
+3. valida `cmake --build` + `ctest` no worktree isolado (com o runtime MinGW no `PATH`);
+4. avança `main` por fast-forward até o topo validado e dá push;
+5. atualiza `PLAN.md`/`AGENTS.md` e registra em `coordination/INTEGRATION.md`;
+6. resolve PRs correspondentes (merge/close com nota) e limpa branches integradas.
+
+Nunca integra uma branch com build ou teste vermelho.

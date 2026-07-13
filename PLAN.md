@@ -1033,11 +1033,11 @@ A cada grupo pequeno de tarefas:
 
 ### Coordenação
 
-- [ ] `GOV-001` — criar forks;
-- [ ] `GOV-002` — criar repositório `ship-lua`;
-- [ ] `GOV-003` — instalar arquivos de coordenação;
-- [ ] `ARCH-001` — gerar inventário de hooks;
-- [ ] `ARCH-002` — RFC 0001 da arquitetura.
+- [x] `GOV-001` — criar forks;
+- [x] `GOV-002` — criar repositório `ship-lua`;
+- [x] `GOV-003` — instalar arquivos de coordenação;
+- [x] `ARCH-001` — gerar inventário de hooks;
+- [x] `ARCH-002` — RFC 0001 da arquitetura.
 
 ### Baseline
 
@@ -1048,30 +1048,30 @@ A cada grupo pequeno de tarefas:
 
 ### Núcleo
 
-- [ ] `CORE-001` — runtime;
-- [ ] `CORE-002` — isolamento;
-- [ ] `CORE-003` — sandbox;
-- [ ] `CORE-004` — logging;
-- [ ] `CORE-005` — erros;
-- [ ] `CORE-006` — memória;
-- [ ] `CORE-007` — lifecycle.
+- [x] `CORE-001` — runtime;
+- [x] `CORE-002` — isolamento;
+- [x] `CORE-003` — sandbox;
+- [x] `CORE-004` — logging;
+- [x] `CORE-005` — erros;
+- [x] `CORE-006` — memória;
+- [x] `CORE-007` — lifecycle.
 
 ### Modloader
 
-- [ ] `MOD-001` — manifesto;
-- [ ] `MOD-002` — parser;
-- [ ] `MOD-003` — discovery;
-- [ ] `MOD-004` — SemVer;
-- [ ] `MOD-005` — dependencies;
-- [ ] `MOD-006` — load order;
-- [ ] `MOD-007` — conflicts.
+- [x] `MOD-001` — manifesto;
+- [x] `MOD-002` — parser;
+- [x] `MOD-003` — discovery;
+- [x] `MOD-004` — SemVer;
+- [x] `MOD-005` — dependencies;
+- [x] `MOD-006` — load order;
+- [x] `MOD-007` — conflicts.
 
 ### API
 
-- [ ] `API-001` — funções;
-- [ ] `API-002` — eventos;
-- [ ] `API-003` — capabilities;
-- [ ] `EVENT-001` — dispatcher;
+- [x] `API-001` — funções;
+- [x] `API-002` — eventos;
+- [x] `API-003` — capabilities;
+- [x] `EVENT-001` — dispatcher;
 - [ ] `CODEGEN-001` — C++;
 - [ ] `CODEGEN-002` — LuaDoc;
 - [ ] `CODEGEN-003` — docs.
@@ -1088,7 +1088,7 @@ A cada grupo pequeno de tarefas:
 - [ ] `STORE-001` a `STORE-004`;
 - [ ] `SECURITY-001` a `SECURITY-003`;
 - [ ] `RELOAD-001` a `RELOAD-003`;
-- [ ] `TOOL-001` a `TOOL-005`;
+- [x] `TOOL-001` a `TOOL-005`;
 - [ ] `DOC-001` a `DOC-004`.
 
 ---
