@@ -21,7 +21,7 @@ bootstrap-done + Fases 2 e 3 em review + carga de mods nos hosts em review
 
 ## Tarefa ativa recomendada
 
-Revisar e integrar os PRs empilhados dos dois hosts e o PR #18 do núcleo.
+Revisar e integrar os PRs empilhados dos dois hosts e o PR #19 de coordenação.
 
 ## Progresso
 
@@ -59,7 +59,7 @@ Revisar e integrar os PRs empilhados dos dois hosts e o PR #18 do núcleo.
 - `MM-003` — review (shutdown idempotente antes dos serviços do host; `2ship.exe` gerado; PR #3).
 - `OOT-004` — review (`oot`, versão 9.1.2 e commit real injetados/detectados; PR #8).
 - `MM-004` — review (`mm`, versão 4.0.2 e commit real injetados/detectados; PR #4).
-- `MOD-008` — review (descoberta da raiz, compatibilidade, dependências, isolamento e cache de `.shipmod`; PR #18).
+- `MOD-008` — done (descoberta da raiz, compatibilidade, dependências, isolamento e cache de `.shipmod`; integrado em `main`).
 - `OOT-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `soh.exe` gerado; PR #9).
 - `MM-005` — review (pasta gravável `mods`, carga comum e `game.ready`; `2ship.exe` gerado; PR #5).
 
@@ -73,7 +73,7 @@ ship-lua `main` publicado em origin (BaiterYamato/ship-lua).
 
 ## Próxima ação
 
-Integrar os PRs empilhados em ordem, incluindo MOD-008, OOT-005 e MM-005. Depois,
+Integrar os PRs empilhados em ordem, incluindo OOT-005 e MM-005. Depois,
 executar um mod comum de conformidade nos dois hosts com ativos legítimos. Os builds
 Windows/MSVC estão verdes; execução com ativos legítimos, Linux e macOS continuam
 pendentes.
