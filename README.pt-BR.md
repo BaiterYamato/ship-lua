@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/assets/banner.png" alt="ShipLua">
+  <img src="docs/assets/banner.png" alt="Link-Span">
 </p>
 
-# ShipLua
+# Link-Span
 
 [English](README.md) · **Português**
 
@@ -42,7 +42,7 @@ Detalhes de integração em [`coordination/INTEGRATION.md`](coordination/INTEGRA
 ## Comece aqui
 
 - **Quer escrever um mod?** → **[Guia: Escrevendo mods](docs/writing-mods.md)**
-- **Quer adicionar o ShipLua ao source do seu jogo e compilar?** → **[Guia: Integração no host](docs/host-integration.md)**
+- **Quer adicionar o Link-Span ao source do seu jogo e compilar?** → **[Guia: Integração no host](docs/host-integration.md)**
 - **Referência da API** (gerada dos schemas) → [`generated/docs/api-reference.md`](generated/docs/api-reference.md)
 - **Exemplos** → [`examples/`](examples/)
   - [`hello-world`](examples/hello-world/) — o mod mínimo (loga a identidade do host).
@@ -50,8 +50,8 @@ Detalhes de integração em [`coordination/INTEGRATION.md`](coordination/INTEGRA
 
 ## Início rápido (Windows)
 
-Se você quer rodar o ShipLua dentro do jogo (não apenas desenvolver o núcleo),
-clone um dos forks de host habilitados para ShipLua com os submódulos, e rode o
+Se você quer rodar o Link-Span dentro do jogo (não apenas desenvolver o núcleo),
+clone um dos forks de host habilitados para Link-Span com os submódulos, e rode o
 helper de build embutido:
 
 ```powershell
@@ -61,10 +61,10 @@ git clone --recurse-submodules https://github.com/BaiterYamato/Shipwright-HyliaF
 
 # 2. De dentro do clone, rode o script de build one-shot
 cd Shipwright-HyliaFoundry
-.\extern\ship-lua\build-game.ps1
+.\extern\link-span\build-game.ps1
 ```
 
-O `build-game.ps1` vive neste repositório (no submódulo `extern/ship-lua` dentro
+O `build-game.ps1` vive neste repositório (no submódulo `extern/link-span` dentro
 do clone do host). Ele verifica os pré-requisitos (Git, CMake ≥ 3.26, Python 3,
 Visual Studio 2022 com o toolset MSVC v143), inicializa os submódulos, configura
 o CMake, gera o pacote de assets `.o2r` customizado **sem ROM**, e compila o
@@ -132,4 +132,4 @@ Leia [`AGENTS.md`](AGENTS.md) (contrato de trabalho) e [`PLAN.md`](PLAN.md) (rot
 
 ## Licença
 
-Núcleo do ShipLua sob a licença do repositório. **Nunca** versione ROMs, `.z64`/`.n64`/`.o2r` ou qualquer asset protegido.
+Núcleo do Link-Span sob a licença do repositório. **Nunca** versione ROMs, `.z64`/`.n64`/`.o2r` ou qualquer asset protegido.

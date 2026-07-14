@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/assets/banner.png" alt="ShipLua">
+  <img src="docs/assets/banner.png" alt="Link-Span">
 </p>
 
-# ShipLua
+# Link-Span
 
 **English** · [Português](README.pt-BR.md)
 
@@ -42,7 +42,7 @@ Integration details in [`coordination/INTEGRATION.en.md`](coordination/INTEGRATI
 ## Start here
 
 - **Want to write a mod?** → **[Guide: Writing mods](docs/writing-mods.en.md)**
-- **Want to add ShipLua to your own game source and build it?** → **[Guide: Host integration](docs/host-integration.en.md)**
+- **Want to add Link-Span to your own game source and build it?** → **[Guide: Host integration](docs/host-integration.en.md)**
 - **API reference** (generated from the schemas) → [`generated/docs/api-reference.en.md`](generated/docs/api-reference.en.md)
 - **Examples** → [`examples/`](examples/)
   - [`hello-world`](examples/hello-world/) — the minimal mod (logs the host identity).
@@ -50,8 +50,8 @@ Integration details in [`coordination/INTEGRATION.en.md`](coordination/INTEGRATI
 
 ## Quick start (Windows)
 
-If you want to run ShipLua inside the game (not just develop the core), clone one
-of the ShipLua-enabled host forks with submodules, then run the bundled build
+If you want to run Link-Span inside the game (not just develop the core), clone one
+of the Link-Span-enabled host forks with submodules, then run the bundled build
 helper:
 
 ```powershell
@@ -61,10 +61,10 @@ git clone --recurse-submodules https://github.com/BaiterYamato/Shipwright-HyliaF
 
 # 2. From inside the clone, run the one-shot build script
 cd Shipwright-HyliaFoundry
-.\extern\ship-lua\build-game.ps1
+.\extern\link-span\build-game.ps1
 ```
 
-`build-game.ps1` lives in this repo (the `extern/ship-lua` submodule inside the
+`build-game.ps1` lives in this repo (the `extern/link-span` submodule inside the
 host clone). It verifies prerequisites (Git, CMake ≥ 3.26, Python 3, Visual
 Studio 2022 with the MSVC v143 toolset), inits submodules, configures CMake,
 generates the custom `.o2r` asset pack **without a ROM**, and builds the game
@@ -141,5 +141,5 @@ lives in [`coordination/`](coordination/).
 
 ## License
 
-The ShipLua core is under the repository license. **Never** commit ROMs,
+The Link-Span core is under the repository license. **Never** commit ROMs,
 `.z64`/`.n64`/`.o2r` files, or any copyrighted assets.
