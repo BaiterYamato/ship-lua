@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "api_version": "0.2.0",
+  "api_version": "0.2.1",
   "types": [
     {"name": "game_id", "kind": "enum", "values": ["oot", "mm"], "description": "Identificador público do jogo host."},
     {"name": "subscription", "kind": "opaque", "lua_type": "integer", "description": "Identificador opaco de inscrição em evento."},
@@ -33,6 +33,9 @@
     {"name": "ship.events.off", "arguments": [{"name": "subscription", "type": "subscription"}], "returns": "boolean", "availability": "common", "capability": null, "errors": ["invalid_handle"]},
     {"name": "ship.hotkeys.register", "arguments": [{"name": "id", "type": "string"}, {"name": "options", "type": "hotkey_options", "required": false}, {"name": "callback", "type": "callback"}], "returns": "boolean", "availability": "common", "capability": null, "errors": ["invalid_argument", "unsupported"]},
     {"name": "ship.mm.player.jump", "arguments": [], "returns": "boolean", "availability": "mm", "capability": "mm.player.jump", "errors": []},
+    {"name": "ship.mm.spawn_dog", "arguments": [], "returns": "boolean", "availability": "mm", "capability": "mm.spawn_dog", "errors": []},
+    {"name": "ship.oot.player.jump", "arguments": [], "returns": "boolean", "availability": "oot", "capability": "oot.player.jump", "errors": []},
+    {"name": "ship.oot.spawn_dog", "arguments": [], "returns": "boolean", "availability": "oot", "capability": "oot.spawn_dog", "errors": []},
     {"name": "ship.log.debug", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
     {"name": "ship.log.info", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
     {"name": "ship.log.warn", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},

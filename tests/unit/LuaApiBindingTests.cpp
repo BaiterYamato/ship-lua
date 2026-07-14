@@ -56,7 +56,7 @@ local ship = require("ship")
 assert(require("ship") == ship)
 local forbidden = pcall(require, "filesystem")
 assert(not forbidden)
-assert(ship.api.version() == "0.2.0")
+assert(ship.api.version() == "0.2.1")
 assert(ship.runtime.version() == "0.1.0")
 
 ship.events.on("game.ready", function(event)
@@ -81,7 +81,7 @@ end)
             {"game_id", game},
             {"host_version", hostVersion},
             {"runtime_version", "0.1.0"},
-            {"api_version", "0.2.0"},
+            {"api_version", "0.2.1"},
         };
         const auto dispatched = host.DispatchEvent("game.ready", payload);
         Check(dispatched.isOk() && dispatched.value->callbacksInvoked == 1 &&
@@ -193,7 +193,7 @@ void TestMissingAndInvalidHostContext() {
     ShipLua::ModHost host{ShipLua::Logger([](auto, const auto&, const auto&) {})};
     const auto loaded = host.LoadModFromManifestAndSource(MakeManifest("test.no_host"), R"lua(
 local ship = require("ship")
-assert(ship.api.version() == "0.2.0")
+assert(ship.api.version() == "0.2.1")
 local game_ok = pcall(ship.game.id)
 local version_ok = pcall(ship.game.host_version)
 assert(not game_ok and not version_ok)
