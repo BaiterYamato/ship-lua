@@ -31,15 +31,15 @@ That same file prints `Hello from mm ...` in 2Ship and `Hello from oot ...` in S
 | **2Ship (MM)** adapter loading mods in-game | ✅ (`hello-world`, `dog-spawner`) |
 | **Shipwright (OoT)** adapter | in progress |
 
-Integration details in [`coordination/INTEGRATION.md`](coordination/INTEGRATION.md).
+Integration details in [`coordination/INTEGRATION.en.md`](coordination/INTEGRATION.en.md).
 
 ---
 
 ## Start here
 
-- **Want to write a mod?** → **[Guide: Writing mods](docs/writing-mods.md)**
-- **Want to add ShipLua to your own game source and build it?** → **[Guide: Host integration](docs/host-integration.md)**
-- **API reference** (generated from the schemas) → [`generated/docs/api-reference.md`](generated/docs/api-reference.md)
+- **Want to write a mod?** → **[Guide: Writing mods](docs/writing-mods.en.md)**
+- **Want to add ShipLua to your own game source and build it?** → **[Guide: Host integration](docs/host-integration.en.md)**
+- **API reference** (generated from the schemas) → [`generated/docs/api-reference.en.md`](generated/docs/api-reference.en.md)
 - **Examples** → [`examples/`](examples/)
   - [`hello-world`](examples/hello-world/) — the minimal mod (logs the host identity).
   - [`dog-spawner`](examples/dog-spawner/) — an **F** hotkey that spawns a dog in MM (uses `ship.mm.*`).
@@ -103,7 +103,7 @@ host-specific bindings (`ship.mm.*`, `ship.oot.*`).
 
 ## Contributing
 
-Read [`AGENTS.md`](AGENTS.md) (working contract) and [`PLAN.md`](PLAN.md) (roadmap).
+Read [`AGENTS.en.md`](AGENTS.en.md) (working contract) and [`PLAN.en.md`](PLAN.en.md) (roadmap).
 Changes to the public API require an RFC in [`rfcs/`](rfcs/). Coordination state
 lives in [`coordination/`](coordination/).
 
