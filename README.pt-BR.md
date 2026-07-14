@@ -44,6 +44,34 @@ Detalhes de integração em [`coordination/INTEGRATION.md`](coordination/INTEGRA
   - [`hello-world`](examples/hello-world/) — o mod mínimo (loga a identidade do host).
   - [`dog-spawner`](examples/dog-spawner/) — hotkey **F** que spawna um cachorro no MM (usa `ship.mm.*`).
 
+## Início rápido (Windows)
+
+Se você quer rodar o ShipLua dentro do jogo (não apenas desenvolver o núcleo),
+clone um dos forks de host habilitados para ShipLua com os submódulos, e rode o
+helper de build embutido:
+
+```powershell
+# 1. Clone o fork do host (OoT ou MM) com todos os submódulos
+git clone --recurse-submodules https://github.com/BaiterYamato/Shipwright-HyliaFoundry.git
+#   ou: https://github.com/BaiterYamato/2ship2harkinian.git
+
+# 2. De dentro do clone, rode o script de build one-shot
+cd Shipwright-HyliaFoundry
+.\extern\ship-lua\build-game.ps1
+```
+
+O `build-game.ps1` vive neste repositório (no submódulo `extern/ship-lua` dentro
+do clone do host). Ele verifica os pré-requisitos (Git, CMake ≥ 3.26, Python 3,
+Visual Studio 2022 com o toolset MSVC v143), inicializa os submódulos, configura
+o CMake, gera o pacote de assets `.o2r` customizado **sem ROM**, e compila o
+executável do jogo. Ele detecta automaticamente se o host é OoT ou MM.
+
+O primeiro build produz um `.exe` executável, mas o jogo **não fica jogável até
+você fornecer uma ROM legítima de Zelda** — o passo sem ROM apenas constrói os
+assets definidos pelo ship. O script imprime o comando `ExtractAssets` exato para
+rodar em seguida quando você tiver uma ROM. Veja `build-game.ps1 -Help` para
+todas as flags (seleção de jogo, configuração, pular etapas).
+
 ## Instalando um mod no jogo
 
 Os mods ficam numa pasta `mods/` ao lado do executável do jogo. Cada mod é:
