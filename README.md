@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/banner.png" alt="ShipLua">
+</p>
+
 # ShipLua
 
 **English** · [Português](README.pt-BR.md)
