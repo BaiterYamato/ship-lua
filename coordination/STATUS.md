@@ -19,6 +19,21 @@ núcleo estável em `main` (Fases 0–3 + mundo/assets/hotkeys/jump done); adapt
 > Nota: o fork do Shipwright foi renomeado para `Shipwright-HyliaFoundry`.
 > Ambos os forks têm default `develop` e branch de integração `lua/main` já criada.
 
+## Clones upstream puros (referência)
+
+Clones somente-leitura do upstream HarbourMasters, rastreando `develop`. Uso:
+comparar drift, sincronizar atualizações upstream (PLAN.md §11) e auditar hooks
+sem depender dos forks BaiterYamato.
+
+| Clone local | Upstream | Branch | HEAD observado |
+|---|---|---|---|
+| `D:/Desenvolvimento/ship-lua-worktrees/upstream/Shipwright` | `HarbourMasters/Shipwright` | `develop` | `585530f68` |
+| `D:/Desenvolvimento/ship-lua-worktrees/upstream/2ship2harkinian` | `HarbourMasters/2ship2harkinian` | `develop` | `b3cc36628` |
+
+> Drift atual: Shipwright upstream está à frente do baseline do fork (`fb3259f7`);
+> 2ship2harkinian upstream coincide com o baseline do fork (`b3cc3662`).
+> Atualizar com `git -C <clone> pull --ff-only` (single-branch, só `develop`).
+
 ## Tarefa ativa recomendada
 
 Mergear a pilha de PRs dos dois hosts (8 OoT + 8 MM = 16 PRs) em `lua/main`,
@@ -119,6 +134,7 @@ ship-lua `main` em `cf14417` (WORLD-001 a WORLD-004, STORE-003, HOTKEY-001, EXAM
 
 1. Mergear os 16 PRs dos hosts em `lua/main` (na ordem: submódulo → bootstrap → shutdown → identidade → mods dir → hotkey → pulo/save → assets).
 2. Após cada merge de host, atualizar o submódulo `extern/ship-lua` para o topo de `main`.
-3. Validar runtime com ativos legítimos dos dois jogos (builds MSVC verdes, mas sem runtime testado com ROM).
-4. Adicionar builds Linux/macOS (só Windows verificado).
-5. Publicar `v0.1.0` após atender os critérios restantes do PLAN.md §16.
+3. Sincronizar drift do Shipwright upstream (`585530f68`) para o fork `lua/main` quando pertinente (PLAN.md §11); o 2ship upstream já coincide com o baseline.
+4. Validar runtime com ativos legítimos dos dois jogos (builds MSVC verdes, mas sem runtime testado com ROM).
+5. Adicionar builds Linux/macOS (só Windows verificado).
+6. Publicar `v0.1.0` após atender os critérios restantes do PLAN.md §16.
