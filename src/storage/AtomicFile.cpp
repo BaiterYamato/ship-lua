@@ -3,9 +3,11 @@
 #include <algorithm>
 #include <atomic>
 #include <cerrno>
+#include <chrono>
 #include <cstdint>
 #include <string>
 #include <system_error>
+#include <thread>
 #include <utility>
 
 #ifdef _WIN32
@@ -72,6 +74,36 @@ Result<void> HostError(std::string message, std::uint64_t code) {
 }
 
 #ifdef _WIN32
+namespace {
+
+// Reattempts the destination replace a bounded number of times when the host
+// reports a transient sharing violation. Two writers committing to the same
+// destination race inside MoveFileExW: the losing writer observes
+// ERROR_ACCESS_DENIED while the winner's handle is still being released by the
+// filesystem layer. This is a well-known Windows quirk for replace-on-rename
+// under contention and clears within microseconds, so we back off briefly and
+// retry instead of surfacing a spurious failure to the caller.
+Result<void> ReplaceWithRetry(const std::filesystem::path& temporary,
+                              const std::filesystem::path& destination) {
+    constexpr int kMaxAttempts = 16;
+    constexpr auto kBackoff = std::chrono::milliseconds(2);
+    DWORD lastError = ERROR_SUCCESS;
+    for (int attempt = 0; attempt < kMaxAttempts; ++attempt) {
+        if (MoveFileExW(temporary.c_str(), destination.c_str(),
+                        MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
+            return Result<void>::ok();
+        }
+        lastError = GetLastError();
+        if (lastError != ERROR_ACCESS_DENIED) {
+            break;
+        }
+        std::this_thread::sleep_for(kBackoff);
+    }
+    return HostError("cannot commit atomic file", lastError);
+}
+
+} // namespace
+
 Result<void> WriteTemporary(const std::filesystem::path& path, std::span<const std::byte> contents) {
     HANDLE file = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW,
                               FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, nullptr);
@@ -105,11 +137,7 @@ Result<void> WriteTemporary(const std::filesystem::path& path, std::span<const s
 
 Result<void> ReplaceDestination(const std::filesystem::path& temporary,
                                 const std::filesystem::path& destination) {
-    if (!MoveFileExW(temporary.c_str(), destination.c_str(),
-                     MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
-        return HostError("cannot commit atomic file", GetLastError());
-    }
-    return Result<void>::ok();
+    return ReplaceWithRetry(temporary, destination);
 }
 #else
 Result<void> WriteTemporary(const std::filesystem::path& path, std::span<const std::byte> contents) {
@@ -141,21 +169,36 @@ Result<void> WriteTemporary(const std::filesystem::path& path, std::span<const s
 
 Result<void> ReplaceDestination(const std::filesystem::path& temporary,
                                 const std::filesystem::path& destination) {
-    if (rename(temporary.c_str(), destination.c_str()) != 0) {
-        return HostError("cannot commit atomic file", errno);
+    // rename(2) over an existing destination is atomic on POSIX local
+    // filesystems, so there is no Windows-style sharing quirk to absorb. We
+    // still retry EINTR defensively so a signal cannot turn a successful
+    // replace into a reported failure.
+    int lastError = 0;
+    for (int attempt = 0; attempt < 16; ++attempt) {
+        if (rename(temporary.c_str(), destination.c_str()) == 0) {
+            lastError = 0;
+            break;
+        }
+        lastError = errno;
+        if (lastError != EINTR) {
+            break;
+        }
+    }
+    if (lastError != 0) {
+        return HostError("cannot commit atomic file", static_cast<std::uint64_t>(lastError));
     }
     const std::filesystem::path parent = ParentOrCurrent(destination);
     const int directory = open(parent.c_str(), O_RDONLY | O_DIRECTORY);
     if (directory < 0) {
-        return HostError("cannot open atomic destination directory", errno);
+        return HostError("cannot open atomic destination directory", static_cast<std::uint64_t>(errno));
     }
     if (fsync(directory) != 0) {
         const int error = errno;
         close(directory);
-        return HostError("cannot flush atomic destination directory", error);
+        return HostError("cannot flush atomic destination directory", static_cast<std::uint64_t>(error));
     }
     if (close(directory) != 0) {
-        return HostError("cannot close atomic destination directory", errno);
+        return HostError("cannot close atomic destination directory", static_cast<std::uint64_t>(errno));
     }
     return Result<void>::ok();
 }
