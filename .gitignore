@@ -34,3 +34,6 @@ CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 build-cmake/
+
+# Git worktrees
+/.worktrees/
