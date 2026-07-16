@@ -45,3 +45,11 @@ This file is the fixed, append-only plan ledger for this repository.
   - coordination/claims/LINK-005.md
   - tools/LinkSpanPackaging.psm1
   - tests/tools/BuildLinkSpanPackagingTests.ps1
+
+## [PLN-20260716-0002][UPDATE] 2026-07-16T18:56:51Z
+- status: done
+- note: Port archives are now required and preserved, ROM/user archives remain excluded, MSVC and 32/32 tests pass, both real hosts started successfully, and the corrected alpha.2 artifact is scanned and ready for publication.
+- refs:
+  - https://github.com/BaiterYamato/link-span/pull/33
+  - https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.2
+  - coordination/handoffs/LINK-005.md

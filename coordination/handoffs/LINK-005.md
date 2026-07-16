@@ -46,6 +46,7 @@ archives próprios antes de carregar `oot.o2r` e `mm.o2r`.
 
 ## Release
 
-- Correção destinada a `v0.1.0-alpha.2`.
+- PR: `https://github.com/BaiterYamato/link-span/pull/33`.
+- Release: `https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.2`.
 - `v0.1.0-alpha.1` não é funcional sem adicionar manualmente os dois archives
   runtime dos ports e deve ser tratada como obsoleta.
