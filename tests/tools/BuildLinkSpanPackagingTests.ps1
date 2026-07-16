@@ -78,6 +78,10 @@ try {
         [System.IO.File]::WriteAllText((Join-Path $publish $asset), "user asset $asset")
     }
     [System.IO.File]::WriteAllText((Join-Path $publish 'Save/slot.sav'), 'user save')
+    New-Item -ItemType Directory -Path (Join-Path $publish 'mods/custom-user-mod') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $publish 'mods/.shiplua-cache') -Force | Out-Null
+    [System.IO.File]::WriteAllText((Join-Path $publish 'mods/custom-user-mod/main.lua'), 'user mod')
+    [System.IO.File]::WriteAllText((Join-Path $publish 'mods/jump.shipmod'), 'stale generated mod')
     Publish-LinkSpanPackage -StageDir $stage -Destination $publish
     foreach ($asset in @('oot.o2r', 'oot.otr', 'mm.o2r')) {
         $path = Join-Path $publish $asset
@@ -90,6 +94,15 @@ try {
     }
     if ((Get-Content -LiteralPath (Join-Path $publish 'hosts/oot/soh.exe') -Raw) -ne 'new host') {
         throw 'V-LINK-6 falhou: host gerado não foi atualizado'
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $publish 'mods/custom-user-mod/main.lua') -PathType Leaf)) {
+        throw 'V-LINK-6 falhou: mod não gerado do usuário foi removido'
+    }
+    if (Test-Path -LiteralPath (Join-Path $publish 'mods/jump.shipmod')) {
+        throw 'V-LINK-6 falhou: pacote de demo obsoleto não foi removido'
+    }
+    if (Test-Path -LiteralPath (Join-Path $publish 'mods/.shiplua-cache')) {
+        throw 'V-LINK-6 falhou: cache derivado do modloader não foi limpo'
     }
     Write-Host 'V-LINK-6: republicação preserva assets base e saves do usuário.' -ForegroundColor Green
 } finally {

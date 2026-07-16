@@ -101,7 +101,14 @@ function Publish-LinkSpanPackage {
 
     $destinationFull = [System.IO.Path]::GetFullPath($Destination)
     New-Item -ItemType Directory -Path $destinationFull -Force | Out-Null
-    foreach ($relative in @('link-span.exe', 'hosts/oot', 'hosts/mm', 'soh.o2r', '2ship.o2r')) {
+    $generated = @(
+        'link-span.exe', 'hosts/oot', 'hosts/mm', 'soh.o2r', '2ship.o2r',
+        'mods/.shiplua-cache',
+        'mods/hello-world', 'mods/jump', 'mods/dog-spawner',
+        'mods/hello-world.shipmod', 'mods/jump.shipmod', 'mods/dog-spawner.shipmod',
+        'mods/link-home-to-clock-tower.shipmod'
+    )
+    foreach ($relative in $generated) {
         $target = [System.IO.Path]::GetFullPath((Join-Path $destinationFull $relative))
         $prefix = $destinationFull.TrimEnd('\') + '\'
         if (-not $target.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {

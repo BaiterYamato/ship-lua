@@ -20,6 +20,9 @@
 .PARAMETER SkipAssets
     Repassa `-SkipAssets` aos builds dos hosts.
 
+.PARAMETER SkipHostBuild
+    Reutiliza executáveis Release já validados e executa apenas launcher e pacote.
+
 .PARAMETER ValidateOnly
     Valida layout e ferramentas sem configurar ou compilar.
 
@@ -34,6 +37,7 @@ param(
     [switch]$LauncherOnly,
     [switch]$SkipSubmodules,
     [switch]$SkipAssets,
+    [switch]$SkipHostBuild,
     [ValidateSet('auto','oot','mm','dual')]
     [string]$Games = 'auto',
     [string]$OotHostPath,
@@ -169,15 +173,18 @@ if ($LauncherOnly) {
 $common = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $hostBuilder, '-Config', $Config,
             '-BuildDir', 'build/linkspan-x64', '-SkipSubmodules')
 if ($SkipAssets) { $common += '-SkipAssets' }
-if ($hasOot) {
+if ($hasOot -and -not $SkipHostBuild) {
     Step 'Compilando Shipwright (OoT)'
     & powershell @common -Game oot -HostPath $ootRoot
     if ($LASTEXITCODE -ne 0) { Fail 'build de Shipwright falhou' }
 }
-if ($hasMm) {
+if ($hasMm -and -not $SkipHostBuild) {
     Step 'Compilando 2Ship2Harkinian (MM)'
     & powershell @common -Game mm -HostPath $mmRoot
     if ($LASTEXITCODE -ne 0) { Fail 'build de 2Ship2Harkinian falhou' }
+}
+if ($SkipHostBuild) {
+    Step 'Reutilizando executáveis existentes dos hosts'
 }
 
 Step "Montando pacote $profile"
