@@ -73,6 +73,11 @@ reserva o exit code `73` e consome `state/next-world`. Os bridges dos hosts:
 5. autenticam e materializam o mesmo estado portátil depois que um save MM é
    carregado.
 
+No Windows, o código 73 deve ser entregue com `ExitProcess(73)` depois do
+`flush` dos logs. O bridge é chamado dentro de um callback Lua; usar
+`std::exit(73)` nesse ponto executa a desmontagem do CRT com a pilha Lua ainda
+ativa e pode terminar em `0xC0000409`, impedindo o launcher de trocar de jogo.
+
 A capability `world.travel` só é anunciada quando o processo foi iniciado pelo
 supervisor, os dois jogos estão disponíveis e as variáveis autenticadas da
 sessão são válidas. Em execução standalone ou com apenas um jogo, ela permanece
