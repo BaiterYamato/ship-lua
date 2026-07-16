@@ -167,4 +167,97 @@ function Publish-LinkSpanPackage {
         Copy-Item -Destination $destinationFull -Recurse -Force
 }
 
-Export-ModuleMember -Function Find-LinkSpanHostExecutable, Copy-LinkSpanHostPackage, Publish-LinkSpanPackage, Assert-LinkSpanPackageIsRomFree
+function New-LinkSpanWindowsArchive {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] [string]$SourceDir,
+        [Parameter(Mandatory)] [string]$Destination
+    )
+
+    $sourceFull = [System.IO.Path]::GetFullPath($SourceDir)
+    $destinationFull = [System.IO.Path]::GetFullPath($Destination)
+    if (-not (Test-Path -LiteralPath $sourceFull -PathType Container)) {
+        throw "Link-Span: diretório do pacote não existe: $sourceFull"
+    }
+    if ($destinationFull.StartsWith($sourceFull.TrimEnd('\', '/') + '\',
+            [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Link-Span: o ZIP não pode ser criado dentro do diretório empacotado'
+    }
+
+    $sevenZip = Get-Command 7z.exe -ErrorAction SilentlyContinue
+    if (-not $sevenZip) {
+        $programFilesCandidate = Join-Path $env:ProgramFiles '7-Zip\7z.exe'
+        if (Test-Path -LiteralPath $programFilesCandidate -PathType Leaf) {
+            $sevenZip = Get-Item -LiteralPath $programFilesCandidate
+        }
+    }
+    if (-not $sevenZip) {
+        throw 'Link-Span: 7z.exe é obrigatório para gerar o ZIP público compatível com o Windows'
+    }
+    $sevenZipPath = if ($sevenZip.Source) { $sevenZip.Source } else { $sevenZip.FullName }
+
+    $destinationDirectory = Split-Path -Parent $destinationFull
+    New-Item -ItemType Directory -Path $destinationDirectory -Force | Out-Null
+    if (Test-Path -LiteralPath $destinationFull) {
+        Remove-Item -LiteralPath $destinationFull -Force
+    }
+
+    Push-Location $sourceFull
+    try {
+        & $sevenZipPath a -tzip -mx=9 -mcu=on $destinationFull '.\*' | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Link-Span: 7-Zip falhou com código $LASTEXITCODE"
+        }
+    } finally {
+        Pop-Location
+    }
+    return $destinationFull
+}
+
+function Test-LinkSpanWindowsArchive {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] [string]$Archive,
+        [string[]]$RequiredEntries = @('link-span.exe'),
+        [string]$ExtractionRoot = ([System.IO.Path]::GetTempPath())
+    )
+
+    $archiveFull = [System.IO.Path]::GetFullPath($Archive)
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($archiveFull)
+    try {
+        $entries = @($zip.Entries)
+        $invalidRoots = @($entries | Where-Object {
+            $_.FullName -eq '.' -or $_.FullName.StartsWith('./') -or $_.FullName.StartsWith('.\')
+        })
+        if ($invalidRoots.Count -gt 0) {
+            throw 'Link-Span: ZIP possui entradas Unix ./ incompatíveis com o Explorer do Windows'
+        }
+        foreach ($required in $RequiredEntries) {
+            $normalized = $required.Replace('\', '/').TrimStart('/')
+            if (-not ($entries | Where-Object { $_.FullName.Replace('\', '/') -ieq $normalized })) {
+                throw "Link-Span: ZIP não contém o arquivo obrigatório $required"
+            }
+        }
+    } finally {
+        $zip.Dispose()
+    }
+
+    $extractDir = Join-Path ([System.IO.Path]::GetFullPath($ExtractionRoot)) `
+        ('linkspan-native-extract-' + [guid]::NewGuid())
+    try {
+        Expand-Archive -LiteralPath $archiveFull -DestinationPath $extractDir -Force
+        foreach ($required in $RequiredEntries) {
+            if (-not (Test-Path -LiteralPath (Join-Path $extractDir $required) -PathType Leaf)) {
+                throw "Link-Span: extração nativa não produziu $required"
+            }
+        }
+    } finally {
+        if (Test-Path -LiteralPath $extractDir) {
+            Remove-Item -LiteralPath $extractDir -Recurse -Force
+        }
+    }
+    return $true
+}
+
+Export-ModuleMember -Function Find-LinkSpanHostExecutable, Copy-LinkSpanHostPackage, Publish-LinkSpanPackage, Assert-LinkSpanPackageIsRomFree, New-LinkSpanWindowsArchive, Test-LinkSpanWindowsArchive

@@ -58,6 +58,9 @@ your legally obtained Zelda ROM or your own extracted game archive next to
 `oot.otr`, or `mm.o2r` files. It does include the redistributable `soh.o2r` and
 `2ship.o2r` runtime archives required by the two ports.
 
+Official Windows ZIP assets are validated by a complete native
+`Expand-Archive` round trip before publication.
+
 - If only OoT is present, Link-Span starts OoT automatically.
 - If only MM is present, Link-Span starts MM automatically.
 - If both are present, Link-Span shows an OoT/MM chooser.
