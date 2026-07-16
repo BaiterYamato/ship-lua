@@ -34,6 +34,11 @@ param(
     [switch]$LauncherOnly,
     [switch]$SkipSubmodules,
     [switch]$SkipAssets,
+    [ValidateSet('auto','oot','mm','dual')]
+    [string]$Games = 'auto',
+    [string]$OotHostPath,
+    [string]$MmHostPath,
+    [string]$OutputDir,
     [switch]$SkipOot,
     [switch]$SkipMm,
     [switch]$ValidateOnly
@@ -42,9 +47,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $buildDir = Join-Path $root 'build/link-span'
-$outputDir = Join-Path $root "x64/$Config"
-$ootRoot = Join-Path $root 'hosts/shipwright'
-$mmRoot = Join-Path $root 'hosts/2ship2harkinian'
+$launcherOutputDir = Join-Path $root "x64/$Config"
+$ootRoot = if ($OotHostPath) { $OotHostPath } else { Join-Path $root 'hosts/shipwright' }
+$mmRoot = if ($MmHostPath) { $MmHostPath } else { Join-Path $root 'hosts/2ship2harkinian' }
 $hostBuilder = Join-Path $root 'build-game.ps1'
 $packagingModule = Join-Path $root 'tools/LinkSpanPackaging.psm1'
 Import-Module -Name $packagingModule -Force
@@ -69,10 +74,36 @@ function Test-HostLayout([string]$path, [string]$gameDirectory) {
            (Test-Path -LiteralPath (Join-Path $path "$gameDirectory/CMakeLists.txt") -PathType Leaf)
 }
 
-function Copy-HostPackage([string]$hostRoot, [string]$exeName, [string]$gameId) {
-    $destination = Copy-LinkSpanHostPackage -HostRoot $hostRoot -OutputDir $outputDir `
+function Copy-HostPackage([string]$hostRoot, [string]$exeName, [string]$gameId,
+                          [string]$stageDir) {
+    $destination = Copy-LinkSpanHostPackage -HostRoot $hostRoot -OutputDir $stageDir `
         -Config $Config -ExeName $exeName -GameId $gameId
     Write-Host "    [OK] $gameId -> $destination" -ForegroundColor Green
+}
+
+function Test-IsChildPath([string]$parent, [string]$child) {
+    $parentFull = [System.IO.Path]::GetFullPath($parent).TrimEnd('\') + '\'
+    $childFull = [System.IO.Path]::GetFullPath($child)
+    return $childFull.StartsWith($parentFull, [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+function Publish-Package([string]$stageDir, [string]$destination) {
+    New-Item -ItemType Directory -Path $destination -Force | Out-Null
+    $generated = @(
+        'link-span.exe', 'hosts/oot', 'hosts/mm',
+        'oot.o2r', 'oot.otr', 'soh.o2r', 'mm.o2r', '2ship.o2r'
+    )
+    foreach ($relative in $generated) {
+        $target = Join-Path $destination $relative
+        if (-not (Test-IsChildPath $destination $target)) {
+            Fail "destino gerado escapou do pacote: $target"
+        }
+        if (Test-Path -LiteralPath $target) {
+            Remove-Item -LiteralPath $target -Recurse -Force
+        }
+    }
+    Get-ChildItem -LiteralPath $stageDir -Force |
+        Copy-Item -Destination $destination -Recurse -Force
 }
 
 Step 'Validando ferramentas e layout'
@@ -87,19 +118,52 @@ foreach ($processName in @('link-span', 'soh', '2ship')) {
 }
 
 if (-not $LauncherOnly) {
-    if (-not $SkipSubmodules) {
+    if (-not $SkipSubmodules -and (-not $OotHostPath -or -not $MmHostPath)) {
         Step 'Inicializando submódulos dos hosts'
         & git -C $root submodule update --init --recursive
         if ($LASTEXITCODE -ne 0) { Fail 'git submodule update falhou' }
     }
-    $hasOot = -not $SkipOot -and (Test-HostLayout $ootRoot 'soh')
-    $hasMm = -not $SkipMm -and (Test-HostLayout $mmRoot 'mm')
-    if (-not $hasOot) { Write-Host '    [INFO] OoT ausente/omitido; continuando com MM.' -ForegroundColor Yellow }
-    if (-not $hasMm) { Write-Host '    [INFO] MM ausente/omitido; continuando com OoT.' -ForegroundColor Yellow }
-    if (-not $hasOot -and -not $hasMm) { Fail 'nenhum host disponível; informe submódulos válidos ou use -LauncherOnly' }
+    $availableOot = -not $SkipOot -and (Test-HostLayout $ootRoot 'soh')
+    $availableMm = -not $SkipMm -and (Test-HostLayout $mmRoot 'mm')
+    switch ($Games) {
+        'oot' {
+            if (-not $availableOot) { Fail 'perfil oot solicitado, mas o host OoT não está disponível' }
+            $hasOot = $true; $hasMm = $false; $profile = 'oot'
+        }
+        'mm' {
+            if (-not $availableMm) { Fail 'perfil mm solicitado, mas o host MM não está disponível' }
+            $hasOot = $false; $hasMm = $true; $profile = 'mm'
+        }
+        'dual' {
+            if (-not $availableOot -or -not $availableMm) { Fail 'perfil dual exige os dois hosts' }
+            $hasOot = $true; $hasMm = $true; $profile = 'dual'
+        }
+        default {
+            $hasOot = $availableOot; $hasMm = $availableMm
+            if ($hasOot -and $hasMm) { $profile = 'dual' }
+            elseif ($hasOot) { $profile = 'oot' }
+            elseif ($hasMm) { $profile = 'mm' }
+            else { Fail 'nenhum host disponível; informe paths válidos ou use -LauncherOnly' }
+        }
+    }
+} else {
+    $hasOot = $false; $hasMm = $false; $profile = 'launcher'
+}
+
+if ($OutputDir) {
+    $outputDir = if ([System.IO.Path]::IsPathRooted($OutputDir)) {
+        [System.IO.Path]::GetFullPath($OutputDir)
+    } else {
+        [System.IO.Path]::GetFullPath((Join-Path $root $OutputDir))
+    }
+} elseif ($LauncherOnly) {
+    $outputDir = $launcherOutputDir
+} else {
+    $outputDir = Join-Path $root "x64/packages/$profile/$Config"
 }
 
 if ($ValidateOnly) {
+    Write-Host "    [OK] perfil: $profile; saída: $outputDir" -ForegroundColor Green
     Write-Host "    [OK] validação concluída; nenhuma configuração ou compilação executada" -ForegroundColor Green
     return
 }
@@ -114,31 +178,58 @@ if ($LASTEXITCODE -ne 0) { Fail 'build do supervisor falhou' }
 & ctest --test-dir $buildDir -C $Config -R '^linkspan_asset_discovery_tests$' --output-on-failure
 if ($LASTEXITCODE -ne 0) { Fail 'testes do supervisor falharam' }
 
-if (-not $LauncherOnly) {
-    $common = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $hostBuilder, '-Config', $Config, '-SkipSubmodules')
-    if ($SkipAssets) { $common += '-SkipAssets' }
-    if ($hasOot) {
-        Step 'Compilando Shipwright (OoT)'
-        & powershell @common -Game oot -HostPath $ootRoot
-        if ($LASTEXITCODE -ne 0) { Fail 'build de Shipwright falhou' }
-    }
-    if ($hasMm) {
-        Step 'Compilando 2Ship2Harkinian (MM)'
-        & powershell @common -Game mm -HostPath $mmRoot
-        if ($LASTEXITCODE -ne 0) { Fail 'build de 2Ship2Harkinian falhou' }
-    }
-
-    Step 'Montando pacote local'
-    if ($hasOot) { Copy-HostPackage $ootRoot 'soh.exe' 'oot' }
-    if ($hasMm) { Copy-HostPackage $mmRoot '2ship.exe' 'mm' }
+$launcherExecutable = Join-Path $launcherOutputDir 'link-span.exe'
+if (-not (Test-Path -LiteralPath $launcherExecutable -PathType Leaf)) {
+    Fail "launcher não foi gerado em $launcherExecutable"
 }
 
-New-Item -ItemType Directory -Path (Join-Path $outputDir 'mods') -Force | Out-Null
-New-Item -ItemType Directory -Path (Join-Path $outputDir 'state') -Force | Out-Null
-$demoPackage = Join-Path $buildDir 'examples/link-home-to-clock-tower.shipmod'
-if (Test-Path -LiteralPath $demoPackage -PathType Leaf) {
-    Copy-Item -LiteralPath $demoPackage -Destination (Join-Path $outputDir 'mods/link-home-to-clock-tower.shipmod') -Force
+if ($LauncherOnly) {
+    New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+    Copy-Item -LiteralPath $launcherExecutable -Destination (Join-Path $outputDir 'link-span.exe') -Force
+    Write-Host ""
+    Write-Host "Build concluído: $(Join-Path $outputDir 'link-span.exe')" -ForegroundColor Green
+    return
+}
+
+$common = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $hostBuilder, '-Config', $Config, '-SkipSubmodules')
+if ($SkipAssets) { $common += '-SkipAssets' }
+if ($hasOot) {
+    Step 'Compilando Shipwright (OoT)'
+    & powershell @common -Game oot -HostPath $ootRoot
+    if ($LASTEXITCODE -ne 0) { Fail 'build de Shipwright falhou' }
+}
+if ($hasMm) {
+    Step 'Compilando 2Ship2Harkinian (MM)'
+    & powershell @common -Game mm -HostPath $mmRoot
+    if ($LASTEXITCODE -ne 0) { Fail 'build de 2Ship2Harkinian falhou' }
+}
+
+Step "Montando pacote $profile"
+$stageDir = Join-Path $root ("build/link-span-package-" + [guid]::NewGuid())
+New-Item -ItemType Directory -Path $stageDir -Force | Out-Null
+try {
+    Copy-Item -LiteralPath $launcherExecutable -Destination (Join-Path $stageDir 'link-span.exe') -Force
+    if ($hasOot) { Copy-HostPackage $ootRoot 'soh.exe' 'oot' $stageDir }
+    if ($hasMm) { Copy-HostPackage $mmRoot '2ship.exe' 'mm' $stageDir }
+
+    $modsDir = Join-Path $stageDir 'mods'
+    New-Item -ItemType Directory -Path $modsDir -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $stageDir 'state') -Force | Out-Null
+    foreach ($modName in @('hello-world', 'jump', 'dog-spawner')) {
+        $source = Join-Path $root "examples/$modName"
+        Copy-Item -LiteralPath $source -Destination (Join-Path $modsDir $modName) -Recurse -Force
+    }
+    Step 'Montando pacote local'
+    $demoPackage = Join-Path $buildDir 'examples/link-home-to-clock-tower.shipmod'
+    if (Test-Path -LiteralPath $demoPackage -PathType Leaf) {
+        Copy-Item -LiteralPath $demoPackage -Destination (Join-Path $modsDir 'link-home-to-clock-tower.shipmod') -Force
+    }
+    Publish-Package $stageDir $outputDir
+} finally {
+    if (Test-Path -LiteralPath $stageDir) {
+        Remove-Item -LiteralPath $stageDir -Recurse -Force
+    }
 }
 Write-Host ""
-Write-Host "Build concluído: $(Join-Path $outputDir 'link-span.exe')" -ForegroundColor Green
+Write-Host "Build concluído ($profile): $(Join-Path $outputDir 'link-span.exe')" -ForegroundColor Green
 Write-Host 'Coloque os assets legítimos ao lado do executável e abra link-span.exe.'

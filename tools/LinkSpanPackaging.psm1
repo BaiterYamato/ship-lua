@@ -60,9 +60,29 @@ function Copy-LinkSpanHostPackage {
         Get-ChildItem -LiteralPath $assetsSource -Force -ErrorAction Stop |
             Copy-Item -Destination $assetsDestination -Recurse -Force
     }
-    Get-ChildItem -LiteralPath $sourceDir -File -Force -ErrorAction SilentlyContinue |
-        Where-Object { $_.Extension -in @('.o2r', '.otr') } |
-        Copy-Item -Destination $OutputDir -Force
+    $archiveNames = if ($GameId -eq 'oot') {
+        @('oot.o2r', 'oot.otr', 'soh.o2r')
+    } else {
+        @('mm.o2r', '2ship.o2r')
+    }
+    $archiveDirectories = @(
+        $sourceDir,
+        $HostRoot,
+        (Join-Path $HostRoot "x64/$Config"),
+        (Join-Path $HostRoot "build/x64/$Config"),
+        (Join-Path $HostRoot "build/x64/x64/$Config"),
+        (Join-Path $HostRoot 'build/x64/soh'),
+        (Join-Path $HostRoot 'build/x64/mm')
+    ) | Select-Object -Unique
+    foreach ($archiveName in $archiveNames) {
+        $archive = $archiveDirectories |
+            ForEach-Object { Join-Path $_ $archiveName } |
+            Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+            Select-Object -First 1
+        if ($archive) {
+            Copy-Item -LiteralPath $archive -Destination (Join-Path $OutputDir $archiveName) -Force
+        }
+    }
 
     if (-not (Test-Path -LiteralPath (Join-Path $destination $ExeName) -PathType Leaf) -or
         ($hasAssets -and -not (Test-Path -LiteralPath $assetsDestination -PathType Container))) {
