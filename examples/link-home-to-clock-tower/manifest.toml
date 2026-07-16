@@ -6,6 +6,7 @@ entrypoint = "main.lua"
 description = "Solicita uma viagem portátil de OoT para a entrada da torre em MM."
 authors = ["BaiterYamato"]
 games = ["oot", "mm"]
+requires_both_games = true
 
 [capabilities]
 required = ["world.travel"]

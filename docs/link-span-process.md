@@ -62,24 +62,32 @@ Para conferir ferramentas e submódulos sem alterar builds:
 
 ## Teleporte entre jogos
 
-O núcleo já possui estado portátil, catálogo de itens, tradução e envelope
-autenticado. O supervisor reserva o exit code `73` e consome
-`state/next-world`. O bridge final dos hosts ainda precisa ser integrado para:
+O núcleo possui estado portátil, catálogo de itens, tradução e envelope
+autenticado. O supervisor cria uma identidade e uma chave efêmeras por sessão,
+reserva o exit code `73` e consome `state/next-world`. Os bridges dos hosts:
 
 1. capturar o save OoT;
 2. publicar o handoff para `mm.clock_tower.entrance`;
 3. encerrar OoT com código 73;
 4. iniciar MM;
-5. autenticar e materializar o mesmo estado portátil.
+5. autenticam e materializam o mesmo estado portátil depois que um save MM é
+   carregado.
 
-Enquanto a capability `world.travel` não estiver integrada nos dois hosts, o mod
-demonstrativo permanece desativado de forma segura. Isso evita perder itens ou
-corromper um save nativo tratando presença de assets como compatibilidade.
+A capability `world.travel` só é anunciada quando o processo foi iniciado pelo
+supervisor, os dois jogos estão disponíveis e as variáveis autenticadas da
+sessão são válidas. Em execução standalone ou com apenas um jogo, ela permanece
+desativada de forma segura.
 
 O build empacota o exemplo em
 `x64/Release/mods/link-home-to-clock-tower.shipmod`. Hosts antigos o rejeitam de
 forma explícita por exigir API `0.3` e `world.travel`; ele não executa um
-teleporte parcial.
+teleporte parcial. No OoT, o pedido só é aceito dentro da casa do Link; o host
+MM aplica a entrada `mm.clock_tower.entrance` ao save selecionado.
+
+O contrato privado entre launcher e hosts usa `LINKSPAN_SESSION_ID`,
+`LINKSPAN_AUTH_KEY` e `LINKSPAN_SEQUENCE`. O handoff precisa pertencer à sessão
+corrente e ter exatamente a sequência anterior à do host de destino; depois do
+commit, `state/handoff.bin` é removido.
 
 ## Mods que exigem os dois jogos
 

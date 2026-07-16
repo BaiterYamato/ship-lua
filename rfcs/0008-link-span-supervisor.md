@@ -118,6 +118,7 @@ launcher; `build-linkspan.ps1` é responsável por normalizar o pacote final.
 - build MSVC Release produz `x64/Release/link-span.exe`.
 - `V-LINK-3`: builds Windows MSVC e MinGW ligam o launcher GUI com o entry point Unicode `wWinMain`.
 - `V-LINK-4`: o host rejeita mods descompactados e `.shipmod` com `requires_both_games = true` quando OoT ou MM não está disponível.
+- `V-LINK-5`: `world.travel` só é anunciado sob o supervisor dual; o destino aceita apenas handoff autenticado da sessão corrente e da sequência imediatamente anterior.
 - `V-LINK-1`: fixture de host preserva `assets/`, `ZAPD.exe`, DLLs e archives.
 
 ## Registro de falhas

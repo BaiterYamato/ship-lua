@@ -1,10 +1,14 @@
 #include "linkspan/launcher/AssetDiscovery.h"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <optional>
+#include <random>
+#include <span>
 #include <string>
 
 #ifdef _WIN32
@@ -17,6 +21,39 @@ namespace {
 
 constexpr unsigned long kSwitchWorldExitCode = 73;
 constexpr int kMaximumSwitches = 16;
+
+struct SessionSecrets {
+    std::array<std::byte, 16> id{};
+    std::array<std::byte, 32> key{};
+};
+
+template <std::size_t Size>
+void FillRandom(std::array<std::byte, Size>& output, std::random_device& random) {
+    for (std::byte& value : output) {
+        value = static_cast<std::byte>(random() & 0xffU);
+    }
+}
+
+SessionSecrets CreateSessionSecrets() {
+    std::random_device random;
+    SessionSecrets secrets;
+    FillRandom(secrets.id, random);
+    FillRandom(secrets.key, random);
+    return secrets;
+}
+
+template <std::size_t Size>
+std::wstring Hex(const std::array<std::byte, Size>& value) {
+    static constexpr wchar_t digits[] = L"0123456789abcdef";
+    std::wstring encoded;
+    encoded.reserve(Size * 2);
+    for (const std::byte byte : value) {
+        const unsigned int number = std::to_integer<unsigned int>(byte);
+        encoded.push_back(digits[number >> 4U]);
+        encoded.push_back(digits[number & 0x0fU]);
+    }
+    return encoded;
+}
 
 #ifdef _WIN32
 std::filesystem::path ExecutableDirectory() {
@@ -66,7 +103,8 @@ std::optional<std::filesystem::path> FindHost(const std::filesystem::path& root,
 }
 
 unsigned long RunHost(const std::filesystem::path& root, const std::filesystem::path& executable,
-                      Game game, const AssetSet& assets) {
+                      Game game, const AssetSet& assets, const SessionSecrets& secrets,
+                      std::uint64_t sequence) {
     const std::filesystem::path session = root / "state";
     std::filesystem::create_directories(session);
     std::filesystem::create_directories(root / "mods");
@@ -74,6 +112,9 @@ unsigned long RunHost(const std::filesystem::path& root, const std::filesystem::
     _wputenv_s(L"LINKSPAN_WORLD", game == Game::Oot ? L"oot" : L"mm");
     _wputenv_s(L"LINKSPAN_SESSION_DIR", session.c_str());
     _wputenv_s(L"LINKSPAN_HANDOFF_PATH", (session / "handoff.bin").c_str());
+    _wputenv_s(L"LINKSPAN_SESSION_ID", Hex(secrets.id).c_str());
+    _wputenv_s(L"LINKSPAN_AUTH_KEY", Hex(secrets.key).c_str());
+    _wputenv_s(L"LINKSPAN_SEQUENCE", std::to_wstring(sequence).c_str());
     _wputenv_s(L"LINKSPAN_AVAILABLE_GAMES", assets.HasBoth()
         ? L"oot,mm"
         : (assets.oot ? L"oot" : L"mm"));
@@ -158,6 +199,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
     if (!game.has_value()) {
         return 0;
     }
+    const SessionSecrets secrets = CreateSessionSecrets();
     for (int switches = 0; switches <= kMaximumSwitches; ++switches) {
         if (!assets.Has(*game)) {
             ShowError(L"O jogo solicitado pelo handoff não possui asset disponível.");
@@ -170,7 +212,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
                 : L"O host hosts/mm/2ship.exe não foi encontrado. Execute build-linkspan.ps1.");
             return 4;
         }
-        const unsigned long exitCode = RunHost(root, *host, *game, assets);
+        const unsigned long exitCode = RunHost(root, *host, *game, assets, secrets,
+                                               static_cast<std::uint64_t>(switches + 1));
         if (exitCode == static_cast<unsigned long>(-1)) {
             ShowError(L"O Windows não conseguiu iniciar o executável do host.");
             return 5;
