@@ -1,8 +1,8 @@
 [submodule "hosts/shipwright"]
 	path = hosts/shipwright
 	url = https://github.com/BaiterYamato/Shipwright-HyliaFoundry.git
-	branch = agent/OOT-WORLD-002-assets
+	branch = agent/OOT-LINK-003-runtime
 [submodule "hosts/2ship2harkinian"]
 	path = hosts/2ship2harkinian
 	url = https://github.com/BaiterYamato/2ship2harkinian.git
-	branch = agent/MM-WORLD-002-assets
+	branch = agent/MM-LINK-003-runtime
