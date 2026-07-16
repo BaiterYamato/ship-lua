@@ -50,6 +50,21 @@ Integration details in [`coordination/INTEGRATION.en.md`](coordination/INTEGRATI
 
 ## Quick start (Windows)
 
+### Ready-to-run launcher package
+
+Download the latest `Link-Span-Windows-x64.zip` release, extract it, and place
+your legally obtained Zelda ROM or your own extracted game archive next to
+`link-span.exe`. The release never includes ROMs, `.o2r`, or `.otr` files.
+
+- If only OoT is present, Link-Span starts OoT automatically.
+- If only MM is present, Link-Span starts MM automatically.
+- If both are present, Link-Span shows an OoT/MM chooser.
+- If an installed folder or `.shipmod` package declares
+  `requires_both_games = true`, Link-Span explains which mod needs both games
+  and does not start an incomplete session.
+
+### Build from source
+
 If you want to run Link-Span inside the game (not just develop the core), clone one
 of the Link-Span-enabled host forks with submodules, then run the bundled build
 helper:

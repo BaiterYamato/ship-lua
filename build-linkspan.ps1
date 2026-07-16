@@ -20,6 +20,10 @@
 .PARAMETER SkipAssets
     Repassa `-SkipAssets` aos builds dos hosts.
 
+.PARAMETER RomFree
+    Produz um pacote redistribuível sem ROMs, O2R ou OTR e falha se qualquer
+    arquivo protegido for encontrado na saída.
+
 .PARAMETER SkipHostBuild
     Reutiliza executáveis Release já validados e executa apenas launcher e pacote.
 
@@ -37,6 +41,7 @@ param(
     [switch]$LauncherOnly,
     [switch]$SkipSubmodules,
     [switch]$SkipAssets,
+    [switch]$RomFree,
     [switch]$SkipHostBuild,
     [ValidateSet('auto','oot','mm','dual')]
     [string]$Games = 'auto',
@@ -81,7 +86,7 @@ function Test-HostLayout([string]$path, [string]$gameDirectory) {
 function Copy-HostPackage([string]$hostRoot, [string]$exeName, [string]$gameId,
                           [string]$stageDir) {
     $destination = Copy-LinkSpanHostPackage -HostRoot $hostRoot -OutputDir $stageDir `
-        -Config $Config -ExeName $exeName -GameId $gameId
+        -Config $Config -ExeName $exeName -GameId $gameId -ExcludeGameArchives:$RomFree
     Write-Host "    [OK] $gameId -> $destination" -ForegroundColor Green
 }
 
@@ -141,6 +146,10 @@ if ($OutputDir) {
     $outputDir = Join-Path $root "x64/packages/$profile/$Config"
 }
 
+if ($RomFree -and (Test-Path -LiteralPath $outputDir -PathType Container)) {
+    Assert-LinkSpanPackageIsRomFree -Path $outputDir | Out-Null
+}
+
 if ($ValidateOnly) {
     Write-Host "    [OK] perfil: $profile; saída: $outputDir" -ForegroundColor Green
     Write-Host "    [OK] validação concluída; nenhuma configuração ou compilação executada" -ForegroundColor Green
@@ -192,6 +201,9 @@ $stageDir = Join-Path $root ("build/link-span-package-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $stageDir -Force | Out-Null
 try {
     Copy-Item -LiteralPath $launcherExecutable -Destination (Join-Path $stageDir 'link-span.exe') -Force
+    if ($RomFree) {
+        Copy-Item -LiteralPath (Join-Path $root 'README.md') -Destination (Join-Path $stageDir 'README.md') -Force
+    }
     if ($hasOot) { Copy-HostPackage $ootRoot 'soh.exe' 'oot' $stageDir }
     if ($hasMm) { Copy-HostPackage $mmRoot '2ship.exe' 'mm' $stageDir }
 
@@ -208,6 +220,10 @@ try {
         Copy-Item -LiteralPath $demoPackage -Destination (Join-Path $modsDir 'link-home-to-clock-tower.shipmod') -Force
     }
     Publish-LinkSpanPackage -StageDir $stageDir -Destination $outputDir
+    if ($RomFree) {
+        Assert-LinkSpanPackageIsRomFree -Path $outputDir | Out-Null
+        Write-Host '    [OK] ROM-free scan: no .z64, .n64, .v64, .o2r, or .otr files.' -ForegroundColor Green
+    }
 } finally {
     if (Test-Path -LiteralPath $stageDir) {
         Remove-Item -LiteralPath $stageDir -Recurse -Force

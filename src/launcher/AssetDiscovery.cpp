@@ -4,9 +4,15 @@
 #include <array>
 #include <cctype>
 #include <fstream>
+#include <iterator>
 #include <optional>
 #include <regex>
+#include <sstream>
 #include <string>
+#include <string_view>
+#include <utility>
+
+#include <miniz.h>
 
 namespace LinkSpan::Launcher {
 namespace {
@@ -62,6 +68,48 @@ void Add(AssetSet& assets, Game game, const std::filesystem::path& source) {
     }
 }
 
+bool RequiresBothGames(std::string_view manifest) {
+    static const std::regex requirement(R"(^\s*requires_both_games\s*=\s*true\s*(?:#.*)?$)",
+                                        std::regex_constants::icase);
+    std::istringstream stream{std::string(manifest)};
+    std::string line;
+    while (std::getline(stream, line)) {
+        if (std::regex_match(line, requirement)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool PackageRequiresBothGames(const std::filesystem::path& package) {
+    constexpr mz_uint64 kMaximumManifestSize = 64U * 1024U;
+    mz_zip_archive archive{};
+    const std::string nativePath = package.string();
+    if (!mz_zip_reader_init_file(&archive, nativePath.c_str(), 0)) {
+        return false;
+    }
+
+    const int index = mz_zip_reader_locate_file(
+        &archive, "manifest.toml", nullptr, MZ_ZIP_FLAG_CASE_SENSITIVE);
+    if (index < 0) {
+        mz_zip_reader_end(&archive);
+        return false;
+    }
+
+    mz_zip_archive_file_stat stat{};
+    if (!mz_zip_reader_file_stat(&archive, static_cast<mz_uint>(index), &stat) ||
+        stat.m_uncomp_size > kMaximumManifestSize) {
+        mz_zip_reader_end(&archive);
+        return false;
+    }
+
+    std::string manifest(static_cast<std::size_t>(stat.m_uncomp_size), '\0');
+    const bool extracted = mz_zip_reader_extract_to_mem(
+        &archive, static_cast<mz_uint>(index), manifest.data(), manifest.size(), 0) != 0;
+    mz_zip_reader_end(&archive);
+    return extracted && RequiresBothGames(manifest);
+}
+
 } // namespace
 
 bool AssetSet::Has(Game game) const noexcept {
@@ -114,6 +162,19 @@ const char* GameId(Game game) noexcept {
     return game == Game::Oot ? "oot" : "mm";
 }
 
+StartupDecision DecideStartup(const AssetSet& assets, bool dualWorldModInstalled) noexcept {
+    if (assets.Empty()) {
+        return StartupDecision::MissingAssets;
+    }
+    if (dualWorldModInstalled && !assets.HasBoth()) {
+        return StartupDecision::DualGameAssetsRequired;
+    }
+    if (assets.HasBoth()) {
+        return StartupDecision::ChooseGame;
+    }
+    return assets.oot ? StartupDecision::LaunchOot : StartupDecision::LaunchMm;
+}
+
 std::vector<std::string> DiscoverDualWorldMods(const std::filesystem::path& directory) {
     std::vector<std::string> result;
     const auto mods = directory / "mods";
@@ -121,30 +182,36 @@ std::vector<std::string> DiscoverDualWorldMods(const std::filesystem::path& dire
     if (!std::filesystem::is_directory(mods, error)) {
         return result;
     }
-    // Keep the launcher core independent from Lua/TOML. This intentionally
-    // handles unpacked development mods; packaged .shipmod files are parsed
-    // by the host and report their own compatibility error when selected.
-    const std::regex requirement(R"(^\s*requires_both_games\s*=\s*true\s*(?:#.*)?$)",
-                                 std::regex_constants::icase);
     std::filesystem::recursive_directory_iterator it(mods, error), end;
     for (; it != end && !error; it.increment(error)) {
-        if (!it->is_regular_file(error) || error || it->path().filename() != "manifest.toml") {
+        if (it->is_directory(error) && !error && it->path().filename() == ".shiplua-cache") {
+            it.disable_recursion_pending();
+            continue;
+        }
+        if (!it->is_regular_file(error) || error) {
             error.clear();
             continue;
         }
-        std::ifstream stream(it->path());
-        std::string line;
+
+        const auto& path = it->path();
         bool requiresBoth = false;
-        while (std::getline(stream, line)) {
-            if (std::regex_match(line, requirement)) {
-                requiresBoth = true;
-                break;
-            }
+        std::string id;
+        if (path.filename() == "manifest.toml") {
+            std::ifstream stream(path);
+            const std::string manifest((std::istreambuf_iterator<char>(stream)),
+                                       std::istreambuf_iterator<char>());
+            requiresBoth = RequiresBothGames(manifest);
+            id = path.parent_path().filename().string();
+        } else if (Lower(path.extension().string()) == ".shipmod") {
+            requiresBoth = PackageRequiresBothGames(path);
+            id = path.stem().string();
         }
         if (requiresBoth) {
-            result.push_back(it->path().parent_path().filename().string());
+            result.push_back(std::move(id));
         }
     }
+    std::sort(result.begin(), result.end());
+    result.erase(std::unique(result.begin(), result.end()), result.end());
     return result;
 }
 

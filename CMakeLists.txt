@@ -77,6 +77,7 @@ add_library(linkspan_launcher_core STATIC
     src/launcher/AssetDiscovery.cpp)
 target_include_directories(linkspan_launcher_core PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(linkspan_launcher_core PUBLIC miniz)
 
 if(WIN32)
     add_executable(linkspan_launcher WIN32 src/launcher/main.cpp)
@@ -84,6 +85,9 @@ else()
     add_executable(linkspan_launcher src/launcher/main.cpp)
 endif()
 target_link_libraries(linkspan_launcher PRIVATE linkspan_launcher_core)
+if(WIN32)
+    target_link_libraries(linkspan_launcher PRIVATE comctl32)
+endif()
 if(MINGW)
     # The GUI entry point is wWinMain. MinGW only selects the Unicode Windows
     # startup object when -municode is passed; MSVC does this automatically.

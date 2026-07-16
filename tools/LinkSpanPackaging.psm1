@@ -27,7 +27,8 @@ function Copy-LinkSpanHostPackage {
         [Parameter(Mandatory)] [string]$OutputDir,
         [Parameter(Mandatory)] [string]$Config,
         [Parameter(Mandatory)] [string]$ExeName,
-        [Parameter(Mandatory)] [ValidateSet('oot', 'mm')] [string]$GameId
+        [Parameter(Mandatory)] [ValidateSet('oot', 'mm')] [string]$GameId,
+        [switch]$ExcludeGameArchives
     )
 
     $executable = Find-LinkSpanHostExecutable -HostRoot $HostRoot -Config $Config -Name $ExeName
@@ -60,27 +61,29 @@ function Copy-LinkSpanHostPackage {
         Get-ChildItem -LiteralPath $assetsSource -Force -ErrorAction Stop |
             Copy-Item -Destination $assetsDestination -Recurse -Force
     }
-    $archiveNames = if ($GameId -eq 'oot') {
-        @('oot.o2r', 'oot.otr', 'soh.o2r')
-    } else {
-        @('mm.o2r', '2ship.o2r')
-    }
-    $archiveDirectories = @(
-        $sourceDir,
-        $HostRoot,
-        (Join-Path $HostRoot "x64/$Config"),
-        (Join-Path $HostRoot "build/x64/$Config"),
-        (Join-Path $HostRoot "build/x64/x64/$Config"),
-        (Join-Path $HostRoot 'build/x64/soh'),
-        (Join-Path $HostRoot 'build/x64/mm')
-    ) | Select-Object -Unique
-    foreach ($archiveName in $archiveNames) {
-        $archive = $archiveDirectories |
-            ForEach-Object { Join-Path $_ $archiveName } |
-            Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
-            Select-Object -First 1
-        if ($archive) {
-            Copy-Item -LiteralPath $archive -Destination (Join-Path $OutputDir $archiveName) -Force
+    if (-not $ExcludeGameArchives) {
+        $archiveNames = if ($GameId -eq 'oot') {
+            @('oot.o2r', 'oot.otr', 'soh.o2r')
+        } else {
+            @('mm.o2r', '2ship.o2r')
+        }
+        $archiveDirectories = @(
+            $sourceDir,
+            $HostRoot,
+            (Join-Path $HostRoot "x64/$Config"),
+            (Join-Path $HostRoot "build/x64/$Config"),
+            (Join-Path $HostRoot "build/x64/x64/$Config"),
+            (Join-Path $HostRoot 'build/x64/soh'),
+            (Join-Path $HostRoot 'build/x64/mm')
+        ) | Select-Object -Unique
+        foreach ($archiveName in $archiveNames) {
+            $archive = $archiveDirectories |
+                ForEach-Object { Join-Path $_ $archiveName } |
+                Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+                Select-Object -First 1
+            if ($archive) {
+                Copy-Item -LiteralPath $archive -Destination (Join-Path $OutputDir $archiveName) -Force
+            }
         }
     }
 
@@ -90,6 +93,26 @@ function Copy-LinkSpanHostPackage {
     }
 
     return $destination
+}
+
+function Assert-LinkSpanPackageIsRomFree {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] [string]$Path
+    )
+
+    $protectedExtensions = @('.z64', '.n64', '.v64', '.o2r', '.otr')
+    $protectedFiles = @(
+        Get-ChildItem -LiteralPath $Path -Recurse -File -Force -ErrorAction Stop |
+            Where-Object { $_.Extension.ToLowerInvariant() -in $protectedExtensions }
+    )
+    if ($protectedFiles.Count -gt 0) {
+        $relative = $protectedFiles | ForEach-Object {
+            [System.IO.Path]::GetRelativePath([System.IO.Path]::GetFullPath($Path), $_.FullName)
+        }
+        throw "Link-Span: ROM-free package contains protected game files: $($relative -join ', ')"
+    }
+    return $true
 }
 
 function Publish-LinkSpanPackage {
@@ -102,7 +125,7 @@ function Publish-LinkSpanPackage {
     $destinationFull = [System.IO.Path]::GetFullPath($Destination)
     New-Item -ItemType Directory -Path $destinationFull -Force | Out-Null
     $generated = @(
-        'link-span.exe', 'hosts/oot', 'hosts/mm', 'soh.o2r', '2ship.o2r',
+        'link-span.exe', 'README.md', 'hosts/oot', 'hosts/mm', 'soh.o2r', '2ship.o2r',
         'mods/.shiplua-cache',
         'mods/hello-world', 'mods/jump', 'mods/dog-spawner',
         'mods/hello-world.shipmod', 'mods/jump.shipmod', 'mods/dog-spawner.shipmod',
@@ -122,4 +145,4 @@ function Publish-LinkSpanPackage {
         Copy-Item -Destination $destinationFull -Recurse -Force
 }
 
-Export-ModuleMember -Function Find-LinkSpanHostExecutable, Copy-LinkSpanHostPackage, Publish-LinkSpanPackage
+Export-ModuleMember -Function Find-LinkSpanHostExecutable, Copy-LinkSpanHostPackage, Publish-LinkSpanPackage, Assert-LinkSpanPackageIsRomFree

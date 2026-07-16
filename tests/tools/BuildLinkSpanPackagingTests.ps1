@@ -66,6 +66,37 @@ try {
     }
     Write-Host 'V-LINK-2: pacote OoT-only sem assets foi aceito.' -ForegroundColor Green
 
+    $romFreeOutput = Join-Path $root 'package-rom-free'
+    $romFreeHost = Copy-LinkSpanHostPackage -HostRoot $hostRoot -OutputDir $romFreeOutput `
+        -Config Release -ExeName '2ship.exe' -GameId mm -ExcludeGameArchives
+    foreach ($path in @(
+        (Join-Path $romFreeHost '2ship.exe'),
+        (Join-Path $romFreeHost 'ZAPD.exe'),
+        (Join-Path $romFreeHost 'assets/nested/fixture.xml')
+    )) {
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw "V-LINK-7 falhou: runtime ROM-free incompleto em $path"
+        }
+    }
+    foreach ($protected in @('mm.o2r', '2ship.o2r')) {
+        if (Test-Path -LiteralPath (Join-Path $romFreeOutput $protected)) {
+            throw "V-LINK-7 falhou: archive protegido copiado para pacote ROM-free: $protected"
+        }
+    }
+    Assert-LinkSpanPackageIsRomFree -Path $romFreeOutput | Out-Null
+    [System.IO.File]::WriteAllText((Join-Path $romFreeOutput 'private.z64'), 'fixture')
+    $blocked = $false
+    try {
+        Assert-LinkSpanPackageIsRomFree -Path $romFreeOutput | Out-Null
+    } catch {
+        $blocked = $true
+    }
+    if (-not $blocked) {
+        throw 'V-LINK-7 falhou: scanner aceitou uma ROM no pacote'
+    }
+    Remove-Item -LiteralPath (Join-Path $romFreeOutput 'private.z64') -Force
+    Write-Host 'V-LINK-7: pacote ROM-free preserva runtime/extractor e rejeita arquivos protegidos.' -ForegroundColor Green
+
     $stage = Join-Path $root 'stage'
     $publish = Join-Path $root 'publish-existing'
     New-Item -ItemType Directory -Path (Join-Path $stage 'hosts/oot') -Force | Out-Null

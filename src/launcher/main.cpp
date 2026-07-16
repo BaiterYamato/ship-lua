@@ -12,8 +12,15 @@
 #include <string>
 
 #ifdef _WIN32
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600
+#endif
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <commctrl.h>
+#ifdef _MSC_VER
+#pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif
 #endif
 
 namespace LinkSpan::Launcher {
@@ -67,22 +74,43 @@ std::filesystem::path ExecutableDirectory() {
 }
 
 void ShowError(const std::wstring& message) {
-    MessageBoxW(nullptr, message.c_str(), L"Link-Span", MB_OK | MB_ICONERROR | MB_SETFOREGROUND);
+    MessageBoxW(nullptr, message.c_str(), L"Link-Span Error",
+                MB_OK | MB_ICONERROR | MB_SETFOREGROUND);
 }
 
 std::optional<Game> ChooseGame(const AssetSet& assets) {
     if (!assets.HasBoth()) {
         return assets.oot ? std::optional<Game>(Game::Oot) : std::optional<Game>(Game::Mm);
     }
-    const int answer = MessageBoxW(
-        nullptr,
-        L"Os assets de Ocarina of Time e Majora's Mask foram encontrados.\n\n"
-        L"Sim: Ocarina of Time\nNão: Majora's Mask\nCancelar: sair",
-        L"Link-Span — escolher jogo", MB_YESNOCANCEL | MB_ICONQUESTION | MB_SETFOREGROUND);
-    if (answer == IDYES) {
+    constexpr int kChooseOot = 100;
+    constexpr int kChooseMm = 101;
+    constexpr int kExit = 102;
+    const TASKDIALOG_BUTTON buttons[] = {
+        {kChooseOot, L"Ocarina of Time"},
+        {kChooseMm, L"Majora's Mask"},
+        {kExit, L"Exit"},
+    };
+    TASKDIALOGCONFIG dialog{};
+    dialog.cbSize = sizeof(dialog);
+    dialog.dwFlags = TDF_ALLOW_DIALOG_CANCELLATION | TDF_SIZE_TO_CONTENT;
+    dialog.pszWindowTitle = L"Link-Span - Choose Game";
+    dialog.pszMainInstruction = L"Choose a game";
+    dialog.pszContent = L"Both Ocarina of Time and Majora's Mask were found.";
+    dialog.pszMainIcon = TD_INFORMATION_ICON;
+    dialog.cButtons = static_cast<UINT>(std::size(buttons));
+    dialog.pButtons = buttons;
+    dialog.nDefaultButton = kChooseOot;
+
+    int answer = kExit;
+    const HRESULT result = TaskDialogIndirect(&dialog, &answer, nullptr, nullptr);
+    if (FAILED(result)) {
+        ShowError(L"Windows could not create the game selection dialog.");
+        return std::nullopt;
+    }
+    if (answer == kChooseOot) {
         return Game::Oot;
     }
-    if (answer == IDNO) {
+    if (answer == kChooseMm) {
         return Game::Mm;
     }
     return std::nullopt;
@@ -166,56 +194,59 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
     using namespace LinkSpan::Launcher;
     const std::filesystem::path root = ExecutableDirectory();
     const AssetSet assets = DiscoverAssets(root);
-    if (assets.Empty()) {
+    const auto dualMods = DiscoverDualWorldMods(root);
+    const StartupDecision startup = DecideStartup(assets, !dualMods.empty());
+    if (startup == StartupDecision::MissingAssets) {
         ShowError(
-            L"Nenhum jogo foi encontrado ao lado de link-span.exe.\n\n"
-            L"Adicione oot.o2r/oot.otr ou uma ROM legítima de Ocarina of Time; "
-            L"e/ou mm.o2r ou uma ROM legítima de Majora's Mask.");
+            L"No supported game was found next to link-span.exe.\n\n"
+            L"Add oot.o2r/oot.otr or a legally obtained Ocarina of Time ROM, "
+            L"and/or mm.o2r or a legally obtained Majora's Mask ROM.");
         return 2;
     }
-    const auto dualMods = DiscoverDualWorldMods(root);
-    if (!dualMods.empty() && !assets.HasBoth()) {
+    if (startup == StartupDecision::DualGameAssetsRequired) {
         // Exit code 8 = a dual-world mod (requires_both_games = true) is
-        // installed but only one game's assets are present. The launcher never
-        // inspects packaged .shipmod files (see docs/link-span-process.md), so
-        // only unpacked development mods in mods/ are listed here. The host's
-        // own modloader validates packaged mods at load time.
+        // installed but only one game's assets are present.
         std::wstring message =
-            L"Mods que exigem os dois jogos (requires_both_games = true) estão "
-            L"instalados, mas apenas um asset foi encontrado:\n\n";
+            L"The following mods require both games (requires_both_games = true), "
+            L"but assets for only one game were found:\n\n";
         for (const auto& mod : dualMods) {
-            message += L"  • ";
+            message += L"  - ";
             message += std::wstring(mod.begin(), mod.end());
             message += L"\n";
         }
         message +=
-            L"\nAdicione o asset (oot.o2r/oot.otr e mm.o2r) do jogo ausente ou "
-            L"remova estes mods de mods/ para continuar.";
+            L"\nAdd the missing game's ROM or extracted assets, or remove these "
+            L"mods from mods/ to continue.";
         ShowError(message);
         return 8;
     }
 
-    std::optional<Game> game = ChooseGame(assets);
+    std::optional<Game> game;
+    if (startup == StartupDecision::ChooseGame) {
+        game = ChooseGame(assets);
+    } else {
+        game = startup == StartupDecision::LaunchOot ? Game::Oot : Game::Mm;
+    }
     if (!game.has_value()) {
         return 0;
     }
     const SessionSecrets secrets = CreateSessionSecrets();
     for (int switches = 0; switches <= kMaximumSwitches; ++switches) {
         if (!assets.Has(*game)) {
-            ShowError(L"O jogo solicitado pelo handoff não possui asset disponível.");
+            ShowError(L"The game requested by the handoff has no available ROM or asset.");
             return 3;
         }
         const auto host = FindHost(root, *game);
         if (!host.has_value()) {
             ShowError(*game == Game::Oot
-                ? L"O host hosts/oot/soh.exe não foi encontrado. Execute build-linkspan.ps1."
-                : L"O host hosts/mm/2ship.exe não foi encontrado. Execute build-linkspan.ps1.");
+                ? L"The host hosts/oot/soh.exe was not found. Run build-linkspan.ps1."
+                : L"The host hosts/mm/2ship.exe was not found. Run build-linkspan.ps1.");
             return 4;
         }
         const unsigned long exitCode = RunHost(root, *host, *game, assets, secrets,
                                                static_cast<std::uint64_t>(switches + 1));
         if (exitCode == static_cast<unsigned long>(-1)) {
-            ShowError(L"O Windows não conseguiu iniciar o executável do host.");
+            ShowError(L"Windows could not start the game host executable.");
             return 5;
         }
         if (exitCode != kSwitchWorldExitCode) {
@@ -223,11 +254,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
         }
         game = ConsumeNextWorld(root);
         if (!game.has_value()) {
-            ShowError(L"O host solicitou troca, mas state/next-world é inválido ou está ausente.");
+            ShowError(L"The host requested a world switch, but state/next-world is missing or invalid.");
             return 6;
         }
     }
-    ShowError(L"A sessão excedeu o limite de 16 trocas consecutivas entre jogos.");
+    ShowError(L"The session exceeded the limit of 16 consecutive world switches.");
     return 7;
 }
 #else

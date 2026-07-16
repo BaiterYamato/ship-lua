@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <string>
 
+#include <miniz.h>
+
 namespace {
 
 void Check(bool condition, const char* message) {
@@ -42,6 +44,18 @@ void WriteRom(const std::filesystem::path& path, std::string title, int format) 
     stream.write(reinterpret_cast<const char*>(header.data()), header.size());
 }
 
+void WritePackage(const std::filesystem::path& path, const std::string& manifest) {
+    mz_zip_archive archive{};
+    if (!mz_zip_writer_init_file(&archive, path.string().c_str(), 0)) {
+        throw std::runtime_error("could not create synthetic .shipmod");
+    }
+    bool ok = mz_zip_writer_add_mem(&archive, "manifest.toml", manifest.data(),
+                                    manifest.size(), MZ_BEST_COMPRESSION) != 0;
+    ok = mz_zip_writer_finalize_archive(&archive) != 0 && ok;
+    mz_zip_writer_end(&archive);
+    Check(ok, "could not finalize synthetic .shipmod");
+}
+
 } // namespace
 
 int main() {
@@ -50,12 +64,27 @@ int main() {
     std::filesystem::create_directories(root);
 
     Check(LinkSpan::Launcher::DiscoverAssets(root).Empty(), "empty directory must have no game");
+    using LinkSpan::Launcher::StartupDecision;
+    Check(LinkSpan::Launcher::DecideStartup({}, false) == StartupDecision::MissingAssets,
+          "empty package must report missing assets");
     WriteFile(root / "oot.o2r");
     auto assets = LinkSpan::Launcher::DiscoverAssets(root);
     Check(assets.oot && !assets.mm, "oot.o2r must select only OoT");
+    Check(LinkSpan::Launcher::DecideStartup(assets, false) == StartupDecision::LaunchOot,
+          "OoT-only package must launch OoT without a chooser");
+    Check(LinkSpan::Launcher::DecideStartup(assets, true) ==
+              StartupDecision::DualGameAssetsRequired,
+          "dual-world mod must block an OoT-only package");
     WriteFile(root / "mm.o2r");
     assets = LinkSpan::Launcher::DiscoverAssets(root);
     Check(assets.HasBoth(), "both O2R files must enable the chooser");
+    Check(LinkSpan::Launcher::DecideStartup(assets, true) == StartupDecision::ChooseGame,
+          "both games must show the chooser even when a dual-world mod is installed");
+
+    std::filesystem::remove(root / "oot.o2r");
+    assets = LinkSpan::Launcher::DiscoverAssets(root);
+    Check(LinkSpan::Launcher::DecideStartup(assets, false) == StartupDecision::LaunchMm,
+          "MM-only package must launch MM without a chooser");
 
     std::filesystem::remove_all(root);
     std::filesystem::create_directories(root);
@@ -85,6 +114,28 @@ int main() {
     }
     Check(LinkSpan::Launcher::DiscoverDualWorldMods(root).empty(),
           "games list alone must remain compatible with either host");
+
+    const auto packagedMod = root / "mods" / "link-home-to-clock-tower.shipmod";
+    WritePackage(packagedMod,
+                 "id = \"linkspan.teleport\"\nrequires_both_games = true\n");
+    dual = LinkSpan::Launcher::DiscoverDualWorldMods(root);
+    Check(dual.size() == 1 && dual.front() == "link-home-to-clock-tower",
+          "packaged .shipmod dual-world requirement must be discovered");
+
+    WriteFile(root / "mods" / "broken.shipmod");
+    dual = LinkSpan::Launcher::DiscoverDualWorldMods(root);
+    Check(dual.size() == 1 && dual.front() == "link-home-to-clock-tower",
+          "invalid .shipmod must be ignored without hiding valid packages");
+
+    const auto staleCache = root / "mods" / ".shiplua-cache" / "stale-dual";
+    std::filesystem::create_directories(staleCache);
+    {
+        std::ofstream manifest(staleCache / "manifest.toml");
+        manifest << "requires_both_games = true\n";
+    }
+    dual = LinkSpan::Launcher::DiscoverDualWorldMods(root);
+    Check(dual.size() == 1 && dual.front() == "link-home-to-clock-tower",
+          "derived modloader cache must not create a stale launcher requirement");
 
     std::filesystem::remove_all(root);
     std::cout << "All Link-Span asset discovery checks passed\n";

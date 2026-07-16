@@ -166,3 +166,13 @@ HOTKEY-001, EXAMPLE-001, MM-JUMP-001 e o helper inicial de build). O PR #31 est�
 6. Validar runtime com ativos legítimos dos dois jogos (builds MSVC verdes, mas sem runtime testado com ROM).
 7. Adicionar builds Linux/macOS (só Windows verificado).
 8. Publicar `v0.1.0` após atender os critérios restantes do PLAN.md §16.
+
+## LINK-004 — launcher público ROM-free (review)
+
+- Launcher em inglês com abertura automática do único jogo disponível, seletor
+  quando ambos estão presentes e bloqueio explicativo para mods dual-game.
+- Pacote Windows x64 Release gerado sem ROM/O2R/OTR e validado por scanner.
+- MSVC Release e 32/32 testes verdes; diálogos validados visualmente.
+- PRs de runtime dos hosts: OoT #13 e MM #10 (draft, stacked).
+- Entrega pública: `v0.1.0-alpha.1`; `v0.1.0` permanece dependente dos critérios
+  de estabilização já listados acima.

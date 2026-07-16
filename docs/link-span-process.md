@@ -12,7 +12,8 @@ cd link-span
 .\x64\Release\link-span.exe
 ```
 
-O launcher não contém ROMs nem baixa conteúdo protegido.
+O launcher não contém ROMs nem baixa conteúdo protegido. A interface exibida ao
+usuário é integralmente em inglês.
 
 ## Seleção por arquivos
 
@@ -32,10 +33,8 @@ não apenas pelo nome do arquivo.
 ## Layout do pacote
 
 ```text
-x64/Release/
+Link-Span-Windows-x64/
   link-span.exe
-  oot.o2r                 # fornecido pelo usuário
-  mm.o2r                  # fornecido pelo usuário
   hosts/oot/
     soh.exe
     assets/               # recursos runtime/extractor do Shipwright
@@ -45,6 +44,10 @@ x64/Release/
   mods/                   # compartilhada pelos dois hosts
   state/                  # handoff e requisição de troca
 ```
+
+Depois de extrair o release, o usuário coloca sua ROM legítima ou seus próprios
+`oot.o2r`/`oot.otr`/`mm.o2r` ao lado de `link-span.exe`. Esses arquivos nunca
+fazem parte do ZIP público.
 
 ## Build rápido do supervisor
 
@@ -59,6 +62,16 @@ Para conferir ferramentas e submódulos sem alterar builds:
 ```powershell
 .\build-linkspan.ps1 -ValidateOnly
 ```
+
+Para produzir um artefato redistribuível sem ROMs nem archives derivados:
+
+```powershell
+.\build-linkspan.ps1 -Config Release -Games dual -RomFree `
+  -OutputDir .\build\release\Link-Span-Windows-x64
+```
+
+O modo `-RomFree` não copia `.z64`, `.n64`, `.v64`, `.o2r` ou `.otr` e executa
+uma segunda varredura sobre toda a saída antes de concluir.
 
 ## Teleporte entre jogos
 
@@ -102,21 +115,15 @@ este último significa "roda em qualquer um dos hosts", enquanto
 `requires_both_games = true` significa "só faz sentido com os dois presentes"
 (por exemplo, um mod de teleporte entre mundos).
 
-### Decisão de escaneamento (LINK-002)
+### Decisão de escaneamento (LINK-004)
 
-O launcher verifica `requires_both_games` **apenas em mods descompactados**
-(`mods/**/manifest.toml`), lendo o campo via regex. Essa varredura é
-intencionalmente barata e independente do parser TOML/Lua — o launcher é um
-supervisor mínimo e não deve depender do runtime do modloader.
+O launcher verifica `requires_both_games` tanto em mods descompactados
+(`mods/**/manifest.toml`) quanto no `manifest.toml` interno de pacotes
+`mods/**/*.shipmod`. O ZIP é lido diretamente em memória, sem extrair arquivos,
+e o manifesto possui limite de 64 KiB. A validação semântica completa continua
+sob responsabilidade do `ManifestParser` do host; essa leitura antecipada existe
+somente para impedir que um mod dual inicie com um dos jogos ausente.
 
-**Pacotes `.shipmod` (ZIP) não são inspecionados pelo launcher.** A autoridade
-para validar a compatibilidade de um pacote continua sendo o host: quando o
-modloader do host carrega um `.shipmod`, ele parseia o manifesto pelo
-`ManifestParser` (campo `requiresBothGames` em `Manifest`) e reporta o próprio
-erro de compatibilidade se as dependências não forem satisfeitas. Isso mantém o
-launcher livre de dependências de extração/ZIP e centraliza a validação semântica
-no núcleo, onde os testes do parser já cobrem os três estados do campo (`true`,
-`false` e ausente).
-
-Quando um mod dual é detectado e apenas um asset está disponível, o launcher
-exibe a mensagem e retorna o **código de saída 8** antes de iniciar qualquer host.
+Quando um mod dual é detectado e apenas um jogo está disponível, o launcher
+exibe a mensagem em inglês e retorna o **código de saída 8** antes de iniciar
+qualquer host.

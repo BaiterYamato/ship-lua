@@ -11,6 +11,14 @@ enum class Game {
     Mm,
 };
 
+enum class StartupDecision {
+    MissingAssets,
+    LaunchOot,
+    LaunchMm,
+    ChooseGame,
+    DualGameAssetsRequired,
+};
+
 struct AssetSet {
     bool oot = false;
     bool mm = false;
@@ -23,10 +31,12 @@ struct AssetSet {
 };
 
 AssetSet DiscoverAssets(const std::filesystem::path& directory);
-// Returns IDs of directory mods explicitly declaring that both worlds are
-// required. Ordinary games = ["oot", "mm"] remains compatible with either
-// host; only requires_both_games = true is a hard dual-world requirement.
+// Returns IDs of unpacked directory mods and packaged .shipmod files explicitly
+// declaring that both worlds are required. Ordinary games = ["oot", "mm"]
+// remains compatible with either host; only requires_both_games = true is a
+// hard dual-world requirement.
 std::vector<std::string> DiscoverDualWorldMods(const std::filesystem::path& directory);
+StartupDecision DecideStartup(const AssetSet& assets, bool dualWorldModInstalled) noexcept;
 const char* GameId(Game game) noexcept;
 
 } // namespace LinkSpan::Launcher
