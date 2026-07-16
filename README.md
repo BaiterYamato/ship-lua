@@ -54,7 +54,9 @@ Integration details in [`coordination/INTEGRATION.en.md`](coordination/INTEGRATI
 
 Download the latest `Link-Span-Windows-x64.zip` release, extract it, and place
 your legally obtained Zelda ROM or your own extracted game archive next to
-`link-span.exe`. The release never includes ROMs, `.o2r`, or `.otr` files.
+`link-span.exe`. The release never includes ROMs or user-derived `oot.o2r`,
+`oot.otr`, or `mm.o2r` files. It does include the redistributable `soh.o2r` and
+`2ship.o2r` runtime archives required by the two ports.
 
 - If only OoT is present, Link-Span starts OoT automatically.
 - If only MM is present, Link-Span starts MM automatically.
@@ -162,4 +164,5 @@ lives in [`coordination/`](coordination/).
 ## License
 
 The Link-Span core is under the repository license. **Never** commit ROMs,
-`.z64`/`.n64`/`.o2r` files, or any copyrighted assets.
+`.z64`/`.n64`/`.v64`, user-derived `oot.o2r`/`oot.otr`/`mm.o2r`, or copyrighted
+game assets. Redistributable port runtime archives are release artifacts only.

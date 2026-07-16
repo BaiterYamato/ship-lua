@@ -35,6 +35,8 @@ não apenas pelo nome do arquivo.
 ```text
 Link-Span-Windows-x64/
   link-span.exe
+  soh.o2r                # recursos públicos obrigatórios do port OoT
+  2ship.o2r              # recursos públicos obrigatórios do port MM
   hosts/oot/
     soh.exe
     assets/               # recursos runtime/extractor do Shipwright
@@ -63,15 +65,23 @@ Para conferir ferramentas e submódulos sem alterar builds:
 .\build-linkspan.ps1 -ValidateOnly
 ```
 
-Para produzir um artefato redistribuível sem ROMs nem archives derivados:
+Para produzir um artefato redistribuível sem ROMs nem archives derivados do jogo:
 
 ```powershell
 .\build-linkspan.ps1 -Config Release -Games dual -RomFree `
   -OutputDir .\build\release\Link-Span-Windows-x64
 ```
 
-O modo `-RomFree` não copia `.z64`, `.n64`, `.v64`, `.o2r` ou `.otr` e executa
-uma segunda varredura sobre toda a saída antes de concluir.
+O modo `-RomFree` não copia `.z64`, `.n64`, `.v64`, `oot.o2r`, `oot.otr` ou
+`mm.o2r`. Ele preserva e exige `soh.o2r` e `2ship.o2r`, pois são recursos
+redistribuíveis próprios dos ports e ambos os executáveis falham sem eles. Uma
+segunda varredura sobre toda a saída confirma essa distinção antes de concluir.
+
+### Invariante de empacotamento V-LINK-8
+
+Todo pacote público que contenha `soh.exe` deve conter `soh.o2r`, e todo pacote
+que contenha `2ship.exe` deve conter `2ship.o2r`. Esses arquivos não substituem
+`oot.o2r`/`mm.o2r` nem uma ROM legítima fornecida pelo usuário.
 
 ## Teleporte entre jogos
 

@@ -28,3 +28,20 @@ This file is the fixed, append-only plan ledger for this repository.
   - https://github.com/BaiterYamato/Shipwright-HyliaFoundry/pull/13
   - https://github.com/BaiterYamato/2ship2harkinian/pull/10
   - https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.1
+
+## [PLN-20260716-0002] Restore required port archives in ROM-free release
+- createdUtc: 2026-07-16T18:44:55Z
+- status: in_progress
+- scope: mixed
+- summary: Fix the public package so it includes redistributable soh.o2r and 2ship.o2r runtime archives while excluding user ROMs and oot.o2r/mm.o2r, then rebuild, smoke-test, and publish a corrected prerelease.
+- milestones:
+  1. Classify port runtime archives separately from user-derived game archives
+  2. Add a packaging regression that requires soh.o2r and 2ship.o2r
+  3. Build and scan a corrected Windows x64 Release package
+  4. Run both real hosts with synthetic base archive names and confirm the missing-port-archive dialogs are gone
+  5. Push the hotfix and publish v0.1.0-alpha.2
+- tags: link-span, hotfix, packaging, rom-free
+- refs:
+  - coordination/claims/LINK-005.md
+  - tools/LinkSpanPackaging.psm1
+  - tests/tools/BuildLinkSpanPackagingTests.ps1

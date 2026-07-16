@@ -61,29 +61,34 @@ function Copy-LinkSpanHostPackage {
         Get-ChildItem -LiteralPath $assetsSource -Force -ErrorAction Stop |
             Copy-Item -Destination $assetsDestination -Recurse -Force
     }
-    if (-not $ExcludeGameArchives) {
-        $archiveNames = if ($GameId -eq 'oot') {
-            @('oot.o2r', 'oot.otr', 'soh.o2r')
-        } else {
-            @('mm.o2r', '2ship.o2r')
-        }
-        $archiveDirectories = @(
-            $sourceDir,
-            $HostRoot,
-            (Join-Path $HostRoot "x64/$Config"),
-            (Join-Path $HostRoot "build/x64/$Config"),
-            (Join-Path $HostRoot "build/x64/x64/$Config"),
-            (Join-Path $HostRoot 'build/x64/soh'),
-            (Join-Path $HostRoot 'build/x64/mm')
-        ) | Select-Object -Unique
-        foreach ($archiveName in $archiveNames) {
-            $archive = $archiveDirectories |
-                ForEach-Object { Join-Path $_ $archiveName } |
-                Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
-                Select-Object -First 1
-            if ($archive) {
-                Copy-Item -LiteralPath $archive -Destination (Join-Path $OutputDir $archiveName) -Force
-            }
+    $portArchiveName = if ($GameId -eq 'oot') { 'soh.o2r' } else { '2ship.o2r' }
+    $archiveNames = if ($ExcludeGameArchives) {
+        @($portArchiveName)
+    } elseif ($GameId -eq 'oot') {
+        @('oot.o2r', 'oot.otr', $portArchiveName)
+    } else {
+        @('mm.o2r', $portArchiveName)
+    }
+    $archiveDirectories = @(
+        $sourceDir,
+        $HostRoot,
+        (Join-Path $HostRoot "x64/$Config"),
+        (Join-Path $HostRoot "build/x64/$Config"),
+        (Join-Path $HostRoot "build/x64/x64/$Config"),
+        (Join-Path $HostRoot 'build/x64/soh'),
+        (Join-Path $HostRoot 'build/x64/mm'),
+        (Join-Path $HostRoot 'soh'),
+        (Join-Path $HostRoot 'mm')
+    ) | Select-Object -Unique
+    foreach ($archiveName in $archiveNames) {
+        $archive = $archiveDirectories |
+            ForEach-Object { Join-Path $_ $archiveName } |
+            Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+            Select-Object -First 1
+        if ($archive) {
+            Copy-Item -LiteralPath $archive -Destination (Join-Path $OutputDir $archiveName) -Force
+        } elseif ($archiveName -eq $portArchiveName) {
+            throw "Link-Span: archive runtime obrigatório $portArchiveName não foi localizado para $GameId"
         }
     }
 
@@ -101,14 +106,31 @@ function Assert-LinkSpanPackageIsRomFree {
         [Parameter(Mandatory)] [string]$Path
     )
 
+    $root = [System.IO.Path]::GetFullPath($Path)
+    $rootPrefix = $root.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+    $allowedPortArchives = @('soh.o2r', '2ship.o2r')
     $protectedExtensions = @('.z64', '.n64', '.v64', '.o2r', '.otr')
     $protectedFiles = @(
         Get-ChildItem -LiteralPath $Path -Recurse -File -Force -ErrorAction Stop |
-            Where-Object { $_.Extension.ToLowerInvariant() -in $protectedExtensions }
+            Where-Object {
+                $fullName = [System.IO.Path]::GetFullPath($_.FullName)
+                $relative = if ($fullName.StartsWith($rootPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+                    $fullName.Substring($rootPrefix.Length)
+                } else {
+                    $fullName
+                }
+                $isAllowedPortArchive = $relative -in $allowedPortArchives
+                $_.Extension.ToLowerInvariant() -in $protectedExtensions -and -not $isAllowedPortArchive
+            }
     )
     if ($protectedFiles.Count -gt 0) {
         $relative = $protectedFiles | ForEach-Object {
-            [System.IO.Path]::GetRelativePath([System.IO.Path]::GetFullPath($Path), $_.FullName)
+            $fullName = [System.IO.Path]::GetFullPath($_.FullName)
+            if ($fullName.StartsWith($rootPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+                $fullName.Substring($rootPrefix.Length)
+            } else {
+                $fullName
+            }
         }
         throw "Link-Span: ROM-free package contains protected game files: $($relative -join ', ')"
     }
