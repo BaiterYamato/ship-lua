@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "api_version": "0.2.1",
+  "api_version": "0.3.0",
   "capabilities": [
     {"name": "scene.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de cena."},
     {"name": "actor.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de ator com handles e snapshots."},
     {"name": "save.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de carregamento de save."},
     {"name": "text.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de texto somente leitura."},
     {"name": "audio.sequence.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos de início de sequência de áudio."},
+    {"name": "world.travel", "status": "contract", "hosts": ["oot", "mm"], "description": "Solicita handoff autenticado para um destino lógico no outro host."},
     {"name": "mm.room.events", "status": "planned", "hosts": ["mm"], "description": "Eventos de room exclusivos de Majora's Mask."},
     {"name": "mm.cycle", "status": "planned", "hosts": ["mm"], "description": "Lifecycle do ciclo de três dias."},
     {"name": "mm.owl_save", "status": "planned", "hosts": ["mm"], "description": "Semântica de owl save."},

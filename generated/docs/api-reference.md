@@ -1,7 +1,7 @@
 <!-- Gerado por tools/generate_api_docs.py. Não edite manualmente. -->
 # Referência da API ShipLua
 
-Versão da API: `0.2.1`. Versão do schema: `1`.
+Versão da API: `0.3.0`. Versão do schema: `1`.
 
 ## Tipos
 
@@ -27,6 +27,7 @@ Versão da API: `0.2.1`. Versão do schema: `1`.
 | `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | — | `invalid_argument`, `unsupported` |
 | `ship.events.off` | `subscription: subscription` | `boolean` | `common` | — | `invalid_handle` |
 | `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | — | `invalid_argument`, `unsupported` |
+| `ship.world.travel` | `world: game_id`, `destination: string` | `boolean` | `common` | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
 | `ship.mm.player.jump` | — | `boolean` | `mm` | `mm.player.jump` | — |
 | `ship.mm.spawn_dog` | — | `boolean` | `mm` | `mm.spawn_dog` | — |
 | `ship.oot.player.jump` | — | `boolean` | `oot` | `oot.player.jump` | — |
@@ -61,6 +62,7 @@ Versão da API: `0.2.1`. Versão do schema: `1`.
 | `save.events` | `contract` | `oot`, `mm` | Eventos comuns de carregamento de save. |
 | `text.events` | `contract` | `oot`, `mm` | Eventos comuns de texto somente leitura. |
 | `audio.sequence.events` | `contract` | `oot`, `mm` | Eventos de início de sequência de áudio. |
+| `world.travel` | `contract` | `oot`, `mm` | Solicita handoff autenticado para um destino lógico no outro host. |
 | `mm.room.events` | `planned` | `mm` | Eventos de room exclusivos de Majora's Mask. |
 | `mm.cycle` | `planned` | `mm` | Lifecycle do ciclo de três dias. |
 | `mm.owl_save` | `planned` | `mm` | Semântica de owl save. |

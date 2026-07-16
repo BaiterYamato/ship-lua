@@ -71,6 +71,7 @@ Result<Manifest> ParseTable(const toml::table& table, const std::string& sourceN
     manifest.description = table["description"].value_or(std::string{});
     ReadStringArray(table, "authors", manifest.authors);
     ReadStringArray(table, "games", manifest.games);
+    manifest.requiresBothGames = table["requires_both_games"].value_or(false);
 
     if (const toml::table* host = table["host"].as_table()) {
         if (auto v = (*host)["shipwright"].value<std::string>()) {

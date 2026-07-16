@@ -47,6 +47,11 @@
       "uniqueItems": true,
       "description": "Games the mod targets. Omitted or empty means both."
     },
+    "requires_both_games": {
+      "type": "boolean",
+      "default": false,
+      "description": "Link-Span-only hard requirement for both OoT and MM assets. When true the launcher refuses to start (exit code 8) unless assets for both games are present. Distinct from games=[\"oot\",\"mm\"], which means 'runs in either host'."
+    },
     "host": {
       "type": "object",
       "description": "Optional per-host version ranges.",

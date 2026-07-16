@@ -1,0 +1,8 @@
+id = "example.requires_both"
+name = "Requires Both Games"
+version = "0.2.0"
+api = ">=0.3 <1.0"
+entrypoint = "main.lua"
+description = "Mod que exige OoT e MM simultaneamente (teleporte entre mundos)."
+games = ["oot", "mm"]
+requires_both_games = true

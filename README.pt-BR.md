@@ -70,6 +70,11 @@ Visual Studio 2022 com o toolset MSVC v143), inicializa os submódulos, configur
 o CMake, gera o pacote de assets `.o2r` customizado **sem ROM**, e compila o
 executável do jogo. Ele detecta automaticamente se o host é OoT ou MM.
 
+Você também pode copiar `build-game.ps1` diretamente para a raiz do clone do
+Shipwright-HyliaFoundry ou do 2ship2harkinian e executá-lo de qualquer diretório.
+O helper procura primeiro a própria localização e detecta `soh/` ou `mm/`. Para
+conferir a detecção sem configurar nem compilar, use `-ValidateOnly`.
+
 O primeiro build produz um `.exe` executável, mas o jogo **não fica jogável até
 você fornecer uma ROM legítima de Zelda** — o passo sem ROM apenas constrói os
 assets definidos pelo ship. O script imprime o comando `ExtractAssets` exato para

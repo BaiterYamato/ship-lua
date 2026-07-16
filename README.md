@@ -70,6 +70,11 @@ Studio 2022 with the MSVC v143 toolset), inits submodules, configures CMake,
 generates the custom `.o2r` asset pack **without a ROM**, and builds the game
 executable. It auto-detects whether the host is OoT or MM.
 
+You may also copy `build-game.ps1` directly to the root of either a
+Shipwright-HyliaFoundry or 2ship2harkinian clone and run it from any directory.
+The helper checks its own location first and detects `soh/` or `mm/`. Use
+`-ValidateOnly` to verify detection without configuring or building anything.
+
 The first build produces a runnable `.exe`, but the game is **not playable until
 you supply a legitimate Zelda ROM** — the no-ROM step only builds the
 ship-defined assets. The script prints the exact `ExtractAssets` command to run

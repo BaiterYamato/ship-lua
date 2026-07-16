@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -12,6 +13,7 @@
 #include "shiplua/runtime/Logger.h"
 #include "shiplua/runtime/LuaRuntime.h"
 #include "shiplua/runtime/Result.h"
+#include "shiplua/world/WorldSession.h"
 
 struct lua_State;
 
@@ -23,6 +25,10 @@ struct LuaApiHostContext {
     std::string runtimeVersion = "0.2.0";
     std::vector<std::string> capabilities;
     std::shared_ptr<HotkeyRegistry> hotkeys;  // nullable; null = host without hotkey support
+    std::function<Result<void>(const WorldDestination&)> worldTravel;
+    // Games whose assets/hosts are available to the supervising Link-Span
+    // process. Empty keeps standalone compatibility and means only gameId.
+    std::vector<std::string> availableGames;
 };
 
 class LuaApiBinding {
@@ -64,6 +70,7 @@ class LuaApiBinding {
     static int EventsOn(lua_State* state) noexcept;
     static int EventsOff(lua_State* state) noexcept;
     static int HotkeysRegister(lua_State* state) noexcept;
+    static int WorldTravel(lua_State* state) noexcept;
     static int LogDebug(lua_State* state) noexcept;
     static int LogInfo(lua_State* state) noexcept;
     static int LogWarn(lua_State* state) noexcept;

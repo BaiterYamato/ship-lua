@@ -55,6 +55,7 @@ target_include_directories(lua_static PUBLIC "${lua_SOURCE_DIR}")
 # ---------------------------------------------------------------------------
 file(GLOB_RECURSE SHIPLUA_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+list(FILTER SHIPLUA_SOURCES EXCLUDE REGEX "/launcher/")
 
 add_library(shiplua STATIC ${SHIPLUA_SOURCES})
 target_include_directories(shiplua PUBLIC
@@ -68,6 +69,34 @@ target_include_directories(shiplua PUBLIC "${lua_SOURCE_DIR}")
 
 add_executable(shiplua_manifest_validator tools/manifest_validator.cpp)
 target_link_libraries(shiplua_manifest_validator PRIVATE shiplua)
+
+# ---------------------------------------------------------------------------
+# Link-Span supervisor
+# ---------------------------------------------------------------------------
+add_library(linkspan_launcher_core STATIC
+    src/launcher/AssetDiscovery.cpp)
+target_include_directories(linkspan_launcher_core PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+if(WIN32)
+    add_executable(linkspan_launcher WIN32 src/launcher/main.cpp)
+else()
+    add_executable(linkspan_launcher src/launcher/main.cpp)
+endif()
+target_link_libraries(linkspan_launcher PRIVATE linkspan_launcher_core)
+if(MINGW)
+    # The GUI entry point is wWinMain. MinGW only selects the Unicode Windows
+    # startup object when -municode is passed; MSVC does this automatically.
+    target_link_options(linkspan_launcher PRIVATE -municode)
+endif()
+set_target_properties(linkspan_launcher PROPERTIES
+    OUTPUT_NAME "link-span"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/x64/$<CONFIG>")
+
+add_executable(linkspan_asset_discovery_tests
+    tests/launcher/AssetDiscoveryTests.cpp)
+target_link_libraries(linkspan_asset_discovery_tests PRIVATE linkspan_launcher_core)
+add_test(NAME linkspan_asset_discovery_tests COMMAND linkspan_asset_discovery_tests)
 
 # ---------------------------------------------------------------------------
 # Example packages
@@ -89,6 +118,23 @@ add_custom_command(
     COMMENT "Empacotando hello-world.shipmod"
     VERBATIM)
 add_custom_target(package_examples DEPENDS "${SHIPLUA_HELLO_WORLD_PACKAGE}")
+
+set(SHIPLUA_LINKSPAN_DEMO_PACKAGE
+    "${SHIPLUA_EXAMPLE_OUTPUT_DIR}/link-home-to-clock-tower.shipmod")
+add_custom_command(
+    OUTPUT "${SHIPLUA_LINKSPAN_DEMO_PACKAGE}"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${SHIPLUA_EXAMPLE_OUTPUT_DIR}"
+    COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/conformance/PackageHelloWorld.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/examples/link-home-to-clock-tower"
+            "${SHIPLUA_LINKSPAN_DEMO_PACKAGE}"
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/examples/link-home-to-clock-tower/manifest.toml"
+        "${CMAKE_CURRENT_SOURCE_DIR}/examples/link-home-to-clock-tower/main.lua"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/conformance/PackageHelloWorld.py"
+    COMMENT "Empacotando link-home-to-clock-tower.shipmod"
+    VERBATIM)
+add_custom_target(package_linkspan_demo DEPENDS "${SHIPLUA_LINKSPAN_DEMO_PACKAGE}")
 
 # ---------------------------------------------------------------------------
 # Tests

@@ -144,6 +144,10 @@ Result<void> ValidateHostContext(const LuaApiHostContext& context) {
             return Result<void>::err(ErrorCode::Unsupported,
                                      "host advertised a capability incompatible with its game");
         }
+        if (requested == "world.travel" && !context.worldTravel) {
+            return Result<void>::err(ErrorCode::InvalidState,
+                                     "host advertised world.travel without a travel handler");
+        }
     }
     return Result<void>::ok();
 }
@@ -258,6 +262,10 @@ void LuaApiBinding::BuildModule(lua_State* state) {
     lua_newtable(state);
     SetFunction(state, -1, "register", &LuaApiBinding::HotkeysRegister, this);
     lua_setfield(state, ship, "hotkeys");
+
+    lua_newtable(state);
+    SetFunction(state, -1, "travel", &LuaApiBinding::WorldTravel, this);
+    lua_setfield(state, ship, "world");
 
     lua_pushvalue(state, ship);
     mShipReference = luaL_ref(state, LUA_REGISTRYINDEX);
@@ -550,6 +558,50 @@ int LuaApiBinding::HotkeysRegister(lua_State* state) noexcept {
         error = "exceção C++ durante registro de hotkey";
     }
     return error != nullptr ? Fail(state, error) : result;
+}
+
+int LuaApiBinding::WorldTravel(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr || lua_type(state, 1) != LUA_TSTRING ||
+        lua_type(state, 2) != LUA_TSTRING) {
+        return Fail(state, "ship.world.travel exige world e destination textuais");
+    }
+    if (!std::binary_search(binding->mHostContext.capabilities.begin(),
+                            binding->mHostContext.capabilities.end(), "world.travel") ||
+        !binding->mHostContext.worldTravel) {
+        return Fail(state, ErrorMessage(ErrorCode::Unsupported));
+    }
+
+    std::size_t worldLength = 0;
+    std::size_t destinationLength = 0;
+    const char* world = lua_tolstring(state, 1, &worldLength);
+    const char* destination = lua_tolstring(state, 2, &destinationLength);
+    WorldDestination request;
+    if (world != nullptr && std::string_view(world, worldLength) == "oot") {
+        request.world = WorldId::Oot;
+    } else if (world != nullptr && std::string_view(world, worldLength) == "mm") {
+        request.world = WorldId::Mm;
+    } else {
+        return Fail(state, "world deve ser 'oot' ou 'mm'");
+    }
+    request.id.assign(destination, destinationLength);
+    const Result<void> valid = ValidateWorldDestination(request);
+    if (!valid.isOk()) {
+        return Fail(state, ErrorMessage(valid.code));
+    }
+
+    Result<void> result;
+    try {
+        result = binding->mHostContext.worldTravel(request);
+    } catch (...) {
+        result = Result<void>::err(ErrorCode::HostFailure,
+                                   "host travel handler threw an exception");
+    }
+    if (!result.isOk()) {
+        return Fail(state, ErrorMessage(result.code));
+    }
+    lua_pushboolean(state, 1);
+    return 1;
 }
 
 int LuaApiBinding::RegisterHotkey(lua_State* state, const char*& error) {

@@ -1,0 +1,28 @@
+# LINK-003
+
+- Status: claimed
+- Agent: codex-windows-01
+- Platform: Windows 11 / Codex
+- Branch: agent/LINK-003-consolidate
+- Started: 2026-07-16
+- Depends on: LINK-001, LINK-002, TOOL-006, OOT-001, MM-JUMP-001
+- Files:
+  - build-linkspan.ps1
+  - build-game.ps1
+  - tools/LinkSpanPackaging.psm1
+  - src/launcher/**
+  - include/linkspan/launcher/**
+  - src/host/ModHost.cpp
+  - src/api/LuaApiBinding.cpp
+  - include/shiplua/**
+  - schema/**
+  - examples/**
+  - tests/**
+  - hosts/shipwright/**
+  - hosts/2ship2harkinian/**
+- Goal:
+  - Consolidar o launcher dual em uma worktree limpa, com build deterministico OoT/MM/dual, tres mods comuns funcionando nos dois hosts e troca autenticada de mundo.
+- Guardrails:
+  - Preservar a worktree `link-002` sem limpeza destrutiva.
+  - Nao versionar assets, saves, logs, caches ou binarios locais.
+  - Excluir o WIP Phase 7 desta consolidacao ate auditoria propria.

@@ -36,7 +36,7 @@ sem depender dos forks BaiterYamato.
 
 ## Tarefa ativa recomendada
 
-Mergear a pilha de PRs dos dois hosts (8 OoT + 8 MM = 16 PRs) em `lua/main`,
+Resolver os gates da auditoria antes de integrar as pilhas (8 OoT + 9 MM = 17 PRs),
 do mais antigo ao mais recente (submódulo → bootstrap → shutdown → identidade →
 mods dir → hotkey → pulo/save → sondagem de assets). Após cada merge, atualizar
 o submódulo `extern/ship-lua` para o topo de `main`.
@@ -81,6 +81,12 @@ o submódulo `extern/ship-lua` para o topo de `main`.
 - `WORLD-002` — done (envelope v1 com HMAC-SHA-256, anti-replay e publicação atômica; 28/28 testes MinGW/MSVC; PR #28 merged).
 - `WORLD-004` — done (catálogo de assets por owner/contrato, sondas autenticadas e 29/29 testes MinGW/MSVC; PR #30 merged).
 - `DOC-005` — done (conjunto completo de documentação em inglês; PR #29 merged).
+- `TOOL-006` — review (`build-game.ps1` portátil entre raiz do host/submódulo,
+  detecção testada e auditoria de integração registrada; 30/30 testes verdes).
+- `LINK-002` — review (gating de assets do launcher; fixture de parser de
+  `requires_both_games` true/false/ausente; decisão documentada de scanner
+  `.shipmod`; mensagem de bloqueio consistente no código 8; 32/32 testes
+  verdes MinGW na worktree `agent/LINK-002-asset-gating`).
 
 > Observação: o núcleo estável, mas não há formalização de "review aceito" para
 > CORE/MOD/API/EVENT/CODEGEN/BIND originais — estão em `main` e os testes
@@ -117,24 +123,46 @@ o submódulo `extern/ship-lua` para o topo de `main`.
 - `OOT-006`/`MM-006` (menu/console mínimo).
 - `OOT-EVT-001` a `OOT-EVT-004` / `MM-EVT-001` a `MM-EVT-004` (ponte de eventos do `GameInteractor`).
 - `HANDLE-001/002`, `PLAYER-001` a `PLAYER-004`, `ACTOR-001` a `ACTOR-004`, `SECURITY-001`.
-- `STORE-001/002/004`, `CONSOLE-001/002`, `RELOAD-001` a `RELOAD-003`, `SECURITY-002/003`.
 - `OOT-OCARINA`, `OOT-EQUIPMENT`, etc.; `MM-CYCLE`, `MM-CLOCK`, `MM-MASKS`, etc. (Fase 8).
 - `DOC-001` a `DOC-004`, `TOOL-002` a `TOOL-005`, `EXAMPLE-002` a `EXAMPLE-004` (Fase 9).
 - `CI-001` a `CI-004` (baseline hosts Linux), workflows de drift, conformance.
 
+### Fase 7 (núcleo) — implementado (review)
+
+Implementação no núcleo compartilhado; integração aos bindings Lua e ModHost
+fica para um próximo ciclo. 35/35 testes verdes MinGW.
+
+- `STORE-001/002/004` + `SECURITY-002` — done (`ModStorage`: VFS por mod, quota
+  bytes/arquivos, path traversal negado em todos os pontos de entrada).
+- `CONSOLE-001/002` — done (`ConsoleRegistry`: registro, names únicos globais,
+  remoção no unload via `UnregisterMod`).
+- `RELOAD-001/002/003` — done (`ModReloader`: watch por mtime, reload
+  transacional, preservação opcional de estado via hooks capture/restore).
+- `SECURITY-003` — done (zip slip já coberto por `PackageExtractor` +
+  `TestUnsafePathsAreTransactional`).
+- Handoff: `coordination/handoffs/PHASE-007.md`.
+
 ## Bloqueios
 
-Nenhum registrado.
+- Link-Span PR #31 altera API pública sem RFC e usa `0.2.1` para adição compatível
+  que exige decisão SemVer `MINOR`.
+- Shipwright PRs #5–#12: Linux, Windows e clang-format vermelhos.
+- 2Ship PRs #1–#9: sem checks de CI associados.
+- Topos dos dois hosts apontam `extern/ship-lua` para `cf14417`, oito commits
+  atrás de `link-span/main` e sem o PR #31.
 
 ## Última integração
 
-ship-lua `main` em `cf14417` (WORLD-001 a WORLD-004, STORE-003, HOTKEY-001, EXAMPLE-001, MM-JUMP-001 e núcleo das Fases 0–3 todos publicados em origin). Sem PRs abertos no `ship-lua`.
+Link-Span `main` em `29e7f2f` (inclui WORLD-001 a WORLD-004, STORE-003,
+HOTKEY-001, EXAMPLE-001, MM-JUMP-001 e o helper inicial de build). O PR #31 está aberto.
 
 ## Próxima ação
 
-1. Mergear os 16 PRs dos hosts em `lua/main` (na ordem: submódulo → bootstrap → shutdown → identidade → mods dir → hotkey → pulo/save → assets).
-2. Após cada merge de host, atualizar o submódulo `extern/ship-lua` para o topo de `main`.
-3. Sincronizar drift do Shipwright upstream (`585530f68`) para o fork `lua/main` quando pertinente (PLAN.md §11); o 2ship upstream já coincide com o baseline.
-4. Validar runtime com ativos legítimos dos dois jogos (builds MSVC verdes, mas sem runtime testado com ROM).
-5. Adicionar builds Linux/macOS (só Windows verificado).
-6. Publicar `v0.1.0` após atender os critérios restantes do PLAN.md §16.
+1. Formalizar/corrigir o contrato do PR Link-Span #31 (RFC + SemVer) e integrá-lo com CI verde.
+2. Corrigir o CI OoT e adicionar CI Linux/Windows à pilha MM.
+3. Atualizar o submódulo `extern/ship-lua` nos dois hosts para o topo aprovado de `main`.
+4. Mergear os 17 PRs dos hosts em `lua/main` (na ordem: submódulo → bootstrap → shutdown → identidade → mods dir → hotkey → pulo/save → assets).
+5. Sincronizar drift do Shipwright upstream (`585530f68`) para o fork `lua/main` quando pertinente (PLAN.md §11); o 2ship upstream já coincide com o baseline.
+6. Validar runtime com ativos legítimos dos dois jogos (builds MSVC verdes, mas sem runtime testado com ROM).
+7. Adicionar builds Linux/macOS (só Windows verificado).
+8. Publicar `v0.1.0` após atender os critérios restantes do PLAN.md §16.

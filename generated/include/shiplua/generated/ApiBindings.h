@@ -10,7 +10,7 @@
 
 namespace ShipLua::Generated {
 
-inline constexpr std::string_view kApiVersion = "0.2.1";
+inline constexpr std::string_view kApiVersion = "0.3.0";
 inline constexpr std::uint32_t kSchemaVersion = 1;
 
 enum class GameId {
@@ -70,6 +70,7 @@ enum class FunctionId {
     ShipEventsOn,
     ShipEventsOff,
     ShipHotkeysRegister,
+    ShipWorldTravel,
     ShipMmPlayerJump,
     ShipMmSpawnDog,
     ShipOotPlayerJump,
@@ -140,6 +141,16 @@ inline constexpr std::array<std::string_view, 2> kShipHotkeysRegisterErrors{{
     "invalid_argument",
     "unsupported",
 }};
+inline constexpr std::array<FieldBinding, 2> kShipWorldTravelArguments{{
+    {"world", "game_id", true},
+    {"destination", "string", true},
+}};
+inline constexpr std::array<std::string_view, 4> kShipWorldTravelErrors{{
+    "invalid_argument",
+    "unsupported",
+    "invalid_state",
+    "host_failure",
+}};
 inline constexpr std::array<FieldBinding, 0> kShipMmPlayerJumpArguments{{
 }};
 inline constexpr std::array<std::string_view, 0> kShipMmPlayerJumpErrors{{
@@ -181,7 +192,7 @@ inline constexpr std::array<std::string_view, 1> kShipLogErrorErrors{{
     "invalid_argument",
 }};
 
-inline constexpr std::array<FunctionBinding, 17> kFunctions{{
+inline constexpr std::array<FunctionBinding, 18> kFunctions{{
     {FunctionId::ShipGameId, "ship.game.id", "game_id", "common", {}, kShipGameIdArguments, kShipGameIdErrors},
     {FunctionId::ShipGameHostVersion, "ship.game.host_version", "string", "common", {}, kShipGameHostVersionArguments, kShipGameHostVersionErrors},
     {FunctionId::ShipRuntimeVersion, "ship.runtime.version", "string", "common", {}, kShipRuntimeVersionArguments, kShipRuntimeVersionErrors},
@@ -191,6 +202,7 @@ inline constexpr std::array<FunctionBinding, 17> kFunctions{{
     {FunctionId::ShipEventsOn, "ship.events.on", "subscription", "common", {}, kShipEventsOnArguments, kShipEventsOnErrors},
     {FunctionId::ShipEventsOff, "ship.events.off", "boolean", "common", {}, kShipEventsOffArguments, kShipEventsOffErrors},
     {FunctionId::ShipHotkeysRegister, "ship.hotkeys.register", "boolean", "common", {}, kShipHotkeysRegisterArguments, kShipHotkeysRegisterErrors},
+    {FunctionId::ShipWorldTravel, "ship.world.travel", "boolean", "common", "world.travel", kShipWorldTravelArguments, kShipWorldTravelErrors},
     {FunctionId::ShipMmPlayerJump, "ship.mm.player.jump", "boolean", "mm", "mm.player.jump", kShipMmPlayerJumpArguments, kShipMmPlayerJumpErrors},
     {FunctionId::ShipMmSpawnDog, "ship.mm.spawn_dog", "boolean", "mm", "mm.spawn_dog", kShipMmSpawnDogArguments, kShipMmSpawnDogErrors},
     {FunctionId::ShipOotPlayerJump, "ship.oot.player.jump", "boolean", "oot", "oot.player.jump", kShipOotPlayerJumpArguments, kShipOotPlayerJumpErrors},
@@ -271,12 +283,13 @@ struct CapabilityBinding {
     bool supportsMm;
 };
 
-inline constexpr std::array<CapabilityBinding, 16> kCapabilities{{
+inline constexpr std::array<CapabilityBinding, 17> kCapabilities{{
     {"scene.events", "contract", true, true},
     {"actor.events", "contract", true, true},
     {"save.events", "contract", true, true},
     {"text.events", "contract", true, true},
     {"audio.sequence.events", "contract", true, true},
+    {"world.travel", "contract", true, true},
     {"mm.room.events", "planned", false, true},
     {"mm.cycle", "planned", false, true},
     {"mm.owl_save", "planned", false, true},

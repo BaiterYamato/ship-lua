@@ -25,6 +25,9 @@ struct Manifest {
     std::vector<std::string> authors;
     // Target games, e.g. {"oot", "mm"}. Empty means "both / any".
     std::vector<std::string> games;
+    // Explicit Link-Span requirement. This is deliberately distinct from
+    // games=["oot","mm"], which means "runs in either game".
+    bool requiresBothGames = false;
 
     // [host] — per-host version ranges. Unset means "no constraint".
     std::optional<std::string> hostShipwright; // key: shipwright

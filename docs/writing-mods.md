@@ -29,6 +29,7 @@ description = "O que faz."
 authors = ["Seu Nome"]
 
 games = ["oot", "mm"]         # em quais jogos roda (vazio = ambos)
+requires_both_games = true      # opcional: exige OoT e MM presentes no launcher
 
 [host]                        # faixas de versão do host (opcional)
 shipwright = ">=9.0"
@@ -50,7 +51,11 @@ storage = true
 network = false
 ```
 
-Só `id`, `name`, `version`, `api` e `entrypoint` são obrigatórios. O loader valida
+Só `id`, `name`, `version`, `api` e `entrypoint` são obrigatórios. `games = ["oot", "mm"]`
+significa que o mod pode rodar em qualquer um dos dois jogos; não bloqueia um pacote
+OoT-only ou MM-only. Use `requires_both_games = true` somente para mods cujo fluxo
+depende dos dois hosts/assets ao mesmo tempo. O launcher recusa explicitamente esse
+mod quando um dos assets está ausente. O loader valida
 `games`, `host` e `api` contra o jogo atual e **recusa** o mod (sem derrubar os outros)
 se for incompatível.
 

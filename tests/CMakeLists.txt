@@ -118,3 +118,19 @@ add_test(NAME api_docs_codegen_check
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_api_docs.py" --check)
 add_test(NAME api_docs_codegen_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_api_docs.py")
+
+find_program(SHIPLUA_POWERSHELL_EXECUTABLE NAMES pwsh powershell)
+if(SHIPLUA_POWERSHELL_EXECUTABLE)
+    add_test(NAME build_game_script_tests
+        COMMAND "${SHIPLUA_POWERSHELL_EXECUTABLE}"
+                -NoProfile
+                -ExecutionPolicy Bypass
+                -File "${CMAKE_CURRENT_SOURCE_DIR}/tools/BuildGameScriptTests.ps1"
+                -ScriptPath "${CMAKE_SOURCE_DIR}/build-game.ps1")
+    add_test(NAME build_linkspan_packaging_tests
+        COMMAND "${SHIPLUA_POWERSHELL_EXECUTABLE}"
+                -NoProfile
+                -ExecutionPolicy Bypass
+                -File "${CMAKE_CURRENT_SOURCE_DIR}/tools/BuildLinkSpanPackagingTests.ps1"
+                -ModulePath "${CMAKE_SOURCE_DIR}/tools/LinkSpanPackaging.psm1")
+endif()

@@ -2,6 +2,7 @@
 /build/
 /build-*/
 /out/
+/x64/
 /generated/**/*.tmp
 
 # Lua bytecode
