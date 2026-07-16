@@ -19,3 +19,12 @@ This file is the fixed, append-only plan ledger for this repository.
   - tests/launcher/AssetDiscoveryTests.cpp
   - docs/link-span-process.md
   - coordination/claims/LINK-004.md
+
+## [PLN-20260716-0001][UPDATE] 2026-07-16T18:29:28Z
+- status: done
+- note: English launcher policy, dual-game mod gating, ROM-free packaging, Release build, 32/32 tests, visual smoke checks, GitHub branches and draft reviews completed.
+- refs:
+  - https://github.com/BaiterYamato/link-span/pull/32
+  - https://github.com/BaiterYamato/Shipwright-HyliaFoundry/pull/13
+  - https://github.com/BaiterYamato/2ship2harkinian/pull/10
+  - https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.1

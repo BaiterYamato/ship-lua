@@ -4,6 +4,8 @@
 - Branch: `agent/LINK-003-consolidate`
 - Plan: `PLN-20260716-0001`
 - Release: `v0.1.0-alpha.1` (prerelease)
+- Root review: `BaiterYamato/link-span#32`.
+- Release URL: `https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.1`.
 
 ## Delivered
 
