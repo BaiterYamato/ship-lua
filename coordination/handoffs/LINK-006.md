@@ -30,4 +30,7 @@ inválida.
 
 ## Publicação
 
-- Hotfix destinado a substituir os assets da release `v0.1.0-alpha.2`.
+- PR: `https://github.com/BaiterYamato/link-span/pull/34`.
+- Assets substituídos em
+  `https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.2`.
+- Cópia verificada baixada em `D:\Link-Span-Windows-x64.zip`.

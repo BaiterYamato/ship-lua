@@ -70,3 +70,12 @@ This file is the fixed, append-only plan ledger for this repository.
   - coordination/claims/LINK-006.md
   - tools/LinkSpanPackaging.psm1
   - tests/tools/BuildLinkSpanPackagingTests.ps1
+
+## [PLN-20260716-0003][UPDATE] 2026-07-16T19:14:30Z
+- status: done
+- note: Windows-native ZIP creation and V-LINK-9 extraction validation are implemented; 32/32 tests pass; the full 9,051-file package completed Expand-Archive; alpha.2 assets were replaced and the corrected ZIP was downloaded to D:\.
+- refs:
+  - https://github.com/BaiterYamato/link-span/pull/34
+  - https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.2
+  - D:\Link-Span-Windows-x64.zip
+  - coordination/handoffs/LINK-006.md
