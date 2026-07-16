@@ -119,6 +119,7 @@ launcher; `build-linkspan.ps1` é responsável por normalizar o pacote final.
 - `V-LINK-3`: builds Windows MSVC e MinGW ligam o launcher GUI com o entry point Unicode `wWinMain`.
 - `V-LINK-4`: o host rejeita mods descompactados e `.shipmod` com `requires_both_games = true` quando OoT ou MM não está disponível.
 - `V-LINK-5`: `world.travel` só é anunciado sob o supervisor dual; o destino aceita apenas handoff autenticado da sessão corrente e da sequência imediatamente anterior.
+- `V-LINK-6`: publicar novamente no mesmo `OutputDir` preserva `oot.o2r`, `oot.otr` e `mm.o2r` fornecidos pelo usuário.
 - `V-LINK-1`: fixture de host preserva `assets/`, `ZAPD.exe`, DLLs e archives.
 
 ## Registro de falhas
@@ -126,6 +127,7 @@ launcher; `build-linkspan.ps1` é responsável por normalizar o pacote final.
 - `B-LINK-1 | 2026-07-15 | o empacotador copiou apenas o executável e descartou assets/ZAPD | V-LINK-1`
 - `B-LINK-2 | 2026-07-16 | o target GUI usava wWinMain sem selecionar o startup Unicode no MinGW | V-LINK-3`
 - `B-LINK-3 | 2026-07-16 | requires_both_games era parseado, mas não participava da compatibilidade do host | V-LINK-4`
+- `B-LINK-4 | 2026-07-16 | o publish classificava assets base do usuário como saídas geradas e podia apagá-los | V-LINK-6`
 
 ## Gate de conclusão do teleporte
 

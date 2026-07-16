@@ -92,4 +92,27 @@ function Copy-LinkSpanHostPackage {
     return $destination
 }
 
-Export-ModuleMember -Function Find-LinkSpanHostExecutable, Copy-LinkSpanHostPackage
+function Publish-LinkSpanPackage {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)] [string]$StageDir,
+        [Parameter(Mandatory)] [string]$Destination
+    )
+
+    $destinationFull = [System.IO.Path]::GetFullPath($Destination)
+    New-Item -ItemType Directory -Path $destinationFull -Force | Out-Null
+    foreach ($relative in @('link-span.exe', 'hosts/oot', 'hosts/mm', 'soh.o2r', '2ship.o2r')) {
+        $target = [System.IO.Path]::GetFullPath((Join-Path $destinationFull $relative))
+        $prefix = $destinationFull.TrimEnd('\') + '\'
+        if (-not $target.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Link-Span: destino gerado escapou do pacote: $target"
+        }
+        if (Test-Path -LiteralPath $target) {
+            Remove-Item -LiteralPath $target -Recurse -Force
+        }
+    }
+    Get-ChildItem -LiteralPath $StageDir -Force |
+        Copy-Item -Destination $destinationFull -Recurse -Force
+}
+
+Export-ModuleMember -Function Find-LinkSpanHostExecutable, Copy-LinkSpanHostPackage, Publish-LinkSpanPackage

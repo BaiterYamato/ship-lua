@@ -81,31 +81,6 @@ function Copy-HostPackage([string]$hostRoot, [string]$exeName, [string]$gameId,
     Write-Host "    [OK] $gameId -> $destination" -ForegroundColor Green
 }
 
-function Test-IsChildPath([string]$parent, [string]$child) {
-    $parentFull = [System.IO.Path]::GetFullPath($parent).TrimEnd('\') + '\'
-    $childFull = [System.IO.Path]::GetFullPath($child)
-    return $childFull.StartsWith($parentFull, [System.StringComparison]::OrdinalIgnoreCase)
-}
-
-function Publish-Package([string]$stageDir, [string]$destination) {
-    New-Item -ItemType Directory -Path $destination -Force | Out-Null
-    $generated = @(
-        'link-span.exe', 'hosts/oot', 'hosts/mm',
-        'oot.o2r', 'oot.otr', 'soh.o2r', 'mm.o2r', '2ship.o2r'
-    )
-    foreach ($relative in $generated) {
-        $target = Join-Path $destination $relative
-        if (-not (Test-IsChildPath $destination $target)) {
-            Fail "destino gerado escapou do pacote: $target"
-        }
-        if (Test-Path -LiteralPath $target) {
-            Remove-Item -LiteralPath $target -Recurse -Force
-        }
-    }
-    Get-ChildItem -LiteralPath $stageDir -Force |
-        Copy-Item -Destination $destination -Recurse -Force
-}
-
 Step 'Validando ferramentas e layout'
 Require-Command git | Out-Null
 Require-Command cmake | Out-Null
@@ -191,7 +166,8 @@ if ($LauncherOnly) {
     return
 }
 
-$common = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $hostBuilder, '-Config', $Config, '-SkipSubmodules')
+$common = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $hostBuilder, '-Config', $Config,
+            '-BuildDir', 'build/linkspan-x64', '-SkipSubmodules')
 if ($SkipAssets) { $common += '-SkipAssets' }
 if ($hasOot) {
     Step 'Compilando Shipwright (OoT)'
@@ -224,7 +200,7 @@ try {
     if (Test-Path -LiteralPath $demoPackage -PathType Leaf) {
         Copy-Item -LiteralPath $demoPackage -Destination (Join-Path $modsDir 'link-home-to-clock-tower.shipmod') -Force
     }
-    Publish-Package $stageDir $outputDir
+    Publish-LinkSpanPackage -StageDir $stageDir -Destination $outputDir
 } finally {
     if (Test-Path -LiteralPath $stageDir) {
         Remove-Item -LiteralPath $stageDir -Recurse -Force

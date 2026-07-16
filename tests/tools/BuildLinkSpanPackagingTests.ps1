@@ -65,6 +65,33 @@ try {
         }
     }
     Write-Host 'V-LINK-2: pacote OoT-only sem assets foi aceito.' -ForegroundColor Green
+
+    $stage = Join-Path $root 'stage'
+    $publish = Join-Path $root 'publish-existing'
+    New-Item -ItemType Directory -Path (Join-Path $stage 'hosts/oot') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $publish 'hosts/oot') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $publish 'Save') -Force | Out-Null
+    [System.IO.File]::WriteAllText((Join-Path $stage 'link-span.exe'), 'new launcher')
+    [System.IO.File]::WriteAllText((Join-Path $stage 'hosts/oot/soh.exe'), 'new host')
+    [System.IO.File]::WriteAllText((Join-Path $publish 'hosts/oot/soh.exe'), 'old host')
+    foreach ($asset in @('oot.o2r', 'oot.otr', 'mm.o2r')) {
+        [System.IO.File]::WriteAllText((Join-Path $publish $asset), "user asset $asset")
+    }
+    [System.IO.File]::WriteAllText((Join-Path $publish 'Save/slot.sav'), 'user save')
+    Publish-LinkSpanPackage -StageDir $stage -Destination $publish
+    foreach ($asset in @('oot.o2r', 'oot.otr', 'mm.o2r')) {
+        $path = Join-Path $publish $asset
+        if ((Get-Content -LiteralPath $path -Raw) -ne "user asset $asset") {
+            throw "V-LINK-6 falhou: asset do usuário foi removido ou alterado: $asset"
+        }
+    }
+    if ((Get-Content -LiteralPath (Join-Path $publish 'Save/slot.sav') -Raw) -ne 'user save') {
+        throw 'V-LINK-6 falhou: save do usuário foi alterado'
+    }
+    if ((Get-Content -LiteralPath (Join-Path $publish 'hosts/oot/soh.exe') -Raw) -ne 'new host') {
+        throw 'V-LINK-6 falhou: host gerado não foi atualizado'
+    }
+    Write-Host 'V-LINK-6: republicação preserva assets base e saves do usuário.' -ForegroundColor Green
 } finally {
     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue
 }
