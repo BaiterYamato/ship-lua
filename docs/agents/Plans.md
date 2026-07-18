@@ -127,3 +127,55 @@ o progresso é registrado em novas seções `UPDATE` com o mesmo identificador.
 - Correção: usar `System.IO.Path.DirectorySeparatorChar` após remover ambos os
   separadores possíveis.
 - Próximo: repetir os testes locais, publicar e confirmar nova matriz remota.
+
+## UPDATE MODSDK-004-MSVC-20260718 — integrações concluídas
+
+- Status: done
+- Concluído:
+  - PR #39 integrada em `1433a8a937a532bec2f19d775eed0963d29498bd`;
+  - PR #36 integrada em `5806907c33074022be86628ce62d06d73d9b5846`;
+  - PR #32 integrada em `f39910100dffe74ad6cd9f81cd6968eb6686d493`;
+  - checks Linux, Windows/MSVC e package verdes na integração final.
+- Próximo: completar o conteúdo do release inicial do SDK e iniciar
+  `OOT-MODSDK-001`.
+
+## PLAN MODSDK-006-INTEGRATION-20260718
+
+- Status: in_progress
+- Criado: 2026-07-18
+- Escopo: core
+- Título: Integrar o CLI de desenvolvimento do release inicial
+- Resumo: portar a implementação limpa de `shipmod` para o `main` 0.3.0,
+  conectar o mock runtime já integrado e validar o fluxo completo sem ROM.
+- Milestones:
+  1. Portar `new`, `validate`, `test` e `doctor` da branch histórica.
+  2. Atualizar scaffolds e exemplo para API `>=0.1 <0.4`.
+  3. Executar `hello-runtime` em OoT e MM pelo mod test runner.
+  4. Validar Release/MSVC e todos os CTests.
+  5. Publicar PR e integrar somente com CI verde.
+- Refs:
+  - `C:\Users\leolo\Downloads\plan(sdk).md` §16 e §29
+  - tools/shipmod.py
+  - examples/hello-runtime
+
+## UPDATE MODSDK-006-INTEGRATION-20260718 — validado localmente
+
+- Status: in_progress
+- Concluído:
+  - implementação histórica portada para worktree limpa sobre `origin/main`;
+  - scaffold atualizado para API 0.3.x e strings TOML/Lua escapadas;
+  - `doctor` inclui o codegen de contratos do MODSDK-003;
+  - `hello-runtime` executa os três testes em OoT e MM no mock runtime;
+  - build Release/MSVC aprovado; suíte ampliada para 53 CTests.
+- Próximo: registrar handoff, publicar PR, confirmar CI remoto e integrar.
+
+## RELEASE-NAMING-20260718
+
+- Status: decision_required
+- Fato: as tags `v0.1.0-alpha.1` e `v0.1.0-alpha.2` já identificam releases
+  públicos do launcher Link-Span neste mesmo repositório.
+- Impacto: a instrução do plano SDK para publicar outro `v0.1.0-alpha.1` não
+  pode ser executada literalmente sem colisão/reescrita de tag.
+- Decisão pendente antes da publicação do SDK: adotar namespace de tag
+  (`sdk-v0.1.0-alpha.1`) ou alinhar o primeiro SDK ao SemVer atual da API.
+- Este bloqueio não impede integrar o CLI nem iniciar `OOT-MODSDK-001`.

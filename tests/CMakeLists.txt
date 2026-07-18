@@ -204,3 +204,12 @@ add_test(NAME mod_runner_package
     COMMAND shiplua_mod_test_runner "${SHIPLUA_HELLO_WORLD_PACKAGE}")
 add_test(NAME mod_runner_usage COMMAND shiplua_mod_test_runner)
 set_tests_properties(mod_runner_usage PROPERTIES WILL_FAIL TRUE)
+
+add_test(NAME shipmod_cli_tests
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_shipmod.py")
+add_test(NAME hello_runtime_manifest_validation
+    COMMAND shiplua_manifest_validator "${CMAKE_SOURCE_DIR}/examples/hello-runtime")
+add_test(NAME hello_runtime_mod_tests_oot
+    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/hello-runtime" --game oot)
+add_test(NAME hello_runtime_mod_tests_mm
+    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/hello-runtime" --game mm)
