@@ -1,6 +1,6 @@
 ---@meta ShipLua
 -- Gerado por tools/generate_api_docs.py. Não edite manualmente.
--- API 0.3.0 / schema 1
+-- API 0.4.0 / schema 1
 
 --- Identificador público do jogo host.
 ---@alias ShipLuaGameId "oot"|"mm"
@@ -15,11 +15,34 @@
 ---@class ShipLuaEventOptions
 ---@field priority? integer
 
---- Handle validado por slot, geração e host.
+--- Handle opaco validado por kind, slot, geração e cena.
 ---@class ShipLuaActorHandle
+---@field kind string
 ---@field slot integer
 ---@field generation integer
----@field game ShipLuaGameId
+---@field scene_generation integer
+
+--- Posição absoluta finita em coordenadas do mundo.
+---@class ShipLuaActorPosition
+---@field x number
+---@field y number
+---@field z number
+
+--- Rotação XYZ em graus.
+---@class ShipLuaActorRotation
+---@field x number
+---@field y number
+---@field z number
+
+--- Transform seguro para criação de ator.
+---@class ShipLuaActorSpawnOptions
+---@field position ShipLuaActorPosition
+---@field rotation? ShipLuaActorRotation
+
+--- Erro estruturado retornado sem lançar lua_error.
+---@class ShipLuaOperationError
+---@field code string
+---@field message string
 
 --- Snapshot mínimo e estável de ator.
 ---@class ShipLuaActorSnapshot
@@ -72,6 +95,7 @@
 ---@alias ShipLuaEventName "game.ready"|"game.frame"|"game.shutdown"|"scene.enter"|"actor.init"|"actor.update"|"actor.destroy"|"save.loaded"|"text.open"|"audio.sequence_started"|"input.hotkey"
 
 ship = ship or {}
+ship.actor = ship.actor or {}
 ship.api = ship.api or {}
 ship.capabilities = ship.capabilities or {}
 ship.events = ship.events or {}
@@ -130,6 +154,25 @@ function ship.events.off(subscription) end
 ---@param callback function
 ---@return boolean
 function ship.hotkeys.register(id, options, callback) end
+
+--- API common; estabilidade: experimental; desde: 0.4.0; capability: actor.spawn; erros: invalid_argument, unsupported, permission_denied, invalid_state, resource_limit, host_failure.
+---@param actor_type string
+---@param options ShipLuaActorSpawnOptions
+---@return ShipLuaActorHandle? value
+---@return ShipLuaOperationError? error
+function ship.actor.spawn(actor_type, options) end
+
+--- API common; estabilidade: experimental; desde: 0.4.0; capability: actor.destroy; erros: invalid_argument, unsupported, permission_denied, invalid_handle, host_failure.
+---@param handle ShipLuaActorHandle
+---@return boolean? value
+---@return ShipLuaOperationError? error
+function ship.actor.destroy(handle) end
+
+--- API common; estabilidade: experimental; desde: 0.4.0; capability: actor.exists; erros: invalid_argument, unsupported, permission_denied, host_failure.
+---@param handle ShipLuaActorHandle
+---@return boolean? value
+---@return ShipLuaOperationError? error
+function ship.actor.exists(handle) end
 
 --- API common; estabilidade: experimental; desde: 0.3.0; capability: world.travel; erros: invalid_argument, unsupported, invalid_state, host_failure.
 ---@param world ShipLuaGameId

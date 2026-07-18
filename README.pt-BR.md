@@ -46,6 +46,7 @@ Detalhes de integração em [`coordination/INTEGRATION.md`](coordination/INTEGRA
 - **Referência da API** (gerada dos schemas) → [`generated/docs/api-reference.md`](generated/docs/api-reference.md)
 - **Exemplos** → [`examples/`](examples/)
   - [`hello-world`](examples/hello-world/) — o mod mínimo (loga a identidade do host).
+  - [`actor-spawn`](examples/actor-spawn/) — atores genéricos com ownership e handles seguros, testado sem ROM.
   - [`dog-spawner`](examples/dog-spawner/) — hotkey **F** que spawna um cachorro no MM (usa `ship.mm.*`).
 
 ## Início rápido (Windows)

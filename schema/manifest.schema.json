@@ -116,11 +116,35 @@
     },
     "permissions": {
       "type": "object",
-      "description": "Sandbox permissions requested by the mod. All default to false.",
+      "description": "Sandbox permissions requested by the mod. Boolean legacy permissions default to false; generic grants must use stable dotted ids.",
       "properties": {
         "storage": { "type": "boolean", "default": false },
         "network": { "type": "boolean", "default": false },
-        "clipboard": { "type": "boolean", "default": false }
+        "clipboard": { "type": "boolean", "default": false },
+        "grants": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$"
+          },
+          "uniqueItems": true,
+          "default": [],
+          "description": "Generic capability permissions such as world.entities.create."
+        }
+      },
+      "additionalProperties": true
+    },
+    "limits": {
+      "type": "object",
+      "description": "Per-mod resource limits that may only reduce host/provider limits.",
+      "properties": {
+        "actors": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 256,
+          "default": 16,
+          "description": "Maximum live actors owned by this mod. Zero disables actor spawning."
+        }
       },
       "additionalProperties": true
     }

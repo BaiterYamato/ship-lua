@@ -1,7 +1,7 @@
 id = "community.jump"
 name = "Pulo"
 version = "0.2.0"
-api = ">=0.2 <0.4"
+api = ">=0.2 <0.5"
 entrypoint = "main.lua"
 description = "Aperte K, com atalho reconfigurável, para fazer o Link pular. Funciona em OoT e em MM."
 authors = ["BaiterYamato"]

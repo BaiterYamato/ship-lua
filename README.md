@@ -46,6 +46,7 @@ Integration details in [`coordination/INTEGRATION.en.md`](coordination/INTEGRATI
 - **API reference** (generated from the schemas) → [`generated/docs/api-reference.en.md`](generated/docs/api-reference.en.md)
 - **Examples** → [`examples/`](examples/)
   - [`hello-world`](examples/hello-world/) — the minimal mod (logs the host identity).
+  - [`actor-spawn`](examples/actor-spawn/) — generic owned actors with safe handles, tested without a ROM.
   - [`dog-spawner`](examples/dog-spawner/) — an **F** hotkey that spawns a dog in MM (uses `ship.mm.*`).
 
 ## Quick start (Windows)

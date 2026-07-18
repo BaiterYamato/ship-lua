@@ -42,7 +42,7 @@ class NewCommandTests(unittest.TestCase):
             mod_dir = Path(temporary) / "kafei-puppet"
             manifest = (mod_dir / "manifest.toml").read_text(encoding="utf-8")
             self.assertIn('id = "community.kafei_puppet"', manifest)
-            self.assertIn('api = ">=0.1 <0.4"', manifest)
+            self.assertIn('api = ">=0.1 <0.5"', manifest)
             self.assertIn('entrypoint = "main.lua"', manifest)
             self.assertTrue((mod_dir / "main.lua").is_file())
             self.assertTrue((mod_dir / "README.md").is_file())

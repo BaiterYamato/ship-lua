@@ -8,6 +8,11 @@ target_link_libraries(handle_registry_tests PRIVATE shiplua)
 
 add_test(NAME handle_registry_tests COMMAND handle_registry_tests)
 
+add_executable(mock_actor_provider_tests unit/MockActorProviderTests.cpp)
+target_link_libraries(mock_actor_provider_tests PRIVATE shiplua)
+
+add_test(NAME mock_actor_provider_tests COMMAND mock_actor_provider_tests)
+
 add_executable(mod_lifecycle_tests unit/ModLifecycleTests.cpp)
 target_link_libraries(mod_lifecycle_tests PRIVATE shiplua)
 
@@ -193,6 +198,10 @@ add_test(NAME mod_runner_example
     COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/frame-counter")
 add_test(NAME mod_runner_example_mm
     COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/frame-counter" --game mm)
+add_test(NAME actor_spawn_example_oot
+    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/actor-spawn" --game oot)
+add_test(NAME actor_spawn_example_mm
+    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/actor-spawn" --game mm)
 add_test(NAME mod_runner_fixture_passing
     COMMAND shiplua_mod_test_runner "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/mod-runner/passing-mod")
 add_test(NAME mod_runner_fixture_failing

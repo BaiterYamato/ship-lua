@@ -56,6 +56,10 @@ before = ["community.ui"]
 
 [permissions]
 storage = true
+grants = ["world.entities.read", "world.entities.create", "world.entities.read"]
+
+[limits]
+actors = 8
 )toml";
 
     auto result = ShipLua::ParseManifestString(source, "complete.toml");
@@ -73,6 +77,11 @@ storage = true
     Check(manifest.loadPriority == 10, "load priority should parse");
     Check(manifest.permStorage, "storage permission should parse");
     Check(!manifest.permNetwork, "permissions should default to false");
+    Check(manifest.permissionGrants.size() == 2 &&
+              manifest.permissionGrants[0] == "world.entities.create" &&
+              manifest.permissionGrants[1] == "world.entities.read",
+          "generic permission grants should be validated, sorted and deduplicated");
+    Check(manifest.limitActors == 8, "actor limit should parse");
     Check(!manifest.requiresBothGames, "requires_both_games should default to false");
 }
 
@@ -146,6 +155,30 @@ void TestManifestErrors() {
     Check(!invalid.isOk(), "invalid TOML should fail");
     Check(invalid.message.find("line") != std::string::npos,
           "syntax error should include source location");
+
+    const std::string invalidGrant = R"toml(
+id = "example.invalid_permission"
+name = "Invalid permission"
+version = "0.1.0"
+api = ">=0.4 <1.0"
+entrypoint = "main.lua"
+[permissions]
+grants = ["NativePointer.Read"]
+)toml";
+    auto badGrant = ShipLua::ParseManifestString(invalidGrant, "bad-grant.toml");
+    Check(!badGrant.isOk(), "invalid generic permission id should fail");
+
+    const std::string invalidLimit = R"toml(
+id = "example.invalid_limit"
+name = "Invalid limit"
+version = "0.1.0"
+api = ">=0.4 <1.0"
+entrypoint = "main.lua"
+[limits]
+actors = 257
+)toml";
+    auto badLimit = ShipLua::ParseManifestString(invalidLimit, "bad-limit.toml");
+    Check(!badLimit.isOk(), "actor limit above the public maximum should fail");
 }
 
 void TestIsolatedHostLifecycle() {

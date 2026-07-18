@@ -24,7 +24,7 @@ ShipLua::Manifest MakeManifest(std::string id) {
     manifest.id = std::move(id);
     manifest.name = "Mock test";
     manifest.version = "0.1.0";
-    manifest.apiRange = ">=0.1 <0.3";
+    manifest.apiRange = ">=0.4 <0.5";
     manifest.entrypoint = "main.lua";
     return manifest;
 }
@@ -67,7 +67,7 @@ void TestCreateValidation() {
           "mock should reject a game id outside the contract");
 
     ShipLua::MockHostOptions unknownCapability;
-    unknownCapability.extraCapabilities = {"actor.spawn"};
+    unknownCapability.extraCapabilities = {"actor.teleport"};
     Check(!ShipLua::MockRuntime::Create(unknownCapability).isOk(),
           "mock should reject capabilities that are not contracted");
 
@@ -88,10 +88,98 @@ assert(ship.capabilities.has("core.events"), "core.events ausente")
 assert(ship.capabilities.has("core.timers"), "core.timers ausente")
 assert(ship.capabilities.has("core.storage"), "core.storage ausente")
 assert(ship.capabilities.has("core.input"), "core.input ausente")
-assert(not ship.capabilities.has("actor.spawn"), "actor.spawn não deveria existir")
+assert(ship.capabilities.has("actor.spawn"), "actor.spawn ausente")
+assert(ship.capabilities.has("actor.destroy"), "actor.destroy ausente")
+assert(ship.capabilities.has("actor.exists"), "actor.exists ausente")
 )lua";
     auto mock = CreateLoaded(MakeManifest("test.capabilities"), source);
-    Check(mock.isOk(), "mod should see the four core capabilities in the mock");
+    Check(mock.isOk(), "mod should see core and actor capabilities in the mock");
+}
+
+void TestActorApiThroughLua() {
+    auto manifest = MakeManifest("test.actors");
+    manifest.permissionGrants = {"world.entities.create",
+                                 "world.entities.destroy", "world.entities.read"};
+    manifest.capabilitiesRequired = {"actor.spawn", "actor.destroy", "actor.exists"};
+    manifest.limitActors = 1;
+    const std::string source = R"lua(
+local ship = require("ship")
+actor, err = ship.actor.spawn("oot.en_dog", {
+  position = { x = 10, y = 20, z = 30 },
+  rotation = { x = 0, y = 90, z = 0 },
+})
+assert(actor and err == nil)
+assert(actor.kind == "actor" and actor.generation > 0 and actor.scene_generation > 0)
+assert(actor.game == nil and actor.pointer == nil and actor.native_id == nil)
+local alive, alive_err = ship.actor.exists(actor)
+assert(alive == true and alive_err == nil)
+
+local second, limit_err = ship.actor.spawn("oot.en_dog", {
+  position = { x = 0, y = 0, z = 0 },
+})
+assert(second == nil and limit_err.code == "resource_limit")
+)lua";
+    auto mock = CreateLoaded(manifest, source);
+    Check(mock.isOk(), "actor API should spawn and query through Lua");
+    if (!mock.isOk()) {
+        return;
+    }
+    Check(mock.value->Actors().CountForMod("test.actors") == 1,
+          "mock provider should own the spawned actor");
+    const auto records = mock.value->Actors().Records();
+    Check(records.size() == 1 && records[0].request.actor == "oot.en_dog" &&
+              records[0].request.rotationY == 90.0,
+          "mock provider should preserve the logical request");
+
+    auto* runtime = mock.value->Host().GetRuntime("test.actors");
+    Check(runtime != nullptr && runtime->DoString(R"lua(
+local ship = require("ship")
+local destroyed, destroy_err = ship.actor.destroy(actor)
+assert(destroyed == true and destroy_err == nil)
+local alive, alive_err = ship.actor.exists(actor)
+assert(alive == false and alive_err == nil)
+local replacement, replacement_err = ship.actor.spawn("oot.en_torch2", {
+  position = { x = 1, y = 2, z = 3 },
+})
+assert(replacement and replacement_err == nil)
+)lua").isOk(),
+          "destroy should release the manifest actor slot");
+    Check(mock.value->Actors().CountForMod("test.actors") == 1,
+          "replacement actor should be live before unload");
+    Check(mock.value->UnloadMod().isOk(), "actor mod should unload");
+    Check(mock.value->Actors().Count() == 0,
+          "unload should release every actor owned by the mod");
+}
+
+void TestActorPermissionsAndStructuredErrors() {
+    auto manifest = MakeManifest("test.actor_permissions");
+    const std::string source = R"lua(
+local ship = require("ship")
+local actor, denied = ship.actor.spawn("oot.en_dog", {
+  position = { x = 0, y = 0, z = 0 },
+})
+assert(actor == nil and denied.code == "permission_denied")
+assert(type(denied.message) == "string")
+)lua";
+    auto mock = CreateLoaded(manifest, source);
+    Check(mock.isOk(), "missing actor permission should return a structured error");
+
+    manifest.id = "test.actor_unsupported";
+    manifest.permissionGrants = {"world.entities.create"};
+    const std::string unsupported = R"lua(
+local ship = require("ship")
+local actor, err = ship.actor.spawn("oot.native_pointer_123", {
+  position = { x = 0, y = 0, z = 0 },
+})
+assert(actor == nil and err.code == "unsupported")
+local bad, bad_err = ship.actor.spawn("oot.en_dog", {
+  position = { x = 0/0, y = 0, z = 0 },
+})
+assert(bad == nil and bad_err.code == "invalid_argument")
+)lua";
+    auto rejected = CreateLoaded(manifest, unsupported);
+    Check(rejected.isOk(),
+          "unsupported actors and invalid transforms should be structured errors");
 }
 
 void TestTimersThroughLua() {
@@ -329,6 +417,8 @@ assert(pcall(ship.storage.get, "k") == false, "storage sem provider deve falhar"
 int main() {
     TestCreateValidation();
     TestCoreCapabilitiesAdvertised();
+    TestActorApiThroughLua();
+    TestActorPermissionsAndStructuredErrors();
     TestTimersThroughLua();
     TestTimerArgumentValidation();
     TestEventsLifecycleAndFrames();

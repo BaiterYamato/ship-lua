@@ -79,6 +79,18 @@ class SchemaValidationTests(unittest.TestCase):
         api["functions"][0]["version"] = "99.0.0"
         self.assertTrue(any("posterior" in error for error in self.validate(api=api)))
 
+    def test_return_error_mode_requires_known_error_type(self):
+        api = copy.deepcopy(self.api)
+        actor_spawn = next(
+            item for item in api["functions"] if item["name"] == "ship.actor.spawn")
+        actor_spawn["error_type"] = "native_pointer_error"
+        self.assertTrue(any("error_type" in error for error in self.validate(api=api)))
+
+    def test_error_type_without_return_mode_is_rejected(self):
+        api = copy.deepcopy(self.api)
+        api["functions"][0]["error_type"] = "operation_error"
+        self.assertTrue(any("error_type" in error for error in self.validate(api=api)))
+
     def test_cli_emits_utf8_on_windows(self):
         result = subprocess.run(
             [sys.executable, str(ROOT / "tools" / "validate_api_schemas.py")],

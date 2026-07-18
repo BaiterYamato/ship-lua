@@ -6,7 +6,7 @@ ShipLua
 
 ## Estado global
 
-núcleo estável em `main` (Fases 0–3 + mundo/assets/hotkeys/jump done); adaptadores de host empilhados em PRs abertos aguardando merge
+núcleo estável em `main`; API genérica `ship.actor` 0.4.0 concluída e validada em branch de review, aguardando integração no provider OoT
 
 ## Repositórios
 
@@ -85,6 +85,9 @@ o submódulo `extern/ship-lua` para o topo de `main`.
   capability registry, Release/MSVC 46/46 e CI Linux/Windows/package verdes).
 - `MODSDK-004` — done (mock runtime e mod test runner integrados pela PR #39;
   callbacks Lua sem `longjmp` sobre estado C++; Release/MSVC 45/45 e CI verde).
+- `MODSDK-005` — review (RFC 0009, `ActorProvider`, `ship.actor.spawn/destroy/exists`,
+  permissões/limites por manifesto, mock ROM-free e exemplos OoT/MM; Release/MSVC
+  56/56 e schemas/codegen 30/30 verdes).
 - `TOOL-006` — review (`build-game.ps1` portátil entre raiz do host/submódulo,
   detecção testada e auditoria de integração registrada).
 - `LINK-002` — review (gating de assets do launcher, parser de
@@ -142,12 +145,12 @@ Nenhum registrado.
 
 ## Última integração
 
-ship-lua `main` em `cf14417` (WORLD-001 a WORLD-004, STORE-003, HOTKEY-001, EXAMPLE-001, MM-JUMP-001 e núcleo das Fases 0–3 todos publicados em origin). Sem PRs abertos no `ship-lua`.
+ship-lua `main` em `fff5785` (MODSDK-001, MODSDK-004, MODSDK-006 e LINK-003 integrados). MODSDK-005 está em branch de review sobre esse baseline.
 
 ## Próxima ação
 
-1. Mergear os 16 PRs dos hosts em `lua/main` (na ordem: submódulo → bootstrap → shutdown → identidade → mods dir → hotkey → pulo/save → assets).
-2. Após cada merge de host, atualizar o submódulo `extern/ship-lua` para o topo de `main`.
+1. Integrar MODSDK-005 no provider OoT: atualizar `extern/ship-lua`, implementar `ActorProvider`, injetar em `LuaApiHostContext::actors` e rebuildar `soh.exe`.
+2. Após aprovação do núcleo 0.4.0, atualizar os demais hosts/submódulos.
 3. Sincronizar drift do Shipwright upstream (`585530f68`) para o fork `lua/main` quando pertinente (PLAN.md §11); o 2ship upstream já coincide com o baseline.
 4. Validar runtime com ativos legítimos dos dois jogos (builds MSVC verdes, mas sem runtime testado com ROM).
 5. Adicionar builds Linux/macOS (só Windows verificado).

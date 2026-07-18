@@ -7,6 +7,7 @@
 
 #include "shiplua/host/ModHost.h"
 #include "shiplua/input/HotkeyRegistry.h"
+#include "shiplua/mock/MockActorProvider.h"
 
 namespace {
 
@@ -24,7 +25,7 @@ ShipLua::Manifest MakeManifest(std::string id, int priority = 50) {
     manifest.id = std::move(id);
     manifest.name = "Binding test";
     manifest.version = "0.1.0";
-    manifest.apiRange = ">=0.1 <0.4";
+    manifest.apiRange = ">=0.4 <0.5";
     manifest.entrypoint = "main.lua";
     manifest.loadPriority = priority;
     return manifest;
@@ -57,7 +58,7 @@ local ship = require("ship")
 assert(require("ship") == ship)
 local forbidden = pcall(require, "filesystem")
 assert(not forbidden)
-assert(ship.api.version() == "0.3.0")
+assert(ship.api.version() == "0.4.0")
 assert(ship.runtime.version() == "0.1.0")
 
 ship.events.on("game.ready", function(event)
@@ -82,7 +83,7 @@ end)
             {"game_id", game},
             {"host_version", hostVersion},
             {"runtime_version", "0.1.0"},
-            {"api_version", "0.3.0"},
+            {"api_version", "0.4.0"},
         };
         const auto dispatched = host.DispatchEvent("game.ready", payload);
         Check(dispatched.isOk() && dispatched.value->callbacksInvoked == 1 &&
@@ -194,7 +195,7 @@ void TestMissingAndInvalidHostContext() {
     ShipLua::ModHost host{ShipLua::Logger([](auto, const auto&, const auto&) {})};
     const auto loaded = host.LoadModFromManifestAndSource(MakeManifest("test.no_host"), R"lua(
 local ship = require("ship")
-assert(ship.api.version() == "0.3.0")
+assert(ship.api.version() == "0.4.0")
 local game_ok = pcall(ship.game.id)
 local version_ok = pcall(ship.game.host_version)
 assert(not game_ok and not version_ok)
@@ -444,6 +445,7 @@ std::shared_ptr<ShipLua::CapabilityRegistry> MakeTestRegistry() {
 void TestCapabilityRegistryLuaApi() {
     auto registry = MakeTestRegistry();
     ShipLua::LuaApiHostContext context{"oot", "9.1.0", "0.1.0", {}, nullptr, registry};
+    context.actors = std::make_shared<ShipLua::MockActorProvider>("oot");
     ShipLua::ModHost host(context, ShipLua::Logger([](auto, const auto&, const auto&) {}));
     const auto loaded = host.LoadModFromManifestAndSource(
         MakeManifest("test.capability_registry"), "local ship = require('ship')");
@@ -550,7 +552,7 @@ assert(#all == 2 and all[1] == "actor.events" and all[2] == "scene.events")
 local info = ship.capabilities.info("scene.events")
 assert(info ~= nil)
 assert(info.provider == "legacy-host")
-assert(info.version == "0.3.0")
+assert(info.version == "0.4.0")
 assert(info.provider_version == "9.1.0")
 assert(info.stability == "stable")
 assert(#info.games == 2)
@@ -566,6 +568,7 @@ assert(ship.capabilities.info("mm.cycle") == nil)
 void TestCapabilityRegistrySharedAcrossMods() {
     auto registry = MakeTestRegistry();
     ShipLua::LuaApiHostContext context{"mm", "4.2.0", "0.1.0", {}, nullptr, registry};
+    context.actors = std::make_shared<ShipLua::MockActorProvider>("mm");
     ShipLua::ModHost host(context, ShipLua::Logger([](auto, const auto&, const auto&) {}));
     Check(host.LoadModFromManifestAndSource(MakeManifest("cap.first"), R"lua(
 local ship = require("ship")

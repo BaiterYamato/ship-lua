@@ -25,7 +25,7 @@ Optionally: `scripts/`, `assets/`, `locale/`, `README.md`.
 id = "community.my_mod"       # Required, unique, reverse-domain style
 name = "My Mod"               # Required
 version = "0.1.0"             # Required, SemVer
-api = ">=0.1 <0.2"            # Required API range supported by the mod
+api = ">=0.4 <0.5"            # Required API range supported by the mod
 entrypoint = "main.lua"       # Required
 description = "What it does."
 authors = ["Your Name"]
@@ -50,6 +50,10 @@ after = ["community.core_utils"]
 [permissions]                  # Optional
 storage = true
 network = false
+grants = ["world.entities.create", "world.entities.destroy", "world.entities.read"]
+
+[limits]
+actors = 8                     # 16 by default; zero disables actor spawn
 ```
 
 Only `id`, `name`, `version`, `api` and `entrypoint` are required. The loader validates
@@ -97,6 +101,30 @@ if ship.capabilities.has("mm.cycle") then
 end
 for _, cap in ipairs(ship.capabilities.list()) do ... end
 ```
+
+### Generic actors
+
+`ship.actor` uses allowlisted logical names and opaque handles; never pass
+native game IDs, pointers, or params. Availability and authorization are
+checked separately. Expected failures return `nil, err` instead of raising:
+
+```lua
+local actor, err = ship.actor.spawn("oot.en_dog", {
+    position = { x = 0, y = 0, z = 0 },
+    rotation = { x = 0, y = 90, z = 0 }, -- degrees
+})
+if not actor then
+    ship.log.warn(err.code .. ": " .. err.message)
+    return
+end
+
+local alive, exists_err = ship.actor.exists(actor)
+local destroyed, destroy_err = ship.actor.destroy(actor)
+```
+
+Handles are valid only for the current session/scene and must not be persisted.
+Runtime unload automatically destroys actors owned by the mod. See the ROM-free
+testable example in [`examples/actor-spawn`](../examples/actor-spawn/).
 
 ### Events
 ```lua
