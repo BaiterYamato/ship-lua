@@ -11,6 +11,8 @@
 
 #include "shiplua/generated/ApiBindings.h"
 #include "shiplua/host/ModHost.h"
+#include "shiplua/storage/KeyValueStorage.h"
+#include "shiplua/timer/FrameTimerScheduler.h"
 #include "shiplua/input/HotkeyRegistry.h"
 
 #ifndef SHIPLUA_GENERATED_DIR
@@ -101,6 +103,10 @@ void RunContractOnHost(const std::string& game, const std::string& source) {
     auto registry = std::make_shared<FakeHotkeyRegistry>();
     ShipLua::LuaApiHostContext context{game, "contract-test", "0.2.0",
                                        ContractCapabilities(game), registry};
+    // O script de contrato exercita ship.timer.* e ship.storage.*: provê os
+    // serviços em memória, como o mock runtime faz (MODSDK-004).
+    context.timers = std::make_shared<ShipLua::FrameTimerScheduler>();
+    context.storage = std::make_shared<ShipLua::KeyValueStorage>();
     ShipLua::ModHost host(context, ShipLua::Logger{});
     const std::string modId = "contract.api_" + game;
     const auto loaded = host.LoadModFromManifestAndSource(MakeManifest(modId), source);

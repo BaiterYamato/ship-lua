@@ -99,6 +99,7 @@ check(validate.check_type("game_id", "oot") == true,
 check(select(1, validate.check_type("game_id", "__invalid__")) == false,
   "enum game_id deveria rejeitar valor fora do contrato")
 check(validate.check_type("subscription", 1) == true, "opaco subscription deveria aceitar integer")
+check(validate.check_type("timer_handle", 1) == true, "opaco timer_handle deveria aceitar integer")
 check(validate.check_type("array<string>", {}) == true, "array deveria aceitar tabela")
 check(select(1, validate.check_type("array<string>", "não-tabela")) == false,
   "array deveria rejeitar escalar")
@@ -127,7 +128,7 @@ probe("ship.game.id", {}, "enum:game_id")
 probe("ship.game.host_version", {}, "string")
 probe("ship.runtime.version", {}, "string")
 probe("ship.api.version", {}, "api_version")
-probe("ship.capabilities.has", { "scene.events" }, "boolean")
+probe("ship.capabilities.has", { "core.events" }, "boolean")
 probe("ship.capabilities.list", {}, "table")
 probe("ship.events.on", { "game.ready", function() end }, "integer")
 probe("ship.hotkeys.register", { "contract.probe", { default = "F5" }, function() end }, "boolean")
@@ -135,6 +136,12 @@ probe("ship.log.debug", { "contract probe" }, "nil")
 probe("ship.log.info", { "contract probe" }, "nil")
 probe("ship.log.warn", { "contract probe" }, "nil")
 probe("ship.log.error", { "contract probe" }, "nil")
+probe("ship.timer.after", { 1, function() end }, "integer")
+probe("ship.timer.every", { 1, function() end }, "integer")
+probe("ship.timer.cancel", { 1 }, "boolean")
+probe("ship.storage.set", { "probe", "probe" }, "boolean")
+probe("ship.storage.delete", { "probe" }, "boolean")
+probe("ship.storage.clear", {  }, "integer")
 check(resolve(ship_mod, "mm.player.jump") == nil, "ship.mm.player.jump não deveria existir no host oot")
 check(resolve(ship_mod, "mm.spawn_dog") == nil, "ship.mm.spawn_dog não deveria existir no host oot")
 
@@ -223,6 +230,48 @@ do
   check(type(err) == "string" and err:find("invalid_argument", 1, true) ~= nil,
     "erro de ship.log.error deveria carregar invalid_argument")
 end
+do
+  local fn = resolve(ship_mod, "timer.after")
+  local ok, err = pcall(fn)
+  check(not ok, "ship.timer.after sem argumentos deveria falhar")
+  check(type(err) == "string" and err:find("invalid_argument", 1, true) ~= nil,
+    "erro de ship.timer.after deveria carregar invalid_argument")
+end
+do
+  local fn = resolve(ship_mod, "timer.every")
+  local ok, err = pcall(fn)
+  check(not ok, "ship.timer.every sem argumentos deveria falhar")
+  check(type(err) == "string" and err:find("invalid_argument", 1, true) ~= nil,
+    "erro de ship.timer.every deveria carregar invalid_argument")
+end
+do
+  local fn = resolve(ship_mod, "timer.cancel")
+  local ok, err = pcall(fn)
+  check(not ok, "ship.timer.cancel sem argumentos deveria falhar")
+  check(type(err) == "string" and err:find("invalid_argument", 1, true) ~= nil,
+    "erro de ship.timer.cancel deveria carregar invalid_argument")
+end
+do
+  local fn = resolve(ship_mod, "storage.get")
+  local ok, err = pcall(fn)
+  check(not ok, "ship.storage.get sem argumentos deveria falhar")
+  check(type(err) == "string" and err:find("invalid_argument", 1, true) ~= nil,
+    "erro de ship.storage.get deveria carregar invalid_argument")
+end
+do
+  local fn = resolve(ship_mod, "storage.set")
+  local ok, err = pcall(fn)
+  check(not ok, "ship.storage.set sem argumentos deveria falhar")
+  check(type(err) == "string" and err:find("invalid_argument", 1, true) ~= nil,
+    "erro de ship.storage.set deveria carregar invalid_argument")
+end
+do
+  local fn = resolve(ship_mod, "storage.delete")
+  local ok, err = pcall(fn)
+  check(not ok, "ship.storage.delete sem argumentos deveria falhar")
+  check(type(err) == "string" and err:find("invalid_argument", 1, true) ~= nil,
+    "erro de ship.storage.delete deveria carregar invalid_argument")
+end
 
 -- Semântica de infraestrutura do mock.
 mock.configure({ game = "oot" })
@@ -230,7 +279,7 @@ ship_mod = mock.build()
 check(ship_mod.game.id() == "oot", "ship.game.id do mock deveria refletir o host")
 check(ship_mod.api.version() == validate.api_version,
   "ship.api.version do mock deveria casar com a IDL")
-check(ship_mod.capabilities.has("scene.events") == true,
+check(ship_mod.capabilities.has("core.events") == true,
   "capability contract do host deveria ser detectável no mock")
 check(ship_mod.capabilities.has("contract.missing") == false,
   "capability desconhecida deveria retornar false no mock")

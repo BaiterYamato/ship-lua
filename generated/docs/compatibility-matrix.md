@@ -26,6 +26,13 @@ Derivada dos schemas canônicos em `schema/` (IDL); regenere com
 | `ship.log.info` | `0.1.0` | `stable` | sim | sim | — | `invalid_argument` |
 | `ship.log.warn` | `0.1.0` | `stable` | sim | sim | — | `invalid_argument` |
 | `ship.log.error` | `0.1.0` | `stable` | sim | sim | — | `invalid_argument` |
+| `ship.timer.after` | `0.3.0` | `experimental` | sim | sim | `core.timers` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.timer.every` | `0.3.0` | `experimental` | sim | sim | `core.timers` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.timer.cancel` | `0.3.0` | `experimental` | sim | sim | `core.timers` | `invalid_argument`, `invalid_handle` |
+| `ship.storage.get` | `0.3.0` | `experimental` | sim | sim | `core.storage` | `invalid_argument`, `unsupported` |
+| `ship.storage.set` | `0.3.0` | `experimental` | sim | sim | `core.storage` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.storage.delete` | `0.3.0` | `experimental` | sim | sim | `core.storage` | `invalid_argument`, `unsupported` |
+| `ship.storage.clear` | `0.3.0` | `experimental` | sim | sim | `core.storage` | `unsupported` |
 
 Funções com disponibilidade específica (`oot`/`mm`) são instaladas pelo
 adaptador do host quando a capability correspondente é anunciada; o núcleo
@@ -51,6 +58,10 @@ nunca registra `ship.oot.*` ou `ship.mm.*` (RFC 0001).
 
 | Capability | Status | OoT | MM |
 |---|---|---|---|
+| `core.events` | `contract` | sim | sim |
+| `core.timers` | `contract` | sim | sim |
+| `core.input` | `contract` | sim | sim |
+| `core.storage` | `contract` | sim | sim |
 | `scene.events` | `contract` | sim | sim |
 | `actor.events` | `contract` | sim | sim |
 | `save.events` | `contract` | sim | sim |
@@ -74,5 +85,5 @@ nunca registra `ship.oot.*` ou `ship.mm.*` (RFC 0001).
 |---|---:|
 | `stable` | 12 |
 | `preview` | 1 |
-| `experimental` | 4 |
+| `experimental` | 11 |
 

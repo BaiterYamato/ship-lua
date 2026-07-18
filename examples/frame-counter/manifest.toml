@@ -1,0 +1,8 @@
+id = "example.frame_counter"
+name = "Contador de frames"
+version = "0.1.0"
+api = ">=0.1 <0.3"
+entrypoint = "main.lua"
+description = "Exemplo MODSDK-004: mod testado no mock runtime com eventos, timers, storage, log e input."
+authors = ["BaiterYamato"]
+games = ["oot", "mm"]

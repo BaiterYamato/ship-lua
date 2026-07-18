@@ -4,6 +4,7 @@
   "types": [
     {"name": "game_id", "kind": "enum", "values": ["oot", "mm"], "description": "Identificador público do jogo host."},
     {"name": "subscription", "kind": "opaque", "lua_type": "integer", "description": "Identificador opaco de inscrição em evento."},
+    {"name": "timer_handle", "kind": "opaque", "lua_type": "integer", "description": "Identificador opaco de timer em frames."},
     {"name": "event_options", "kind": "object", "fields": [
       {"name": "priority", "type": "integer", "required": false}
     ], "description": "Opções determinísticas de inscrição."},
@@ -39,7 +40,14 @@
     {"name": "ship.log.debug", "version": "0.1.0", "stability": "stable", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
     {"name": "ship.log.info", "version": "0.1.0", "stability": "stable", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
     {"name": "ship.log.warn", "version": "0.1.0", "stability": "stable", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
-    {"name": "ship.log.error", "version": "0.1.0", "stability": "stable", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]}
+    {"name": "ship.log.error", "version": "0.1.0", "stability": "stable", "arguments": [{"name": "message", "type": "string"}], "returns": "nil", "availability": "common", "capability": null, "errors": ["invalid_argument"]},
+    {"name": "ship.timer.after", "version": "0.3.0", "stability": "experimental", "arguments": [{"name": "frames", "type": "integer"}, {"name": "callback", "type": "callback"}], "returns": "timer_handle", "availability": "common", "capability": "core.timers", "errors": ["invalid_argument", "resource_limit", "unsupported"]},
+    {"name": "ship.timer.every", "version": "0.3.0", "stability": "experimental", "arguments": [{"name": "frames", "type": "integer"}, {"name": "callback", "type": "callback"}], "returns": "timer_handle", "availability": "common", "capability": "core.timers", "errors": ["invalid_argument", "resource_limit", "unsupported"]},
+    {"name": "ship.timer.cancel", "version": "0.3.0", "stability": "experimental", "arguments": [{"name": "handle", "type": "timer_handle"}], "returns": "boolean", "availability": "common", "capability": "core.timers", "errors": ["invalid_argument", "invalid_handle"]},
+    {"name": "ship.storage.get", "version": "0.3.0", "stability": "experimental", "arguments": [{"name": "key", "type": "string"}, {"name": "default", "type": "any", "required": false}], "returns": "any", "availability": "common", "capability": "core.storage", "errors": ["invalid_argument", "unsupported"]},
+    {"name": "ship.storage.set", "version": "0.3.0", "stability": "experimental", "arguments": [{"name": "key", "type": "string"}, {"name": "value", "type": "any"}], "returns": "boolean", "availability": "common", "capability": "core.storage", "errors": ["invalid_argument", "resource_limit", "unsupported"]},
+    {"name": "ship.storage.delete", "version": "0.3.0", "stability": "experimental", "arguments": [{"name": "key", "type": "string"}], "returns": "boolean", "availability": "common", "capability": "core.storage", "errors": ["invalid_argument", "unsupported"]},
+    {"name": "ship.storage.clear", "version": "0.3.0", "stability": "experimental", "arguments": [], "returns": "integer", "availability": "common", "capability": "core.storage", "errors": ["unsupported"]}
   ],
   "error_codes": ["unsupported", "invalid_argument", "invalid_handle", "invalid_state", "permission_denied", "resource_limit", "host_failure", "script_failure"]
 }
