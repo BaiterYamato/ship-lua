@@ -56,7 +56,8 @@ class ApiContractsCodegenTests(unittest.TestCase):
     def test_mock_embeds_contract_capabilities_per_host(self):
         mock = self.generate_all()["generated/lua/shiplua_mock.lua"]
         self.assertIn('"mm.player.jump"', mock)
-        self.assertIn('mm = { "scene.events"', mock)
+        self.assertIn('mm = { "core.events"', mock)
+        self.assertIn('"mm.spawn_dog"', mock)
 
     def test_invalid_schema_is_rejected_by_check_mode(self):
         with tempfile.TemporaryDirectory() as directory:
