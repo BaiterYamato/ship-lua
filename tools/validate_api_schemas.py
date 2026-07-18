@@ -208,7 +208,7 @@ def main() -> int:
         for error in errors:
             print(f"Erro: {error}", file=sys.stderr)
         return 1
-    print("Schemas ShipLua válidos: API 0.2.0")
+    print(f"Schemas ShipLua válidos: API {api.get('api_version', '?')}")
     return 0
 
 

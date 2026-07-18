@@ -1,6 +1,6 @@
 ---@meta ShipLua
 -- Gerado por tools/generate_api_docs.py. Não edite manualmente.
--- API 0.2.0 / schema 1
+-- API 0.3.0 / schema 1
 
 --- Identificador público do jogo host.
 ---@alias ShipLuaGameId "oot"|"mm"
@@ -76,8 +76,10 @@ ship.game = ship.game or {}
 ship.hotkeys = ship.hotkeys or {}
 ship.log = ship.log or {}
 ship.mm = ship.mm or {}
+ship.oot = ship.oot or {}
 ship.runtime = ship.runtime or {}
 ship.mm.player = ship.mm.player or {}
+ship.oot.player = ship.oot.player or {}
 
 --- API common; capability: comum; erros: nenhum.
 ---@return ShipLuaGameId
@@ -126,6 +128,18 @@ function ship.hotkeys.register(id, options, callback) end
 --- API mm; capability: mm.player.jump; erros: nenhum.
 ---@return boolean
 function ship.mm.player.jump() end
+
+--- API mm; capability: mm.spawn_dog; erros: nenhum.
+---@return boolean
+function ship.mm.spawn_dog() end
+
+--- API oot; capability: oot.player.jump; erros: nenhum.
+---@return boolean
+function ship.oot.player.jump() end
+
+--- API oot; capability: oot.spawn_dog; erros: nenhum.
+---@return boolean
+function ship.oot.spawn_dog() end
 
 --- API common; capability: comum; erros: invalid_argument.
 ---@param message string

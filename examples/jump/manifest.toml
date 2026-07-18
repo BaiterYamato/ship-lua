@@ -1,11 +1,11 @@
 id = "community.jump"
 name = "Pulo"
-version = "0.1.0"
-api = ">=0.2 <0.3"
+version = "0.2.0"
+api = ">=0.2 <0.4"
 entrypoint = "main.lua"
-description = "Aperte K, com atalho reconfigurável, para fazer o Link pular."
+description = "Aperte K, com atalho reconfigurável, para fazer o Link pular. Funciona em OoT e em MM."
 authors = ["BaiterYamato"]
-games = ["mm"]
+games = ["oot", "mm"]
 
 [capabilities]
-required = ["mm.player.jump"]
+optional = ["oot.player.jump", "mm.player.jump"]

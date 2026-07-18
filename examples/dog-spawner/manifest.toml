@@ -1,8 +1,11 @@
 id = "community.dog_spawner"
 name = "Dog Spawner"
-version = "0.1.0"
-api = ">=0.2 <0.3"
+version = "0.2.0"
+api = ">=0.2 <0.4"
 entrypoint = "main.lua"
-description = "Aperte F (rebindável) para spawnar um cachorro da Clock Town."
+description = "Aperte F (rebindável) para spawnar um cachorro. Funciona em OoT (Hyrule Market) e em MM (Clock Town)."
 authors = ["BaiterYamato"]
-games = ["mm"]
+games = ["oot", "mm"]
+
+[capabilities]
+optional = ["oot.spawn_dog", "mm.spawn_dog"]
