@@ -73,6 +73,67 @@ storage = true
     Check(manifest.loadPriority == 10, "load priority should parse");
     Check(manifest.permStorage, "storage permission should parse");
     Check(!manifest.permNetwork, "permissions should default to false");
+    Check(!manifest.requiresBothGames, "requires_both_games should default to false");
+}
+
+void TestRequiresBothGamesField() {
+    // Explicit `requires_both_games = true` must flip the flag. This is the
+    // contract the launcher gates on (exit code 8 when a dual-world mod has
+    // only one host asset available).
+    {
+        const std::string source = R"toml(
+id = "example.dual"
+name = "Dual"
+version = "0.2.0"
+api = ">=0.3 <1.0"
+entrypoint = "main.lua"
+games = ["oot", "mm"]
+requires_both_games = true
+)toml";
+        auto result = ShipLua::ParseManifestString(source, "dual.toml");
+        Check(result.isOk(), "manifest with requires_both_games=true should parse");
+        if (result.isOk()) {
+            Check(result.value->requiresBothGames,
+                  "requires_both_games=true should set the flag");
+        }
+    }
+    // Explicit `requires_both_games = false` keeps compatibility with either
+    // host (the historical semantics of games=["oot","mm"]).
+    {
+        const std::string source = R"toml(
+id = "example.either"
+name = "Either"
+version = "0.2.0"
+api = ">=0.3 <1.0"
+entrypoint = "main.lua"
+games = ["oot", "mm"]
+requires_both_games = false
+)toml";
+        auto result = ShipLua::ParseManifestString(source, "either.toml");
+        Check(result.isOk(), "manifest with requires_both_games=false should parse");
+        if (result.isOk()) {
+            Check(!result.value->requiresBothGames,
+                  "requires_both_games=false must clear the flag");
+        }
+    }
+    // Omitting the field keeps the default false — a mod that only lists
+    // `games` stays runnable on whichever host is present.
+    {
+        const std::string source = R"toml(
+id = "example.implicit"
+name = "Implicit"
+version = "0.2.0"
+api = ">=0.3 <1.0"
+entrypoint = "main.lua"
+games = ["oot", "mm"]
+)toml";
+        auto result = ShipLua::ParseManifestString(source, "implicit.toml");
+        Check(result.isOk(), "manifest without requires_both_games should parse");
+        if (result.isOk()) {
+            Check(!result.value->requiresBothGames,
+                  "absent requires_both_games must default to false");
+        }
+    }
 }
 
 void TestManifestErrors() {
@@ -164,6 +225,7 @@ void TestDirectoryTraversalIsRejected() {
 
 int main() {
     TestCompleteManifest();
+    TestRequiresBothGamesField();
     TestManifestErrors();
     TestIsolatedHostLifecycle();
     TestDirectoryLoad();

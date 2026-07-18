@@ -16,6 +16,7 @@ local FUNCTIONS = {
   { name = "ship.events.on", availability = "common", required_arguments = 2 },
   { name = "ship.events.off", availability = "common", required_arguments = 1 },
   { name = "ship.hotkeys.register", availability = "common", required_arguments = 2 },
+  { name = "ship.world.travel", availability = "common", required_arguments = 2 },
   { name = "ship.mm.player.jump", availability = "mm", required_arguments = 0 },
   { name = "ship.mm.spawn_dog", availability = "mm", required_arguments = 0 },
   { name = "ship.oot.player.jump", availability = "oot", required_arguments = 0 },
@@ -40,8 +41,8 @@ local ENUM_VALUES = {
 }
 
 local CONTRACT_CAPABILITIES = {
-  oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "oot.player.jump", "oot.spawn_dog" },
-  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "mm.player.jump", "mm.spawn_dog" },
+  oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "world.travel", "oot.player.jump", "oot.spawn_dog" },
+  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "world.travel", "mm.player.jump", "mm.spawn_dog" },
 }
 
 local failures = {}

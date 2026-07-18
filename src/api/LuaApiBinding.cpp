@@ -164,6 +164,10 @@ Result<void> ValidateLuaApiHostContext(const LuaApiHostContext& context) {
             return Result<void>::err(ErrorCode::Unsupported,
                                      "host advertised a capability incompatible with its game");
         }
+        if (requested == "world.travel" && !context.worldTravel) {
+            return Result<void>::err(ErrorCode::InvalidState,
+                                     "host advertised world.travel without a travel handler");
+        }
     }
     return Result<void>::ok();
 }
@@ -397,6 +401,10 @@ void LuaApiBinding::BuildModule(lua_State* state) {
     SetFunction(state, -1, "delete", &LuaApiBinding::StorageDelete, this);
     SetFunction(state, -1, "clear", &LuaApiBinding::StorageClear, this);
     lua_setfield(state, ship, "storage");
+
+    lua_newtable(state);
+    SetFunction(state, -1, "travel", &LuaApiBinding::WorldTravel, this);
+    lua_setfield(state, ship, "world");
 
     lua_pushvalue(state, ship);
     mShipReference = luaL_ref(state, LUA_REGISTRYINDEX);
@@ -1424,6 +1432,81 @@ int LuaApiBinding::ClearStorage(lua_State* state, const char*& error) {
     lua_pushinteger(state, static_cast<lua_Integer>(*cleared.value));
     return 1;
 }
+
+#if defined(_MSC_VER)
+#define SHIPLUA_WORLD_NOINLINE __declspec(noinline)
+#elif defined(__GNUC__) || defined(__clang__)
+#define SHIPLUA_WORLD_NOINLINE __attribute__((noinline))
+#else
+#define SHIPLUA_WORLD_NOINLINE
+#endif
+
+int LuaApiBinding::WorldTravel(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    const char* error = nullptr;
+    int resultCount = 0;
+    if (binding == nullptr) {
+        error = "contexto da API ship indisponível";
+    } else {
+        resultCount = binding->WorldTravelFromLua(state, error);
+    }
+    return error == nullptr ? resultCount : Fail(state, error);
+}
+
+SHIPLUA_WORLD_NOINLINE int LuaApiBinding::WorldTravelFromLua(lua_State* state,
+                                                             const char*& error) {
+    try {
+        if (lua_type(state, 1) != LUA_TSTRING || lua_type(state, 2) != LUA_TSTRING) {
+            error = "ship.world.travel exige world e destination textuais";
+            return 0;
+        }
+        if (mCapabilities == nullptr ||
+            !mCapabilities->Has("world.travel", mHostContext.gameId) ||
+            !mHostContext.worldTravel) {
+            error = ErrorMessage(ErrorCode::Unsupported);
+            return 0;
+        }
+
+        std::size_t worldLength = 0;
+        std::size_t destinationLength = 0;
+        const char* world = lua_tolstring(state, 1, &worldLength);
+        const char* destination = lua_tolstring(state, 2, &destinationLength);
+        if (world == nullptr || destination == nullptr) {
+            error = "ship.world.travel exige world e destination textuais";
+            return 0;
+        }
+
+        WorldDestination request;
+        const std::string_view worldName(world, worldLength);
+        if (worldName == "oot") {
+            request.world = WorldId::Oot;
+        } else if (worldName == "mm") {
+            request.world = WorldId::Mm;
+        } else {
+            error = "world deve ser 'oot' ou 'mm'";
+            return 0;
+        }
+        request.id.assign(destination, destinationLength);
+
+        const Result<void> valid = ValidateWorldDestination(request);
+        if (!valid.isOk()) {
+            error = ErrorMessage(valid.code);
+            return 0;
+        }
+        const Result<void> traveled = mHostContext.worldTravel(request);
+        if (!traveled.isOk()) {
+            error = ErrorMessage(traveled.code);
+            return 0;
+        }
+        lua_pushboolean(state, 1);
+        return 1;
+    } catch (...) {
+        error = ErrorMessage(ErrorCode::HostFailure);
+        return 0;
+    }
+}
+
+#undef SHIPLUA_WORLD_NOINLINE
 
 EventFlow LuaApiBinding::InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
                                         EventPayload& payload) {

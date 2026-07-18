@@ -1,0 +1,8 @@
+id = "example.either_host"
+name = "Either Host"
+version = "0.2.0"
+api = ">=0.3 <1.0"
+entrypoint = "main.lua"
+description = "Mod compativel com qualquer host; requires_both_games explicitamente false."
+games = ["oot", "mm"]
+requires_both_games = false

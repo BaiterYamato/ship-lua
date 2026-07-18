@@ -54,3 +54,76 @@ o progresso é registrado em novas seções `UPDATE` com o mesmo identificador.
   - build Release/MSVC e 46/46 testes CTest aprovados;
   - sonda AddressSanitizer aprovada em OoT e MM.
 - Próximo: atualizar o PR 36, confirmar CI verde e mergear; depois resolver o PR 32.
+
+## UPDATE MODSDK-004-MSVC-20260718 — PRs 39 e 36 integradas
+
+- Status: in_progress
+- Concluído:
+  - PR #39 corrigida, validada em Release/MSVC 45/45 e integrada em `main`;
+  - PR #36 reconciliada com timers/storage/mock runtime, validada em
+    Release/MSVC 46/46 e integrada em `main`;
+  - checks remotos Linux, Windows e package verdes nas duas integrações.
+- Próximo: reconciliar a PR #32 com o SDK atual, validar launcher e pacote e
+  integrar somente com CI verde.
+
+## [PLN-20260716-0001] English ROM-free Link-Span GitHub release
+
+- createdUtc: 2026-07-16T17:59:49Z
+- status: done
+- scope: mixed
+- summary: English launcher UX, automatic single-game selection, dual-game mod
+  gating and a ROM-free Windows Release package.
+- refs:
+  - https://github.com/BaiterYamato/link-span/pull/32
+  - https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.1
+  - coordination/handoffs/LINK-004.md
+
+## [PLN-20260716-0002] Restore required port archives in ROM-free release
+
+- createdUtc: 2026-07-16T18:44:55Z
+- status: done
+- scope: mixed
+- summary: Preserve redistributable `soh.o2r` and `2ship.o2r` runtime archives
+  while excluding user ROMs and user-derived OoT/MM archives.
+- refs:
+  - https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.2
+  - coordination/handoffs/LINK-005.md
+
+## UPDATE MODSDK-004-MSVC-20260718 — PR 32
+
+- Status: in_progress
+- Escopo: integrar o launcher dual sobre o SDK `0.3.0` atual.
+- Preservar:
+  1. abertura automática quando somente um jogo estiver disponível;
+  2. seletor em inglês quando ambos estiverem disponíveis;
+  3. bloqueio de mod `requires_both_games` quando faltar um jogo;
+  4. pacote Release sem ROMs/archives derivados do usuário;
+  5. `ship.world.travel` com fronteira segura contra `longjmp` no MSVC.
+- Próximo: gerar contratos, resolver os conflitos restantes e executar a matriz
+  Release/MSVC, CTest e empacotamento.
+
+## UPDATE MODSDK-004-MSVC-20260718 — PR 32 validada localmente
+
+- Status: in_progress
+- Concluído:
+  - conflitos de CMake, contratos, bindings, testes e ledger resolvidos;
+  - `ship.world.travel` adaptado à capability registry e à fronteira MSVC
+    não-inline, com regressão de `pcall` inválido;
+  - fixture de contrato atualizada com handler determinístico de viagem;
+  - build Release/MSVC e 49/49 testes CTest aprovados;
+  - testes de launcher, `build-game.ps1` e pacote ROM-free aprovados;
+  - nenhum `.z64`, `.n64`, `.v64`, `.o2r`, `.otr`, save ou asset protegido
+    rastreado no repositório;
+  - commits de submódulo OoT/MM confirmados nas branches remotas declaradas.
+- Próximo: publicar no head da PR #32, aguardar CI verde, retirar draft e
+  integrar em `main`.
+
+## UPDATE MODSDK-004-MSVC-20260718 — PR 32 CI Ubuntu
+
+- Status: in_progress
+- Falha encontrada: `Publish-LinkSpanPackage` montava o prefixo de contenção
+  com `\\` fixo; no Linux, o destino normalizado usa `/` e o teste V-LINK-6
+  recusava todos os arquivos como escape do pacote.
+- Correção: usar `System.IO.Path.DirectorySeparatorChar` após remover ambos os
+  separadores possíveis.
+- Próximo: repetir os testes locais, publicar e confirmar nova matriz remota.

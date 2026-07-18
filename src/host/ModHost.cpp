@@ -108,6 +108,18 @@ Result<void> ValidateCompatibility(const Manifest& manifest, const LuaApiHostCon
         return Result<void>::err(ErrorCode::Unsupported,
                                  "mod does not support game '" + context.gameId + "'");
     }
+    if (manifest.requiresBothGames) {
+        const auto isAvailable = [&context](const std::string& game) {
+            return context.gameId == game ||
+                   std::find(context.availableGames.begin(), context.availableGames.end(), game) !=
+                       context.availableGames.end();
+        };
+        if (!isAvailable("oot") || !isAvailable("mm")) {
+            return Result<void>::err(
+                ErrorCode::Unsupported,
+                "mod requires both games, but OoT and MM are not both available");
+        }
+    }
 
     auto apiVersion = SemVersion::Parse(std::string(Generated::kApiVersion));
     auto apiRange = VersionRange::Parse(manifest.apiRange);

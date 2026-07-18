@@ -129,6 +129,18 @@ M.functions = {
     returns = "boolean",
     errors = { "invalid_argument", "unsupported" },
   },
+  ["ship.world.travel"] = {
+    version = "0.3.0",
+    stability = "experimental",
+    availability = "common",
+    capability = "world.travel",
+    arguments = {
+      { name = "world", type = "game_id", required = true },
+      { name = "destination", type = "string", required = true },
+    },
+    returns = "boolean",
+    errors = { "invalid_argument", "unsupported", "invalid_state", "host_failure" },
+  },
   ["ship.mm.player.jump"] = {
     version = "0.2.0",
     stability = "experimental",

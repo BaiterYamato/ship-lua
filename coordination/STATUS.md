@@ -81,7 +81,18 @@ o submódulo `extern/ship-lua` para o topo de `main`.
 - `WORLD-002` — done (envelope v1 com HMAC-SHA-256, anti-replay e publicação atômica; 28/28 testes MinGW/MSVC; PR #28 merged).
 - `WORLD-004` — done (catálogo de assets por owner/contrato, sondas autenticadas e 29/29 testes MinGW/MSVC; PR #30 merged).
 - `DOC-005` — done (conjunto completo de documentação em inglês; PR #29 merged).
-- `MODSDK-001` — review (capability registry com descritores, múltiplos providers, seleção determinística e `ship.capabilities.has/list/info/providers` com feature detection por range SemVer; RFC 0008; 30/30 testes MinGW).
+- `MODSDK-001` — done (PR #36 integrada após correção das fronteiras Lua/MSVC;
+  capability registry, Release/MSVC 46/46 e CI Linux/Windows/package verdes).
+- `MODSDK-004` — done (mock runtime e mod test runner integrados pela PR #39;
+  callbacks Lua sem `longjmp` sobre estado C++; Release/MSVC 45/45 e CI verde).
+- `TOOL-006` — review (`build-game.ps1` portátil entre raiz do host/submódulo,
+  detecção testada e auditoria de integração registrada).
+- `LINK-002` — review (gating de assets do launcher, parser de
+  `requires_both_games` e mensagens de bloqueio cobertos por testes).
+- `LINK-003` — in_progress (PR #32 sendo reconciliada com `main` após as PRs
+  #36/#39; launcher dual, pacote ROM-free e `world.travel` preservados).
+- `LINK-003-CONFLICTS` — review (conflitos da PR #32 resolvidos sobre `main`;
+  Release/MSVC e 49/49 testes verdes, sem arquivos protegidos rastreados).
 
 > Observação: o núcleo estável, mas não há formalização de "review aceito" para
 > CORE/MOD/API/EVENT/CODEGEN/BIND originais — estão em `main` e os testes

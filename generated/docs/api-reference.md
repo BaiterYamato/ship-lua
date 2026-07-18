@@ -28,6 +28,7 @@ Versão da API: `0.3.0`. Versão do schema: `1`.
 | `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | `stable` | `0.1.0` | — | `invalid_argument`, `unsupported` |
 | `ship.events.off` | `subscription: subscription` | `boolean` | `common` | `stable` | `0.1.0` | — | `invalid_handle` |
 | `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | `preview` | `0.2.0` | — | `invalid_argument`, `unsupported` |
+| `ship.world.travel` | `world: game_id`, `destination: string` | `boolean` | `common` | `experimental` | `0.3.0` | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
 | `ship.mm.player.jump` | — | `boolean` | `mm` | `experimental` | `0.2.0` | `mm.player.jump` | — |
 | `ship.mm.spawn_dog` | — | `boolean` | `mm` | `experimental` | `0.3.0` | `mm.spawn_dog` | — |
 | `ship.oot.player.jump` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.player.jump` | — |
@@ -73,6 +74,7 @@ Versão da API: `0.3.0`. Versão do schema: `1`.
 | `save.events` | `contract` | `oot`, `mm` | Eventos comuns de carregamento de save. |
 | `text.events` | `contract` | `oot`, `mm` | Eventos comuns de texto somente leitura. |
 | `audio.sequence.events` | `contract` | `oot`, `mm` | Eventos de início de sequência de áudio. |
+| `world.travel` | `contract` | `oot`, `mm` | Solicita handoff autenticado para um destino lógico no outro host. |
 | `mm.room.events` | `planned` | `mm` | Eventos de room exclusivos de Majora's Mask. |
 | `mm.cycle` | `planned` | `mm` | Lifecycle do ciclo de três dias. |
 | `mm.owl_save` | `planned` | `mm` | Semântica de owl save. |

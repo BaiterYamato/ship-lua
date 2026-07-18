@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    One-shot Windows build for the ShipLua-enabled forks of Shipwright (OoT) and
+    One-shot Windows build for the Link-Span-enabled forks of Shipwright (OoT) and
     2Ship2Harkinian (MM).
 
 .DESCRIPTION
@@ -26,9 +26,10 @@
 
 .PARAMETER HostPath
     Path to the cloned host repository (the one containing CMakeLists.txt with
-    project(Ship ...) or project(2Ship ...)). Default: current directory. If the
-    script is invoked from inside extern/ship-lua/ of a host clone, the parent's
-    parent is used automatically.
+    project(Ship ...) or project(2Ship ...)). By default, the script searches its
+    own directory, its parent directories (including extern/link-span), and then
+    the current directory. This allows copying build-game.ps1 directly into a
+    host root or running it from the Link-Span submodule.
 
 .PARAMETER Config
     Debug | Release | RelWithDebInfo | MinSizeRel. Default: Release.
@@ -43,12 +44,26 @@
 .PARAMETER SkipAssets
     Skip the .o2r asset generation step.
 
+.PARAMETER RomPath
+    Path to a supported OoT/MM ROM dump. When supplied, the script extracts the
+    base game .o2r automatically (the source tree cannot contain copyrighted
+    assets). If omitted, a single *.z64/*.n64/*.v64 file in the host root is
+    detected automatically; otherwise the custom-only build is produced.
+
 .PARAMETER SkipBuild
     Configure only; do not build.
+
+.PARAMETER ValidateOnly
+    Resolve and validate the host path and game, then exit before checking build
+    prerequisites or changing the host checkout. Intended for diagnostics/tests.
 
 .EXAMPLE
     # From the root of a freshly cloned BaiterYamato/Shipwright-HyliaFoundry fork:
     .\extern\ship-lua\build-game.ps1
+
+.EXAMPLE
+    # Copy this script to either host root and run it from any directory:
+    C:\games\2ship2harkinian\build-game.ps1
 
 .EXAMPLE
     # Explicit game + custom host path:
@@ -74,7 +89,11 @@ param(
 
     [switch]$SkipAssets,
 
+    [string]$RomPath,
+
     [switch]$SkipBuild,
+
+    [switch]$ValidateOnly,
 
     [switch]$Help
 )
@@ -105,6 +124,18 @@ function Die([string]$msg) {
     exit 1
 }
 
+function Test-HostRoot([string]$Path) {
+    if (-not $Path -or -not (Test-Path -LiteralPath $Path -PathType Container)) {
+        return $false
+    }
+
+    $hasRootCMake = Test-Path -LiteralPath (Join-Path $Path 'CMakeLists.txt') -PathType Leaf
+    $hasGameCMake =
+        (Test-Path -LiteralPath (Join-Path $Path 'soh/CMakeLists.txt') -PathType Leaf) -or
+        (Test-Path -LiteralPath (Join-Path $Path 'mm/CMakeLists.txt') -PathType Leaf)
+    return $hasRootCMake -and $hasGameCMake
+}
+
 if ($Help) {
     Get-Help $MyInvocation.MyCommand.Path -Detailed
     exit 0
@@ -129,20 +160,29 @@ Write-Host ""
 
 Write-Step "Resolving host repository path"
 
-if (-not $HostPath) {
-    # If invoked from inside extern/ship-lua/, walk up two levels to the host root.
+if ($HostPath) {
+    $resolvedHostPath = Resolve-Path -LiteralPath $HostPath -ErrorAction SilentlyContinue
+    if ($resolvedHostPath) {
+        $HostPath = $resolvedHostPath.Path
+    }
+} else {
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-    $candidate = Split-Path -Parent (Split-Path -Parent $scriptDir)
-    if (Test-Path (Join-Path $candidate 'CMakeLists.txt')) {
-        $HostPath = $candidate
-    } else {
-        $HostPath = (Get-Location).Path
+    $parentDir = Split-Path -Parent $scriptDir
+    $grandParentDir = if ($parentDir) { Split-Path -Parent $parentDir } else { $null }
+    $candidates = @($scriptDir, $parentDir, $grandParentDir, (Get-Location).Path) |
+        Where-Object { $_ } |
+        Select-Object -Unique
+
+    foreach ($candidate in $candidates) {
+        if (Test-HostRoot $candidate) {
+            $HostPath = (Resolve-Path -LiteralPath $candidate).Path
+            break
+        }
     }
 }
 
-$HostPath = (Resolve-Path -LiteralPath $HostPath -ErrorAction SilentlyContinue).Path
-if (-not $HostPath -or -not (Test-Path (Join-Path $HostPath 'CMakeLists.txt'))) {
-    Die "No CMakeLists.txt found under '$HostPath'. Run this script from inside a Shipwright-HyliaFoundry or 2ship2harkinian clone, or pass -HostPath <path>."
+if (-not (Test-HostRoot $HostPath)) {
+    Die "No supported host root found. Copy this script to a Shipwright-HyliaFoundry or 2ship2harkinian root, run it from extern/link-span, or pass -HostPath <path>."
 }
 
 Write-Ok "Host repository: $HostPath"
@@ -168,6 +208,7 @@ if ($Game -eq 'auto') {
 switch ($Game) {
     'oot' {
         $assetTarget   = 'GenerateSohOtr'
+        $buildTarget   = 'soh'
         $exeName       = 'soh.exe'
         $extractTarget = 'ExtractAssets'
         $projectId     = 'Shipwright'
@@ -175,11 +216,17 @@ switch ($Game) {
     }
     'mm' {
         $assetTarget   = 'Generate2ShipOtr'
+        $buildTarget   = '2ship'
         $exeName       = '2ship.exe'
         $extractTarget = 'ExtractAssets'
         $projectId     = '2Ship2Harkinian'
         Write-Ok "Game: Majora's Mask (2Ship2Harkinian)"
     }
+}
+
+if ($ValidateOnly) {
+    Write-Ok "Host validation completed; no build actions were executed (-ValidateOnly)"
+    return
 }
 
 # -----------------------------------------------------------------------------
@@ -273,6 +320,15 @@ Write-Ok "MSVC v143 toolset ($v143Version)"
 Write-Host ""
 Write-Host "    All prerequisites satisfied." -ForegroundColor Green
 
+# Building over a running executable commonly fails with a linker lock on Windows.
+$processName = [System.IO.Path]::GetFileNameWithoutExtension($exeName)
+$runningGame = Get-Process -Name $processName -ErrorAction SilentlyContinue
+if ($runningGame) {
+    $processIds = ($runningGame | Select-Object -ExpandProperty Id) -join ', '
+    Die "$exeName is running (PID: $processIds). Close the game before building."
+}
+Write-Ok "$exeName is not running"
+
 # -----------------------------------------------------------------------------
 # Submodules
 # -----------------------------------------------------------------------------
@@ -316,23 +372,61 @@ if ($SkipBuild) {
 }
 
 # -----------------------------------------------------------------------------
-# Build ZAPD (asset extractor) first
-# -----------------------------------------------------------------------------
-
-Write-Step "Building ZAPD (asset extraction tool)"
-& cmake --build $buildPath --target ZAPD --config $Config
-if ($LASTEXITCODE -ne 0) {
-    Die "Building ZAPD failed (exit $LASTEXITCODE)."
-}
-Write-Ok "ZAPD built"
-
-# -----------------------------------------------------------------------------
-# Generate assets (no ROM)
+# Build ZAPD and generate custom assets
 # -----------------------------------------------------------------------------
 
 if (-not $SkipAssets) {
-    Write-Step "Generating custom .o2r (--norom; full game assets still require a ROM)"
-    & cmake --build $buildPath --target $assetTarget --config $Config
+    Write-Step "Building ZAPD (asset extraction tool)"
+    & cmake --build $buildPath --target ZAPD --config $Config -- /m:1
+    if ($LASTEXITCODE -ne 0) {
+        Die "Building ZAPD failed (exit $LASTEXITCODE)."
+    }
+    Write-Ok "ZAPD built"
+
+    # A custom-only O2R is useful for development but cannot boot the game.
+    # If the caller supplied a ROM (or one obvious dump is present), run the
+    # real ExtractAssets flow so the base game archive is generated as well.
+    if ($RomPath) {
+        $resolvedRom = Resolve-Path -LiteralPath $RomPath -ErrorAction SilentlyContinue
+        if (-not $resolvedRom -or -not (Test-Path -LiteralPath $resolvedRom.Path -PathType Leaf)) {
+            Die "ROM file not found: $RomPath"
+        }
+        $RomPath = $resolvedRom.Path
+    } else {
+        $romCandidates = Get-ChildItem -LiteralPath $HostPath -File -Include *.z64,*.n64,*.v64 -ErrorAction SilentlyContinue
+        if ($romCandidates.Count -eq 1) { $RomPath = $romCandidates[0].FullName }
+    }
+
+    if ($RomPath) {
+        Write-Step "Extracting base game assets from ROM"
+        $gameDir = if ($Game -eq 'mm') { 'mm' } else { 'soh' }
+        $exporter = Join-Path $HostPath 'OTRExporter/extract_assets.py'
+        $xmlDir = if ($Game -eq 'mm') { '../mm/assets/xml' } else { '../soh/assets/xml' }
+        $customDir = Join-Path $HostPath (if ($Game -eq 'mm') { 'mm/assets/custom' } else { 'soh/assets/custom' })
+        $customFile = if ($Game -eq 'mm') { '2ship.o2r' } else { 'soh.o2r' }
+        $baseFile = if ($Game -eq 'mm') { 'mm.o2r' } else { 'oot.o2r' }
+        $zapdExe = Join-Path $buildPath "$Config/ZAPD.exe"
+        Push-Location (Join-Path $HostPath $gameDir)
+        try {
+            & $pythonExe $exporter -z $zapdExe --non-interactive --xml-root $xmlDir --custom-otr-file $customFile --custom-assets-path $customDir $RomPath
+            if ($LASTEXITCODE -ne 0) { Die "Asset extraction failed (exit $LASTEXITCODE). Verify that the ROM is a supported dump." }
+        } finally { Pop-Location }
+        $archive = Join-Path $HostPath "$gameDir/$baseFile"
+        if (-not (Test-Path -LiteralPath $archive)) { Die "Asset extractor completed but did not create $archive" }
+        Copy-Item -LiteralPath $archive -Destination (Join-Path $HostPath $baseFile) -Force
+        New-Item -ItemType Directory -Path (Join-Path $buildPath $gameDir) -Force | Out-Null
+        Copy-Item -LiteralPath $archive -Destination (Join-Path $buildPath "$gameDir/$baseFile") -Force
+        $customArchive = Join-Path $HostPath "$gameDir/$customFile"
+        if (Test-Path -LiteralPath $customArchive) {
+            Copy-Item -LiteralPath $customArchive -Destination (Join-Path $HostPath $customFile) -Force
+            Copy-Item -LiteralPath $customArchive -Destination (Join-Path $buildPath "$gameDir/$customFile") -Force
+        }
+        Write-Ok "Base game .o2r generated from ROM"
+    } else {
+        Write-Step "Generating custom .o2r (--norom; no base game assets)"
+        Write-Warn "No ROM dump found. The executable will still build but cannot boot until ExtractAssets creates the base .o2r. Use -RomPath <file>."
+        & cmake --build $buildPath --target $assetTarget --config $Config -- /m:1
+    }
     if ($LASTEXITCODE -ne 0) {
         Write-Warn "Asset generation target '$assetTarget' failed (exit $LASTEXITCODE). The game .exe can still build; rerun with -SkipAssets to skip this step."
     } else {
@@ -347,7 +441,7 @@ if (-not $SkipAssets) {
 # -----------------------------------------------------------------------------
 
 Write-Step "Building $projectId (--config $Config)"
-& cmake --build $buildPath --config $Config
+& cmake --build $buildPath --target $buildTarget --config $Config -- /m:1
 if ($LASTEXITCODE -ne 0) {
     Die "Build failed (exit $LASTEXITCODE). See the compiler output above."
 }
@@ -358,6 +452,7 @@ Write-Ok "Build complete"
 # -----------------------------------------------------------------------------
 
 $exeCandidates = @(
+    (Join-Path $HostPath "x64/$Config/$exeName"),
     (Join-Path $buildPath "x64/$Config/$exeName"),
     (Join-Path $buildPath "$Config/$exeName"),
     (Join-Path $buildPath $exeName)
@@ -383,9 +478,13 @@ if ($exeFound) {
 Write-Host ""
 Write-Host "  Next steps:" -ForegroundColor Cyan
 if (-not $SkipAssets) {
-    Write-Host "    - Custom .o2r was generated WITHOUT a ROM."
-    Write-Host "      To make the game playable, supply a legitimate Zelda ROM and run:"
-    Write-Host "        cmake --build `"$buildPath`" --target $extractTarget --config $Config"
+    if ($RomPath) {
+        Write-Host "    - Base game assets were extracted from: $RomPath"
+    } else {
+        Write-Host "    - Only custom .o2r was generated (WITHOUT a ROM)."
+        Write-Host "      To make the game playable, supply a legitimate Zelda ROM and rerun:"
+        Write-Host "        .\build-game.ps1 -HostPath `"$HostPath`" -RomPath `"C:\path\to\game.z64`""
+    }
 } else {
     Write-Host "    - Asset generation was skipped; run when ready:"
     Write-Host "        cmake --build `"$buildPath`" --target $assetTarget --config $Config"

@@ -50,6 +50,23 @@ Integration details in [`coordination/INTEGRATION.en.md`](coordination/INTEGRATI
 
 ## Quick start (Windows)
 
+### Ready-to-run launcher package
+
+Download the latest `Link-Span-Windows-x64.zip` release, extract it, and place
+your legally obtained Zelda ROM or your own extracted game archive next to
+`link-span.exe`. The release never includes ROMs or user-derived `oot.o2r`,
+`oot.otr`, or `mm.o2r` files. It does include the redistributable `soh.o2r` and
+`2ship.o2r` runtime archives required by the two ports.
+
+- If only OoT is present, Link-Span starts OoT automatically.
+- If only MM is present, Link-Span starts MM automatically.
+- If both are present, Link-Span shows an OoT/MM chooser.
+- If an installed folder or `.shipmod` package declares
+  `requires_both_games = true`, Link-Span explains which mod needs both games
+  and does not start an incomplete session.
+
+### Build from source
+
 If you want to run Link-Span inside the game (not just develop the core), clone one
 of the Link-Span-enabled host forks with submodules, then run the bundled build
 helper:
@@ -69,6 +86,11 @@ host clone). It verifies prerequisites (Git, CMake ≥ 3.26, Python 3, Visual
 Studio 2022 with the MSVC v143 toolset), inits submodules, configures CMake,
 generates the custom `.o2r` asset pack **without a ROM**, and builds the game
 executable. It auto-detects whether the host is OoT or MM.
+
+You may also copy `build-game.ps1` directly to the root of either a
+Shipwright-HyliaFoundry or 2ship2harkinian clone and run it from any directory.
+The helper checks its own location first and detects `soh/` or `mm/`. Use
+`-ValidateOnly` to verify detection without configuring or building anything.
 
 The first build produces a runnable `.exe`, but the game is **not playable until
 you supply a legitimate Zelda ROM** — the no-ROM step only builds the
@@ -142,4 +164,5 @@ lives in [`coordination/`](coordination/).
 ## License
 
 The Link-Span core is under the repository license. **Never** commit ROMs,
-`.z64`/`.n64`/`.o2r` files, or any copyrighted assets.
+`.z64`/`.n64`/`.v64`, user-derived `oot.o2r`/`oot.otr`/`mm.o2r`, or copyrighted
+game assets. Redistributable port runtime archives are release artifacts only.

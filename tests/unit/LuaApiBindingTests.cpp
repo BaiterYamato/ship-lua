@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -581,6 +582,41 @@ assert(ship.capabilities.has("actor.spawn"))               -- mock-runtime cobre
     host.UnloadAll();
 }
 
+void TestWorldTravelCapabilityUsesHostHandler() {
+    std::optional<ShipLua::WorldDestination> requested;
+    ShipLua::LuaApiHostContext context;
+    context.gameId = "oot";
+    context.hostVersion = "9.1.0";
+    context.capabilities = {"world.travel"};
+    context.worldTravel = [&requested](const ShipLua::WorldDestination& destination) {
+        requested = destination;
+        return ShipLua::Result<void>::ok();
+    };
+    ShipLua::ModHost host(context, ShipLua::Logger([](auto, const auto&, const auto&) {}));
+    const auto loaded = host.LoadModFromManifestAndSource(
+        MakeManifest("test.world_travel"), R"lua(
+local ship = require("ship")
+assert(ship.capabilities.has("world.travel"))
+assert(not pcall(ship.world.travel))
+assert(ship.world.travel("mm", "mm.clock_tower.entrance"))
+)lua");
+    Check(loaded.isOk(), "world.travel should load with an injected host handler: " +
+                             loaded.message);
+    Check(requested.has_value() && requested->world == ShipLua::WorldId::Mm &&
+              requested->id == "mm.clock_tower.entrance",
+          "world.travel should pass a validated logical destination to the host");
+
+    ShipLua::LuaApiHostContext invalid;
+    invalid.gameId = "oot";
+    invalid.hostVersion = "9.1.0";
+    invalid.capabilities = {"world.travel"};
+    ShipLua::ModHost invalidHost(invalid, ShipLua::Logger([](auto, const auto&, const auto&) {}));
+    const auto rejected = invalidHost.LoadModFromManifestAndSource(
+        MakeManifest("test.world_travel_without_handler"), "return true");
+    Check(!rejected.isOk() && rejected.code == ShipLua::ErrorCode::InvalidState,
+          "a host must not advertise world.travel without a handler");
+}
+
 } // namespace
 
 int main() {
@@ -598,6 +634,7 @@ int main() {
     TestCapabilityRegistryLuaApi();
     TestLegacyContextSynthesizesCapabilityDescriptors();
     TestCapabilityRegistrySharedAcrossMods();
+    TestWorldTravelCapabilityUsesHostHandler();
     if (failures != 0) {
         std::cerr << failures << " check(s) failed\n";
         return 1;

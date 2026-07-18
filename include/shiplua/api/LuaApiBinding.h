@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -15,6 +16,7 @@
 #include "shiplua/runtime/Result.h"
 #include "shiplua/storage/KeyValueStorage.h"
 #include "shiplua/timer/FrameTimerScheduler.h"
+#include "shiplua/world/WorldSession.h"
 
 struct lua_State;
 
@@ -31,6 +33,10 @@ struct LuaApiHostContext {
     std::shared_ptr<CapabilityRegistry> capabilityRegistry;
     std::shared_ptr<FrameTimerScheduler> timers;  // nullable; null = host sem ship.timer
     std::shared_ptr<KeyValueStorage> storage;     // nullable; null = host sem ship.storage
+    std::function<Result<void>(const WorldDestination&)> worldTravel;
+    // Games whose assets/hosts are available to the supervising Link-Span
+    // process. Empty keeps standalone compatibility and means only gameId.
+    std::vector<std::string> availableGames;
 };
 
 // Validates a host context before any binding is installed: game id must be
@@ -87,6 +93,7 @@ class LuaApiBinding {
     static int StorageSet(lua_State* state) noexcept;
     static int StorageDelete(lua_State* state) noexcept;
     static int StorageClear(lua_State* state) noexcept;
+    static int WorldTravel(lua_State* state) noexcept;
     static int LogDebug(lua_State* state) noexcept;
     static int LogInfo(lua_State* state) noexcept;
     static int LogWarn(lua_State* state) noexcept;
@@ -114,6 +121,7 @@ class LuaApiBinding {
     int SetStorage(lua_State* state, const char*& error);
     int DeleteStorage(lua_State* state, const char*& error);
     int ClearStorage(lua_State* state, const char*& error);
+    int WorldTravelFromLua(lua_State* state, const char*& error);
     EventFlow InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
                              EventPayload& payload);
     int WriteLog(lua_State* state, LogLevel level, const char*& error);

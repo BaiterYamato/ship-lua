@@ -132,6 +132,7 @@ probe("ship.capabilities.has", { "core.events" }, "boolean")
 probe("ship.capabilities.list", {}, "table")
 probe("ship.events.on", { "game.ready", function() end }, "integer")
 probe("ship.hotkeys.register", { "contract.probe", { default = "F5" }, function() end }, "boolean")
+probe("ship.world.travel", { "oot", "probe" }, "boolean")
 probe("ship.log.debug", { "contract probe" }, "nil")
 probe("ship.log.info", { "contract probe" }, "nil")
 probe("ship.log.warn", { "contract probe" }, "nil")
@@ -201,6 +202,13 @@ do
   check(not ok, "ship.hotkeys.register sem argumentos deveria falhar")
   check(type(err) == "string" and err:find("invalid_argument", 1, true) ~= nil,
     "erro de ship.hotkeys.register deveria carregar invalid_argument")
+end
+do
+  local fn = resolve(ship_mod, "world.travel")
+  local ok, err = pcall(fn)
+  check(not ok, "ship.world.travel sem argumentos deveria falhar")
+  check(type(err) == "string" and err:find("invalid_argument", 1, true) ~= nil,
+    "erro de ship.world.travel deveria carregar invalid_argument")
 end
 do
   local fn = resolve(ship_mod, "log.debug")

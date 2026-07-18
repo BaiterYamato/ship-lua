@@ -18,6 +18,7 @@ Derivada dos schemas canônicos em `schema/` (IDL); regenere com
 | `ship.events.on` | `0.1.0` | `stable` | sim | sim | — | `invalid_argument`, `unsupported` |
 | `ship.events.off` | `0.1.0` | `stable` | sim | sim | — | `invalid_handle` |
 | `ship.hotkeys.register` | `0.2.0` | `preview` | sim | sim | — | `invalid_argument`, `unsupported` |
+| `ship.world.travel` | `0.3.0` | `experimental` | sim | sim | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
 | `ship.mm.player.jump` | `0.2.0` | `experimental` | — | sim | `mm.player.jump` | — |
 | `ship.mm.spawn_dog` | `0.3.0` | `experimental` | — | sim | `mm.spawn_dog` | — |
 | `ship.oot.player.jump` | `0.3.0` | `experimental` | sim | — | `oot.player.jump` | — |
@@ -67,6 +68,7 @@ nunca registra `ship.oot.*` ou `ship.mm.*` (RFC 0001).
 | `save.events` | `contract` | sim | sim |
 | `text.events` | `contract` | sim | sim |
 | `audio.sequence.events` | `contract` | sim | sim |
+| `world.travel` | `contract` | sim | sim |
 | `mm.room.events` | `planned` | — | sim |
 | `mm.cycle` | `planned` | — | sim |
 | `mm.owl_save` | `planned` | — | sim |
@@ -85,5 +87,5 @@ nunca registra `ship.oot.*` ou `ship.mm.*` (RFC 0001).
 |---|---:|
 | `stable` | 12 |
 | `preview` | 1 |
-| `experimental` | 11 |
+| `experimental` | 12 |
 

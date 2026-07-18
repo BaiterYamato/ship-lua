@@ -55,8 +55,10 @@ bool WritePackage(const std::filesystem::path &path,
 }
 
 ShipLua::ModHost MakeHost(const std::string &game = "oot",
-                          const std::string &version = "9.1.2") {
+                          const std::string &version = "9.1.2",
+                          std::vector<std::string> availableGames = {}) {
   ShipLua::LuaApiHostContext context{game, version, "0.1.0", {}};
+  context.availableGames = std::move(availableGames);
   return ShipLua::ModHost(std::move(context));
 }
 
@@ -138,6 +140,31 @@ void TestPackageOwnership(const std::filesystem::path &root) {
         "unload should remove owned extraction directory");
 }
 
+void TestVLink4DualGameRequirement(const std::filesystem::path &root) {
+  const auto mods = root / "dual-requirement";
+  const std::string dual = "requires_both_games = true\n"
+                           "games = [\"oot\", \"mm\"]\n";
+  WriteDirectoryMod(mods, "unpacked", Manifest("example.dual.unpacked", dual));
+  Check(WritePackage(mods / "packed.shipmod",
+                     Manifest("example.dual.packed", dual), "loaded = true\n"),
+        "dual-world package fixture should be created");
+
+  auto singleHost = MakeHost();
+  auto rejected = singleHost.LoadModsFromRoot(mods, root / "cache-dual-single");
+  Check(rejected.isOk(), "dual-world rejection should be isolated per mod");
+  Check(rejected.isOk() && rejected.value->loadedIds.empty(),
+        "single-game runtime must not load dual-world mods");
+  Check(rejected.isOk() &&
+            rejected.value->rejected.contains("example.dual.unpacked") &&
+            rejected.value->rejected.contains("example.dual.packed"),
+        "both unpacked and .shipmod dual-world mods must be rejected");
+
+  auto dualHost = MakeHost("oot", "9.1.2", {"oot", "mm"});
+  auto accepted = dualHost.LoadModsFromRoot(mods, root / "cache-dual-ready");
+  Check(accepted.isOk() && accepted.value->loadedIds.size() == 2,
+        "runtime with both games available should load dual-world mods");
+}
+
 void TestInvalidRoot(const std::filesystem::path &root) {
   auto host = MakeHost();
   auto result = host.LoadModsFromRoot(root / "missing", root / "cache-missing");
@@ -157,6 +184,7 @@ int main() {
   TestDeterministicDependencies(root);
   TestCompatibilityAndFailureIsolation(root);
   TestPackageOwnership(root);
+  TestVLink4DualGameRequirement(root);
   TestInvalidRoot(root);
 
   std::filesystem::remove_all(root, ignored);

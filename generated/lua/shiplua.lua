@@ -83,6 +83,7 @@ ship.oot = ship.oot or {}
 ship.runtime = ship.runtime or {}
 ship.storage = ship.storage or {}
 ship.timer = ship.timer or {}
+ship.world = ship.world or {}
 ship.mm.player = ship.mm.player or {}
 ship.oot.player = ship.oot.player or {}
 
@@ -129,6 +130,12 @@ function ship.events.off(subscription) end
 ---@param callback function
 ---@return boolean
 function ship.hotkeys.register(id, options, callback) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: world.travel; erros: invalid_argument, unsupported, invalid_state, host_failure.
+---@param world ShipLuaGameId
+---@param destination string
+---@return boolean
+function ship.world.travel(world, destination) end
 
 --- API mm; estabilidade: experimental; desde: 0.2.0; capability: mm.player.jump; erros: nenhum.
 ---@return boolean

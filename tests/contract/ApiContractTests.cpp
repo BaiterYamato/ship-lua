@@ -107,6 +107,9 @@ void RunContractOnHost(const std::string& game, const std::string& source) {
     // serviços em memória, como o mock runtime faz (MODSDK-004).
     context.timers = std::make_shared<ShipLua::FrameTimerScheduler>();
     context.storage = std::make_shared<ShipLua::KeyValueStorage>();
+    context.worldTravel = [](const ShipLua::WorldDestination&) {
+        return ShipLua::Result<void>::ok();
+    };
     ShipLua::ModHost host(context, ShipLua::Logger{});
     const std::string modId = "contract.api_" + game;
     const auto loaded = host.LoadModFromManifestAndSource(MakeManifest(modId), source);

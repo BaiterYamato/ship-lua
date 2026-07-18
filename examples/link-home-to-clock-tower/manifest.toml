@@ -1,0 +1,12 @@
+id = "linkspan.link_home_to_clock_tower"
+name = "Casa do Link para Torre do Relógio"
+version = "0.1.0"
+api = ">=0.3 <0.4"
+entrypoint = "main.lua"
+description = "Solicita uma viagem portátil de OoT para a entrada da torre em MM."
+authors = ["BaiterYamato"]
+games = ["oot", "mm"]
+requires_both_games = true
+
+[capabilities]
+required = ["world.travel"]
