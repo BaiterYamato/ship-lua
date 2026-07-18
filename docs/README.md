@@ -21,3 +21,4 @@ que continua sendo a fonte canônica do registro do projeto.
 - [Estado de coordenação](../coordination/STATUS.md) · [English](../coordination/STATUS.en.md)
 - [RFC de arquitetura](../rfcs/0001-shiplua-architecture.md) · [English](../rfcs/0001-shiplua-architecture.en.md)
 - [Referência gerada da API](../generated/docs/api-reference.md) · [English](../generated/docs/api-reference.en.md)
+- [Matriz de compatibilidade gerada](../generated/docs/compatibility-matrix.md)

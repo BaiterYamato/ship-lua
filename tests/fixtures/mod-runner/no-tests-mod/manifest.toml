@@ -1,0 +1,8 @@
+id = "fixture.no_tests"
+name = "Fixture No Tests"
+version = "0.1.0"
+api = ">=0.1 <0.3"
+entrypoint = "main.lua"
+description = "Fixture do mod test runner: mod sem diretório de testes."
+authors = ["BaiterYamato"]
+games = ["oot", "mm"]

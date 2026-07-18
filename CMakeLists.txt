@@ -34,6 +34,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(miniz)
 
+# miniz injects /Zi on MSVC, which conflicts with the project-wide /Z7 and
+# makes sccache abort when it cannot find miniz.pdb. Pin miniz to a proper
+# per-target program-database PDB so the Windows CI build stays cacheable.
+if (MSVC)
+    set_target_properties(miniz PROPERTIES MSVC_DEBUG_INFORMATION_FORMAT ProgramDatabase)
+endif()
+
 if(NOT EXISTS "${lua_SOURCE_DIR}/lua.h")
     message(FATAL_ERROR
         "Lua sources were not fetched (network problem?). "
@@ -89,6 +96,12 @@ add_custom_command(
     COMMENT "Empacotando hello-world.shipmod"
     VERBATIM)
 add_custom_target(package_examples DEPENDS "${SHIPLUA_HELLO_WORLD_PACKAGE}")
+
+# O mod test runner executa pacotes .shipmod em alguns testes do ctest; o
+# pacote de exemplo precisa existir antes dele rodar.
+add_executable(shiplua_mod_test_runner tools/mod_test_runner.cpp)
+target_link_libraries(shiplua_mod_test_runner PRIVATE shiplua)
+add_dependencies(shiplua_mod_test_runner package_examples)
 
 # ---------------------------------------------------------------------------
 # Tests

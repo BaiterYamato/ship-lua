@@ -23,3 +23,4 @@ which remains the canonical source of the project record.
 - [State of coordination](../coordination/STATUS.md) · [English](../coordination/STATUS.en.md)
 - [Architecture RFC](../rfcs/0001-shiplua-architecture.md) · [English](../rfcs/0001-shiplua-architecture.en.md)
 - [Reference generated from API](../generated/docs/api-reference.md) · [English](../generated/docs/api-reference.en.md)
+- [Generated compatibility matrix](../generated/docs/compatibility-matrix.md)

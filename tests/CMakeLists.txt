@@ -3,6 +3,16 @@ target_link_libraries(runtime_tests PRIVATE shiplua)
 
 add_test(NAME runtime_tests COMMAND runtime_tests)
 
+add_executable(handle_registry_tests unit/HandleRegistryTests.cpp)
+target_link_libraries(handle_registry_tests PRIVATE shiplua)
+
+add_test(NAME handle_registry_tests COMMAND handle_registry_tests)
+
+add_executable(mod_lifecycle_tests unit/ModLifecycleTests.cpp)
+target_link_libraries(mod_lifecycle_tests PRIVATE shiplua)
+
+add_test(NAME mod_lifecycle_tests COMMAND mod_lifecycle_tests)
+
 add_executable(manifest_host_tests unit/ManifestHostTests.cpp)
 target_link_libraries(manifest_host_tests PRIVATE shiplua)
 
@@ -85,6 +95,23 @@ target_link_libraries(lua_api_binding_tests PRIVATE shiplua)
 
 add_test(NAME lua_api_binding_tests COMMAND lua_api_binding_tests)
 
+add_executable(key_value_storage_tests unit/KeyValueStorageTests.cpp)
+target_link_libraries(key_value_storage_tests PRIVATE shiplua)
+
+add_test(NAME key_value_storage_tests COMMAND key_value_storage_tests)
+
+add_executable(mock_runtime_unit_tests unit/MockRuntimeTests.cpp)
+target_link_libraries(mock_runtime_unit_tests PRIVATE shiplua)
+
+add_test(NAME mock_runtime_unit_tests COMMAND mock_runtime_unit_tests)
+
+add_executable(mod_test_runner_tests unit/ModTestRunnerTests.cpp)
+target_link_libraries(mod_test_runner_tests PRIVATE shiplua)
+target_compile_definitions(mod_test_runner_tests PRIVATE
+    SHIPLUA_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_test(NAME mod_test_runner_tests COMMAND mod_test_runner_tests)
+
 add_executable(hello_world_conformance_tests conformance/HelloWorldConformanceTests.cpp)
 target_link_libraries(hello_world_conformance_tests PRIVATE shiplua)
 target_compile_definitions(hello_world_conformance_tests PRIVATE
@@ -123,3 +150,41 @@ add_test(NAME api_docs_codegen_check
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_api_docs.py" --check)
 add_test(NAME api_docs_codegen_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_api_docs.py")
+
+add_executable(api_contract_tests contract/ApiContractTests.cpp)
+target_link_libraries(api_contract_tests PRIVATE shiplua)
+target_compile_definitions(api_contract_tests PRIVATE
+    SHIPLUA_GENERATED_DIR="${CMAKE_SOURCE_DIR}/generated")
+
+add_test(NAME api_contract_tests COMMAND api_contract_tests)
+
+add_executable(mock_runtime_tests contract/MockRuntimeTests.cpp)
+target_link_libraries(mock_runtime_tests PRIVATE shiplua lua_static)
+target_compile_definitions(mock_runtime_tests PRIVATE
+    SHIPLUA_GENERATED_DIR="${CMAKE_SOURCE_DIR}/generated")
+
+add_test(NAME mock_runtime_tests COMMAND mock_runtime_tests)
+
+add_test(NAME api_contract_codegen_check
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_api_contracts.py" --check)
+add_test(NAME api_contract_codegen_tests
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_api_contracts.py")
+
+# ---------------------------------------------------------------------------
+# MODSDK-004 — mod test runner (mock runtime) via CLI
+# ---------------------------------------------------------------------------
+add_test(NAME mod_runner_example
+    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/frame-counter")
+add_test(NAME mod_runner_example_mm
+    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/frame-counter" --game mm)
+add_test(NAME mod_runner_fixture_passing
+    COMMAND shiplua_mod_test_runner "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/mod-runner/passing-mod")
+add_test(NAME mod_runner_fixture_failing
+    COMMAND shiplua_mod_test_runner "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/mod-runner/failing-mod")
+set_tests_properties(mod_runner_fixture_failing PROPERTIES WILL_FAIL TRUE)
+add_test(NAME mod_runner_fixture_no_tests
+    COMMAND shiplua_mod_test_runner "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/mod-runner/no-tests-mod")
+add_test(NAME mod_runner_package
+    COMMAND shiplua_mod_test_runner "${SHIPLUA_HELLO_WORLD_PACKAGE}")
+add_test(NAME mod_runner_usage COMMAND shiplua_mod_test_runner)
+set_tests_properties(mod_runner_usage PROPERTIES WILL_FAIL TRUE)
