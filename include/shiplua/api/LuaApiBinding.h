@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "shiplua/capability/CapabilityRegistry.h"
 #include "shiplua/events/EventDispatcher.h"
 #include "shiplua/input/HotkeyRegistry.h"
 #include "shiplua/runtime/Logger.h"
@@ -25,6 +26,9 @@ struct LuaApiHostContext {
     std::string runtimeVersion = "0.2.0";
     std::vector<std::string> capabilities;
     std::shared_ptr<HotkeyRegistry> hotkeys;  // nullable; null = host without hotkey support
+    // Registry consultável de capabilities (RFC 0008). Nullable; null = derivar
+    // descritores da lista plana `capabilities` via Generated::kCapabilities.
+    std::shared_ptr<CapabilityRegistry> capabilityRegistry;
     std::shared_ptr<FrameTimerScheduler> timers;  // nullable; null = host sem ship.timer
     std::shared_ptr<KeyValueStorage> storage;     // nullable; null = host sem ship.storage
 };
@@ -71,6 +75,8 @@ class LuaApiBinding {
     static int ApiVersion(lua_State* state) noexcept;
     static int CapabilityHas(lua_State* state) noexcept;
     static int CapabilityList(lua_State* state) noexcept;
+    static int CapabilityInfo(lua_State* state) noexcept;
+    static int CapabilityProviders(lua_State* state) noexcept;
     static int EventsOn(lua_State* state) noexcept;
     static int EventsOff(lua_State* state) noexcept;
     static int HotkeysRegister(lua_State* state) noexcept;
@@ -95,6 +101,10 @@ class LuaApiBinding {
     int RegisterEventFromLua(lua_State* state, const char*& error);
     int RemoveEventFromLua(lua_State* state, const char*& error);
     int RegisterHotkey(lua_State* state, const char*& error);
+    int CapabilityHasFromLua(lua_State* state, const char*& error);
+    int CapabilityListFromLua(lua_State* state, const char*& error);
+    int CapabilityInfoFromLua(lua_State* state, const char*& error);
+    int CapabilityProvidersFromLua(lua_State* state, const char*& error);
     static int ScheduleTimer(lua_State* state, bool repeating) noexcept;
     int ScheduleTimerFromLua(lua_State* state, bool repeating, const char*& error);
     Result<TimerHandle> DoScheduleTimer(lua_State* state, bool repeating, std::uint64_t frames,
@@ -115,6 +125,7 @@ class LuaApiBinding {
     Logger mLogger;
     LuaApiHostContext mHostContext;
     std::shared_ptr<HotkeyRegistry> mHotkeys;
+    std::shared_ptr<CapabilityRegistry> mCapabilities;
     std::shared_ptr<FrameTimerScheduler> mTimers;
     std::shared_ptr<KeyValueStorage> mStorage;
     std::map<std::string, std::shared_ptr<HotkeyCallback>> mHotkeyCallbacks;

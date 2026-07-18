@@ -32,3 +32,25 @@ o progresso é registrado em novas seções `UPDATE` com o mesmo identificador.
   - build Release/MSVC concluído e 45/45 testes CTest aprovados.
 - Próximo: publicar a correção no head do PR 39 e confirmar os checks remotos.
 
+## UPDATE MODSDK-004-MSVC-20260718 — PR 36
+
+- Status: in_progress
+- Escopo: integrar `MODSDK-001` sobre o `main` após o merge do PR 39.
+- Milestones:
+  1. Resolver os conflitos de capability registry com timers/storage.
+  2. Eliminar o `longjmp` inseguro em `CapabilityList/Info/Providers`.
+  3. Validar Release/MSVC e atualizar o head do PR 36.
+  4. Confirmar CI verde e mergear o PR 36.
+
+## UPDATE MODSDK-004-MSVC-20260718 — PR 36 validado
+
+- Status: in_progress
+- Concluído:
+  - conflitos com o PR 39 resolvidos no contexto, bindings e testes;
+  - crash `0xC0000005` reproduzido em `lua_api_binding_tests`;
+  - corrupção tardia `0xc0000409` reproduzida em `api_contract_tests`;
+  - callbacks de capabilities separados por fronteira não-inline segura;
+  - expectativa legada alinhada à API gerada `0.3.0`;
+  - build Release/MSVC e 46/46 testes CTest aprovados;
+  - sonda AddressSanitizer aprovada em OoT e MM.
+- Próximo: atualizar o PR 36, confirmar CI verde e mergear; depois resolver o PR 32.
