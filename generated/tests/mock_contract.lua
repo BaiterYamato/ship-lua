@@ -137,8 +137,6 @@ probe("ship.log.warn", { "contract probe" }, "nil")
 probe("ship.log.error", { "contract probe" }, "nil")
 check(resolve(ship_mod, "mm.player.jump") == nil, "ship.mm.player.jump não deveria existir no host oot")
 check(resolve(ship_mod, "mm.spawn_dog") == nil, "ship.mm.spawn_dog não deveria existir no host oot")
-check(resolve(ship_mod, "oot.player.jump") == nil, "ship.oot.player.jump não deveria existir no host oot")
-check(resolve(ship_mod, "oot.spawn_dog") == nil, "ship.oot.spawn_dog não deveria existir no host oot")
 
 -- Sondas de chamada válida no host OOT (funções do adaptador).
 mock.configure({ game = "oot" })
@@ -254,7 +252,8 @@ check(mock.calls[1].name == "ship.events.on",
   "primeira chamada registrada deveria ser ship.events.on")
 
 -- Hotkeys: registro retorna true e retém o callback.
-check(ship_mod.hotkeys.register("contract.probe", function() end) == true,
+check(ship_mod.hotkeys.register("contract.probe",
+    { default = "F5", label = "probe" }, function() end) == true,
   "registro de hotkey deveria confirmar no mock")
 check(type(mock.hotkeys["contract.probe"]) == "function",
   "callback de hotkey deveria ser retido pelo mock")

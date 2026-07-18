@@ -382,8 +382,8 @@ def generate_mock_lua(api: dict[str, Any], events: dict[str, Any],
         "  return true",
         "end",
         "",
-        "handlers[\"ship.hotkeys.register\"] = function(id, options_or_callback, callback)",
-        "  M.hotkeys[id] = callback or options_or_callback",
+        "handlers[\"ship.hotkeys.register\"] = function(id, options, callback)",
+        "  M.hotkeys[id] = callback",
         "  return true",
         "end",
         "",
@@ -923,6 +923,8 @@ def generate_mock_contract_lua(api: dict[str, Any], events: dict[str, Any],
         if function["availability"] == "common":
             lines.extend(mock_probe(function, api, events, capabilities))
     for function in host_functions:
+        if function["availability"] == "oot":
+            continue
         lines.append(
             f"check(resolve(ship_mod, {q(dotted(function['name']))}) == nil,"
             f" {q(function['name'] + ' não deveria existir no host oot')})")
@@ -1019,7 +1021,8 @@ def generate_mock_contract_lua(api: dict[str, Any], events: dict[str, Any],
     if "ship.hotkeys.register" in function_names:
         lines.extend([
             "-- Hotkeys: registro retorna true e retém o callback.",
-            "check(ship_mod.hotkeys.register(\"contract.probe\", function() end) == true,",
+            "check(ship_mod.hotkeys.register(\"contract.probe\",",
+            "    { default = \"F5\", label = \"probe\" }, function() end) == true,",
             "  \"registro de hotkey deveria confirmar no mock\")",
             "check(type(mock.hotkeys[\"contract.probe\"]) == \"function\",",
             "  \"callback de hotkey deveria ser retido pelo mock\")",

@@ -110,8 +110,8 @@ handlers["ship.events.off"] = function(subscription)
   return true
 end
 
-handlers["ship.hotkeys.register"] = function(id, options_or_callback, callback)
-  M.hotkeys[id] = callback or options_or_callback
+handlers["ship.hotkeys.register"] = function(id, options, callback)
+  M.hotkeys[id] = callback
   return true
 end
 
