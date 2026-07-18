@@ -144,15 +144,15 @@ add_test(NAME validator_usage COMMAND shiplua_manifest_validator)
 set_tests_properties(validator_usage PROPERTIES WILL_FAIL TRUE)
 
 add_test(NAME api_schema_validation
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/validate_api_schemas.py")
+    COMMAND "${Python3_EXECUTABLE}" "${SHIPLUA_SOURCE_DIR}/tools/validate_api_schemas.py")
 add_test(NAME api_schema_validation_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_validate_api_schemas.py")
 add_test(NAME api_cpp_codegen_check
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_cpp_api.py" --check)
+    COMMAND "${Python3_EXECUTABLE}" "${SHIPLUA_SOURCE_DIR}/tools/generate_cpp_api.py" --check)
 add_test(NAME api_cpp_codegen_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_cpp_api.py")
 add_test(NAME api_docs_codegen_check
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_api_docs.py" --check)
+    COMMAND "${Python3_EXECUTABLE}" "${SHIPLUA_SOURCE_DIR}/tools/generate_api_docs.py" --check)
 add_test(NAME api_docs_codegen_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_api_docs.py")
 
@@ -163,31 +163,31 @@ if(SHIPLUA_POWERSHELL_EXECUTABLE)
                 -NoProfile
                 -ExecutionPolicy Bypass
                 -File "${CMAKE_CURRENT_SOURCE_DIR}/tools/BuildGameScriptTests.ps1"
-                -ScriptPath "${CMAKE_SOURCE_DIR}/build-game.ps1")
+                -ScriptPath "${SHIPLUA_SOURCE_DIR}/build-game.ps1")
     add_test(NAME build_linkspan_packaging_tests
         COMMAND "${SHIPLUA_POWERSHELL_EXECUTABLE}"
                 -NoProfile
                 -ExecutionPolicy Bypass
                 -File "${CMAKE_CURRENT_SOURCE_DIR}/tools/BuildLinkSpanPackagingTests.ps1"
-                -ModulePath "${CMAKE_SOURCE_DIR}/tools/LinkSpanPackaging.psm1")
+                -ModulePath "${SHIPLUA_SOURCE_DIR}/tools/LinkSpanPackaging.psm1")
 endif()
 
 add_executable(api_contract_tests contract/ApiContractTests.cpp)
 target_link_libraries(api_contract_tests PRIVATE shiplua)
 target_compile_definitions(api_contract_tests PRIVATE
-    SHIPLUA_GENERATED_DIR="${CMAKE_SOURCE_DIR}/generated")
+    SHIPLUA_GENERATED_DIR="${SHIPLUA_SOURCE_DIR}/generated")
 
 add_test(NAME api_contract_tests COMMAND api_contract_tests)
 
 add_executable(mock_runtime_tests contract/MockRuntimeTests.cpp)
 target_link_libraries(mock_runtime_tests PRIVATE shiplua lua_static)
 target_compile_definitions(mock_runtime_tests PRIVATE
-    SHIPLUA_GENERATED_DIR="${CMAKE_SOURCE_DIR}/generated")
+    SHIPLUA_GENERATED_DIR="${SHIPLUA_SOURCE_DIR}/generated")
 
 add_test(NAME mock_runtime_tests COMMAND mock_runtime_tests)
 
 add_test(NAME api_contract_codegen_check
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_api_contracts.py" --check)
+    COMMAND "${Python3_EXECUTABLE}" "${SHIPLUA_SOURCE_DIR}/tools/generate_api_contracts.py" --check)
 add_test(NAME api_contract_codegen_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_api_contracts.py")
 
@@ -195,13 +195,13 @@ add_test(NAME api_contract_codegen_tests
 # MODSDK-004 — mod test runner (mock runtime) via CLI
 # ---------------------------------------------------------------------------
 add_test(NAME mod_runner_example
-    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/frame-counter")
+    COMMAND shiplua_mod_test_runner "${SHIPLUA_SOURCE_DIR}/examples/frame-counter")
 add_test(NAME mod_runner_example_mm
-    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/frame-counter" --game mm)
+    COMMAND shiplua_mod_test_runner "${SHIPLUA_SOURCE_DIR}/examples/frame-counter" --game mm)
 add_test(NAME actor_spawn_example_oot
-    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/actor-spawn" --game oot)
+    COMMAND shiplua_mod_test_runner "${SHIPLUA_SOURCE_DIR}/examples/actor-spawn" --game oot)
 add_test(NAME actor_spawn_example_mm
-    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/actor-spawn" --game mm)
+    COMMAND shiplua_mod_test_runner "${SHIPLUA_SOURCE_DIR}/examples/actor-spawn" --game mm)
 add_test(NAME mod_runner_fixture_passing
     COMMAND shiplua_mod_test_runner "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/mod-runner/passing-mod")
 add_test(NAME mod_runner_fixture_failing
@@ -217,8 +217,8 @@ set_tests_properties(mod_runner_usage PROPERTIES WILL_FAIL TRUE)
 add_test(NAME shipmod_cli_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_shipmod.py")
 add_test(NAME hello_runtime_manifest_validation
-    COMMAND shiplua_manifest_validator "${CMAKE_SOURCE_DIR}/examples/hello-runtime")
+    COMMAND shiplua_manifest_validator "${SHIPLUA_SOURCE_DIR}/examples/hello-runtime")
 add_test(NAME hello_runtime_mod_tests_oot
-    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/hello-runtime" --game oot)
+    COMMAND shiplua_mod_test_runner "${SHIPLUA_SOURCE_DIR}/examples/hello-runtime" --game oot)
 add_test(NAME hello_runtime_mod_tests_mm
-    COMMAND shiplua_mod_test_runner "${CMAKE_SOURCE_DIR}/examples/hello-runtime" --game mm)
+    COMMAND shiplua_mod_test_runner "${SHIPLUA_SOURCE_DIR}/examples/hello-runtime" --game mm)
