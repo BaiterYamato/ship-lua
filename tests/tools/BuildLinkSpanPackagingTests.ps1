@@ -72,13 +72,14 @@ try {
     foreach ($path in @(
         (Join-Path $romFreeHost '2ship.exe'),
         (Join-Path $romFreeHost 'ZAPD.exe'),
-        (Join-Path $romFreeHost 'assets/nested/fixture.xml')
+        (Join-Path $romFreeHost 'assets/nested/fixture.xml'),
+        (Join-Path $romFreeOutput '2ship.o2r')
     )) {
         if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
             throw "V-LINK-7 falhou: runtime ROM-free incompleto em $path"
         }
     }
-    foreach ($protected in @('mm.o2r', '2ship.o2r')) {
+    foreach ($protected in @('mm.o2r')) {
         if (Test-Path -LiteralPath (Join-Path $romFreeOutput $protected)) {
             throw "V-LINK-7 falhou: archive protegido copiado para pacote ROM-free: $protected"
         }
@@ -95,7 +96,31 @@ try {
         throw 'V-LINK-7 falhou: scanner aceitou uma ROM no pacote'
     }
     Remove-Item -LiteralPath (Join-Path $romFreeOutput 'private.z64') -Force
-    Write-Host 'V-LINK-7: pacote ROM-free preserva runtime/extractor e rejeita arquivos protegidos.' -ForegroundColor Green
+    [System.IO.File]::WriteAllText((Join-Path $romFreeOutput 'mm.o2r'), 'private fixture')
+    $blocked = $false
+    try {
+        Assert-LinkSpanPackageIsRomFree -Path $romFreeOutput | Out-Null
+    } catch {
+        $blocked = $true
+    }
+    if (-not $blocked) {
+        throw 'V-LINK-7 falhou: scanner aceitou archive base derivado da ROM'
+    }
+    Remove-Item -LiteralPath (Join-Path $romFreeOutput 'mm.o2r') -Force
+    Write-Host 'V-LINK-7: pacote ROM-free preserva archive do port e rejeita ROM/archive base.' -ForegroundColor Green
+
+    Remove-Item -LiteralPath (Join-Path $hostRoot '2ship.o2r') -Force
+    $missingPortArchiveBlocked = $false
+    try {
+        Copy-LinkSpanHostPackage -HostRoot $hostRoot -OutputDir (Join-Path $root 'missing-port') `
+            -Config Release -ExeName '2ship.exe' -GameId mm -ExcludeGameArchives | Out-Null
+    } catch {
+        $missingPortArchiveBlocked = $true
+    }
+    if (-not $missingPortArchiveBlocked) {
+        throw 'V-LINK-8 falhou: pacote público aceitou host sem 2ship.o2r'
+    }
+    Write-Host 'V-LINK-8: pacote público exige o archive redistribuível do port.' -ForegroundColor Green
 
     $stage = Join-Path $root 'stage'
     $publish = Join-Path $root 'publish-existing'

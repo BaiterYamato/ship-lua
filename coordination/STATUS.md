@@ -176,3 +176,14 @@ HOTKEY-001, EXAMPLE-001, MM-JUMP-001 e o helper inicial de build). O PR #31 est�
 - PRs de runtime dos hosts: OoT #13 e MM #10 (draft, stacked).
 - Entrega pública: `v0.1.0-alpha.1`; `v0.1.0` permanece dependente dos critérios
   de estabilização já listados acima.
+
+## LINK-005 — hotfix dos archives runtime (review)
+
+- Causa de `Missing soh.o2r`/`Missing 2ship.o2r` confirmada: o scanner ROM-free
+  removia também os archives redistribuíveis próprios dos ports.
+- Empacotamento corrigido para exigir `soh.o2r` e `2ship.o2r`, mantendo ROMs e
+  `oot.o2r`/`oot.otr`/`mm.o2r` fora do release.
+- MSVC Release e 32/32 testes verdes; regressões `V-LINK-7` e `V-LINK-8` verdes.
+- Smoke real com os assets do usuário: OoT e MM iniciaram sem diálogo de archive
+  ausente.
+- Correção pública destinada a `v0.1.0-alpha.2`; `alpha.1` fica obsoleta.

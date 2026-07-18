@@ -21,8 +21,9 @@
     Repassa `-SkipAssets` aos builds dos hosts.
 
 .PARAMETER RomFree
-    Produz um pacote redistribuível sem ROMs, O2R ou OTR e falha se qualquer
-    arquivo protegido for encontrado na saída.
+    Produz um pacote redistribuível sem ROMs nem archives derivados do jogo.
+    Preserva `soh.o2r` e `2ship.o2r`, que são archives runtime públicos dos
+    ports e são obrigatórios pelos respectivos executáveis.
 
 .PARAMETER SkipHostBuild
     Reutiliza executáveis Release já validados e executa apenas launcher e pacote.
@@ -222,7 +223,7 @@ try {
     Publish-LinkSpanPackage -StageDir $stageDir -Destination $outputDir
     if ($RomFree) {
         Assert-LinkSpanPackageIsRomFree -Path $outputDir | Out-Null
-        Write-Host '    [OK] ROM-free scan: no .z64, .n64, .v64, .o2r, or .otr files.' -ForegroundColor Green
+        Write-Host '    [OK] ROM-free scan: no ROM or user-derived game archive files.' -ForegroundColor Green
     }
 } finally {
     if (Test-Path -LiteralPath $stageDir) {
