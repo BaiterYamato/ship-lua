@@ -24,6 +24,13 @@ local FUNCTIONS = {
   { name = "ship.log.info", availability = "common", required_arguments = 1 },
   { name = "ship.log.warn", availability = "common", required_arguments = 1 },
   { name = "ship.log.error", availability = "common", required_arguments = 1 },
+  { name = "ship.timer.after", availability = "common", required_arguments = 2 },
+  { name = "ship.timer.every", availability = "common", required_arguments = 2 },
+  { name = "ship.timer.cancel", availability = "common", required_arguments = 1 },
+  { name = "ship.storage.get", availability = "common", required_arguments = 1 },
+  { name = "ship.storage.set", availability = "common", required_arguments = 2 },
+  { name = "ship.storage.delete", availability = "common", required_arguments = 1 },
+  { name = "ship.storage.clear", availability = "common", required_arguments = 0 },
 }
 
 local EVENTS = { "game.ready", "game.frame", "game.shutdown", "scene.enter", "actor.init", "actor.update", "actor.destroy", "save.loaded", "text.open", "audio.sequence_started", "input.hotkey" }
@@ -33,8 +40,8 @@ local ENUM_VALUES = {
 }
 
 local CONTRACT_CAPABILITIES = {
-  oot = { "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "oot.player.jump", "oot.spawn_dog" },
-  mm = { "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "mm.player.jump", "mm.spawn_dog" },
+  oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "oot.player.jump", "oot.spawn_dog" },
+  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "mm.player.jump", "mm.spawn_dog" },
 }
 
 local failures = {}
@@ -116,6 +123,9 @@ check(pcall(ship.log.debug, "contract probe"), "ship.log.debug deveria aceitar m
 check(pcall(ship.log.info, "contract probe"), "ship.log.info deveria aceitar mensagem textual")
 check(pcall(ship.log.warn, "contract probe"), "ship.log.warn deveria aceitar mensagem textual")
 check(pcall(ship.log.error, "contract probe"), "ship.log.error deveria aceitar mensagem textual")
+local ok_value, value = pcall(ship.storage.clear)
+check(ok_value, "ship.storage.clear deveria executar sem argumentos")
+if ok_value then check_return_type("ship.storage.clear", "integer", value) end
 
 -- Capabilities: feature detection reflete o contexto anunciado pelo host.
 local granted = CONTRACT_CAPABILITIES[host] or {}

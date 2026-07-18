@@ -96,6 +96,23 @@ void PushEventPayload(lua_State* state, const EventPayload& payload) {
     PushEventObject(state, payload);
 }
 
+void PushStorageValue(lua_State* state, const KeyValueStorage::Value& value) {
+    std::visit(
+        [state](const auto& item) {
+            using T = std::decay_t<decltype(item)>;
+            if constexpr (std::is_same_v<T, bool>) {
+                lua_pushboolean(state, item);
+            } else if constexpr (std::is_same_v<T, std::int64_t>) {
+                lua_pushinteger(state, static_cast<lua_Integer>(item));
+            } else if constexpr (std::is_same_v<T, double>) {
+                lua_pushnumber(state, static_cast<lua_Number>(item));
+            } else {
+                lua_pushlstring(state, item.data(), item.size());
+            }
+        },
+        value);
+}
+
 const char* ErrorMessage(ErrorCode code) {
     switch (code) {
         case ErrorCode::InvalidArgument: return "argumento inválido para a API ship";
@@ -122,7 +139,9 @@ bool IsValidHotkeyId(std::string_view id) {
     });
 }
 
-Result<void> ValidateHostContext(const LuaApiHostContext& context) {
+} // namespace
+
+Result<void> ValidateLuaApiHostContext(const LuaApiHostContext& context) {
     if (!context.gameId.empty() && context.gameId != "oot" && context.gameId != "mm") {
         return Result<void>::err(ErrorCode::InvalidArgument,
                                  "host game id must be 'oot', 'mm', or empty");
@@ -148,8 +167,6 @@ Result<void> ValidateHostContext(const LuaApiHostContext& context) {
     return Result<void>::ok();
 }
 
-} // namespace
-
 LuaApiBinding::LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logger logger,
                              LuaApiHostContext hostContext, std::size_t modLoadOrder,
                              int modPriority, std::size_t maxConsecutiveFailures)
@@ -158,6 +175,8 @@ LuaApiBinding::LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logge
       mLogger(std::move(logger)),
       mHostContext(std::move(hostContext)),
       mHotkeys(mHostContext.hotkeys),
+      mTimers(mHostContext.timers),
+      mStorage(mHostContext.storage),
       mModLoadOrder(modLoadOrder),
       mModPriority(modPriority),
       mMaxConsecutiveFailures(std::max<std::size_t>(1, maxConsecutiveFailures)) {
@@ -183,7 +202,7 @@ Result<void> LuaApiBinding::Install() {
     if (mInstalled) {
         return Result<void>::err(ErrorCode::InvalidState, "ship API is already installed");
     }
-    const auto validContext = ValidateHostContext(mHostContext);
+    const auto validContext = ValidateLuaApiHostContext(mHostContext);
     if (!validContext.isOk()) {
         return validContext;
     }
@@ -259,6 +278,19 @@ void LuaApiBinding::BuildModule(lua_State* state) {
     SetFunction(state, -1, "register", &LuaApiBinding::HotkeysRegister, this);
     lua_setfield(state, ship, "hotkeys");
 
+    lua_newtable(state);
+    SetFunction(state, -1, "after", &LuaApiBinding::TimerAfter, this);
+    SetFunction(state, -1, "every", &LuaApiBinding::TimerEvery, this);
+    SetFunction(state, -1, "cancel", &LuaApiBinding::TimerCancel, this);
+    lua_setfield(state, ship, "timer");
+
+    lua_newtable(state);
+    SetFunction(state, -1, "get", &LuaApiBinding::StorageGet, this);
+    SetFunction(state, -1, "set", &LuaApiBinding::StorageSet, this);
+    SetFunction(state, -1, "delete", &LuaApiBinding::StorageDelete, this);
+    SetFunction(state, -1, "clear", &LuaApiBinding::StorageClear, this);
+    lua_setfield(state, ship, "storage");
+
     lua_pushvalue(state, ship);
     mShipReference = luaL_ref(state, LUA_REGISTRYINDEX);
     lua_pop(state, 1);
@@ -296,6 +328,27 @@ void LuaApiBinding::Uninstall() noexcept {
         }
     }
     mCallbacks.clear();
+    for (auto& [id, callback] : mTimerCallbacks) {
+        (void)id;
+        callback->active = false;
+    }
+    if (mTimers != nullptr) {
+        try {
+            mTimers->CancelAll(mRuntime.ModId());
+        } catch (...) {
+            // O scheduler não pode reter referência chamável para o estado Lua.
+        }
+    }
+    if (state != nullptr) {
+        for (auto& [id, callback] : mTimerCallbacks) {
+            (void)id;
+            if (callback->registryReference != kNoReference) {
+                luaL_unref(state, LUA_REGISTRYINDEX, callback->registryReference);
+                callback->registryReference = kNoReference;
+            }
+        }
+    }
+    mTimerCallbacks.clear();
     if (state != nullptr) {
         for (auto& [id, callback] : mHotkeyCallbacks) {
             (void)id;
@@ -700,6 +753,292 @@ int LuaApiBinding::RegisterHotkey(lua_State* state, const char*& error) {
     }
     lua_pushboolean(state, registered ? 1 : 0);
     return 1;
+}
+
+// ---------------------------------------------------------------------------
+// ship.timer — frames inteiros (plan-sdk.md §8.1); o host injeta o scheduler
+// ---------------------------------------------------------------------------
+
+int LuaApiBinding::TimerAfter(lua_State* state) noexcept {
+    return ScheduleTimer(state, false);
+}
+
+int LuaApiBinding::TimerEvery(lua_State* state) noexcept {
+    return ScheduleTimer(state, true);
+}
+
+int LuaApiBinding::ScheduleTimer(lua_State* state, bool repeating) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr) {
+        return Fail(state, "contexto da API ship indisponível");
+    }
+    if (!lua_isinteger(state, 1)) {
+        return Fail(state, repeating ? "ship.timer.every exige um intervalo em frames inteiro"
+                                     : "ship.timer.after exige um atraso em frames inteiro");
+    }
+    const lua_Integer frames = lua_tointeger(state, 1);
+    if (frames < 1) {
+        return Fail(state, "ship.timer exige um atraso de pelo menos 1 frame");
+    }
+    if (!lua_isfunction(state, 2)) {
+        return Fail(state, repeating ? "ship.timer.every exige um callback"
+                                     : "ship.timer.after exige um callback");
+    }
+    ErrorCode error = ErrorCode::Ok;
+    TimerHandle handle{};
+    try {
+        auto result = binding->DoScheduleTimer(state, repeating,
+                                               static_cast<std::uint64_t>(frames), 2);
+        if (result.isOk()) {
+            handle = *result.value;
+        } else {
+            error = result.code;
+        }
+    } catch (...) {
+        error = ErrorCode::HostFailure;
+    }
+    if (error != ErrorCode::Ok) {
+        return Fail(state, ErrorMessage(error));
+    }
+    lua_pushinteger(state, static_cast<lua_Integer>(handle.id));
+    return 1;
+}
+
+Result<TimerHandle> LuaApiBinding::DoScheduleTimer(lua_State* state, bool repeating,
+                                                   std::uint64_t frames, int callbackIndex) {
+    if (mTimers == nullptr) {
+        return Result<TimerHandle>::err(ErrorCode::Unsupported,
+                                        ErrorMessage(ErrorCode::Unsupported));
+    }
+    if (mTimerCallbacks.size() >= mMaxTimersPerMod) {
+        return Result<TimerHandle>::err(ErrorCode::ResourceLimit,
+                                        ErrorMessage(ErrorCode::ResourceLimit));
+    }
+    callbackIndex = lua_absindex(state, callbackIndex);
+    lua_pushvalue(state, callbackIndex);
+    const int reference = luaL_ref(state, LUA_REGISTRYINDEX);
+    if (reference == LUA_NOREF) {
+        return Result<TimerHandle>::err(ErrorCode::HostFailure,
+                                        "não foi possível reter o callback do timer");
+    }
+
+    auto callback = std::make_shared<LuaCallback>();
+    callback->registryReference = reference;
+    auto handleHolder = std::make_shared<std::uint64_t>(0);
+
+    LuaRuntime* runtime = &mRuntime;
+    const std::string modId = mRuntime.ModId();
+    Logger logger = mLogger;
+    TimerCallback onFire = [this, runtime, callback, handleHolder, logger, modId,
+                            repeating]() {
+        if (!callback->active || callback->registryReference == kNoReference) {
+            return;
+        }
+        lua_State* s = runtime->State();
+        if (s == nullptr) {
+            return;
+        }
+        lua_pushcfunction(s, TracebackHandler);
+        const int handlerIndex = lua_gettop(s);
+        lua_rawgeti(s, LUA_REGISTRYINDEX, callback->registryReference);
+        const int status = lua_pcall(s, 0, 0, handlerIndex);
+        std::string failure;
+        if (status != LUA_OK) {
+            size_t length = 0;
+            const char* message = lua_tolstring(s, -1, &length);
+            failure = message != nullptr ? std::string(message, length)
+                                         : "callback de timer falhou sem mensagem";
+            lua_pop(s, 2);
+            logger.error(modId, failure);
+        } else {
+            lua_pop(s, 1);
+        }
+        if (!repeating) {
+            // Timers one-shot disparam uma única vez: libera o callback Lua e
+            // remove o registro imediatamente, sem esperar cancel/unload.
+            callback->active = false;
+            if (callback->registryReference != kNoReference) {
+                luaL_unref(s, LUA_REGISTRYINDEX, callback->registryReference);
+                callback->registryReference = kNoReference;
+            }
+            mTimerCallbacks.erase(*handleHolder);
+        }
+        if (status != LUA_OK) {
+            // O scheduler contabiliza a falha e desativa após falhas repetidas.
+            throw std::runtime_error(failure);
+        }
+    };
+
+    Result<TimerHandle> scheduled =
+        repeating ? mTimers->Every(modId, frames, {mModLoadOrder, mModPriority}, std::move(onFire))
+                  : mTimers->After(modId, frames, {mModLoadOrder, mModPriority}, std::move(onFire));
+    if (!scheduled.isOk()) {
+        luaL_unref(state, LUA_REGISTRYINDEX, reference);
+        return scheduled;
+    }
+    *handleHolder = scheduled.value->id;
+    mTimerCallbacks.emplace(scheduled.value->id, std::move(callback));
+    return scheduled;
+}
+
+int LuaApiBinding::TimerCancel(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr || !lua_isinteger(state, 1)) {
+        return Fail(state, "ship.timer.cancel exige um handle inteiro");
+    }
+    const lua_Integer raw = lua_tointeger(state, 1);
+    if (raw <= 0) {
+        return Fail(state, "handle de timer inválido");
+    }
+    const std::uint64_t id = static_cast<std::uint64_t>(raw);
+    const auto found = binding->mTimerCallbacks.find(id);
+    if (found == binding->mTimerCallbacks.end()) {
+        return Fail(state, ErrorMessage(ErrorCode::InvalidHandle));
+    }
+    if (binding->mTimers != nullptr) {
+        try {
+            binding->mTimers->Cancel({id});
+        } catch (...) {
+            // O callback já está inativo; o scheduler pode descartar o registro.
+        }
+    }
+    found->second->active = false;
+    if (found->second->registryReference != kNoReference) {
+        luaL_unref(state, LUA_REGISTRYINDEX, found->second->registryReference);
+        found->second->registryReference = kNoReference;
+    }
+    binding->mTimerCallbacks.erase(found);
+    lua_pushboolean(state, 1);
+    return 1;
+}
+
+// ---------------------------------------------------------------------------
+// ship.storage — namespace automático por mod (plan-sdk.md §8.18)
+// ---------------------------------------------------------------------------
+
+int LuaApiBinding::StorageGet(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr || binding->mStorage == nullptr) {
+        return Fail(state, ErrorMessage(ErrorCode::Unsupported));
+    }
+    if (lua_type(state, 1) != LUA_TSTRING) {
+        return Fail(state, "ship.storage.get exige uma chave textual");
+    }
+    size_t length = 0;
+    const char* key = lua_tolstring(state, 1, &length);
+    if (key == nullptr) {
+        return Fail(state, "ship.storage.get exige uma chave textual");
+    }
+    try {
+        auto result = binding->mStorage->Get(binding->mRuntime.ModId(), std::string(key, length));
+        if (!result.isOk()) {
+            return Fail(state, ErrorMessage(result.code));
+        }
+        if (result.value->has_value()) {
+            PushStorageValue(state, **result.value);
+            return 1;
+        }
+    } catch (...) {
+        return Fail(state, ErrorMessage(ErrorCode::HostFailure));
+    }
+    if (lua_gettop(state) >= 2) {
+        lua_pushvalue(state, 2);
+        return 1;
+    }
+    lua_pushnil(state);
+    return 1;
+}
+
+int LuaApiBinding::StorageSet(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr || binding->mStorage == nullptr) {
+        return Fail(state, ErrorMessage(ErrorCode::Unsupported));
+    }
+    if (lua_type(state, 1) != LUA_TSTRING) {
+        return Fail(state, "ship.storage.set exige uma chave textual");
+    }
+    size_t length = 0;
+    const char* key = lua_tolstring(state, 1, &length);
+    if (key == nullptr) {
+        return Fail(state, "ship.storage.set exige uma chave textual");
+    }
+    KeyValueStorage::Value value;
+    switch (lua_type(state, 2)) {
+        case LUA_TBOOLEAN:
+            value = lua_toboolean(state, 2) != 0;
+            break;
+        case LUA_TNUMBER:
+            if (lua_isinteger(state, 2)) {
+                value = static_cast<std::int64_t>(lua_tointeger(state, 2));
+            } else {
+                value = static_cast<double>(lua_tonumber(state, 2));
+            }
+            break;
+        case LUA_TSTRING: {
+            size_t size = 0;
+            const char* text = lua_tolstring(state, 2, &size);
+            value = text != nullptr ? std::string(text, size) : std::string{};
+            break;
+        }
+        default:
+            return Fail(state,
+                        "ship.storage.set aceita somente booleano, número ou texto");
+    }
+    try {
+        const auto stored =
+            binding->mStorage->Set(binding->mRuntime.ModId(), std::string(key, length),
+                                   std::move(value));
+        if (!stored.isOk()) {
+            return Fail(state, ErrorMessage(stored.code));
+        }
+    } catch (...) {
+        return Fail(state, ErrorMessage(ErrorCode::HostFailure));
+    }
+    lua_pushboolean(state, 1);
+    return 1;
+}
+
+int LuaApiBinding::StorageDelete(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr || binding->mStorage == nullptr) {
+        return Fail(state, ErrorMessage(ErrorCode::Unsupported));
+    }
+    if (lua_type(state, 1) != LUA_TSTRING) {
+        return Fail(state, "ship.storage.delete exige uma chave textual");
+    }
+    size_t length = 0;
+    const char* key = lua_tolstring(state, 1, &length);
+    if (key == nullptr) {
+        return Fail(state, "ship.storage.delete exige uma chave textual");
+    }
+    try {
+        auto removed = binding->mStorage->Delete(binding->mRuntime.ModId(),
+                                                 std::string(key, length));
+        if (!removed.isOk()) {
+            return Fail(state, ErrorMessage(removed.code));
+        }
+        lua_pushboolean(state, *removed.value ? 1 : 0);
+        return 1;
+    } catch (...) {
+        return Fail(state, ErrorMessage(ErrorCode::HostFailure));
+    }
+}
+
+int LuaApiBinding::StorageClear(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr || binding->mStorage == nullptr) {
+        return Fail(state, ErrorMessage(ErrorCode::Unsupported));
+    }
+    try {
+        auto cleared = binding->mStorage->Clear(binding->mRuntime.ModId());
+        if (!cleared.isOk()) {
+            return Fail(state, ErrorMessage(cleared.code));
+        }
+        lua_pushinteger(state, static_cast<lua_Integer>(*cleared.value));
+        return 1;
+    } catch (...) {
+        return Fail(state, ErrorMessage(ErrorCode::HostFailure));
+    }
 }
 
 EventFlow LuaApiBinding::InvokeCallback(const std::shared_ptr<LuaCallback>& callback,

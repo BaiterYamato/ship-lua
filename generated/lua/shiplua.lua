@@ -8,6 +8,9 @@
 --- Identificador opaco de inscrição em evento.
 ---@alias ShipLuaSubscription integer
 
+--- Identificador opaco de timer em frames.
+---@alias ShipLuaTimerHandle integer
+
 --- Opções determinísticas de inscrição.
 ---@class ShipLuaEventOptions
 ---@field priority? integer
@@ -78,6 +81,8 @@ ship.log = ship.log or {}
 ship.mm = ship.mm or {}
 ship.oot = ship.oot or {}
 ship.runtime = ship.runtime or {}
+ship.storage = ship.storage or {}
+ship.timer = ship.timer or {}
 ship.mm.player = ship.mm.player or {}
 ship.oot.player = ship.oot.player or {}
 
@@ -160,3 +165,41 @@ function ship.log.warn(message) end
 ---@param message string
 ---@return nil
 function ship.log.error(message) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.timers; erros: invalid_argument, resource_limit, unsupported.
+---@param frames integer
+---@param callback function
+---@return ShipLuaTimerHandle
+function ship.timer.after(frames, callback) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.timers; erros: invalid_argument, resource_limit, unsupported.
+---@param frames integer
+---@param callback function
+---@return ShipLuaTimerHandle
+function ship.timer.every(frames, callback) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.timers; erros: invalid_argument, invalid_handle.
+---@param handle ShipLuaTimerHandle
+---@return boolean
+function ship.timer.cancel(handle) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.storage; erros: invalid_argument, unsupported.
+---@param key string
+---@param default? any
+---@return any
+function ship.storage.get(key, default) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.storage; erros: invalid_argument, resource_limit, unsupported.
+---@param key string
+---@param value any
+---@return boolean
+function ship.storage.set(key, value) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.storage; erros: invalid_argument, unsupported.
+---@param key string
+---@return boolean
+function ship.storage.delete(key) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.storage; erros: unsupported.
+---@return integer
+function ship.storage.clear() end

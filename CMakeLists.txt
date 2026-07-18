@@ -97,6 +97,12 @@ add_custom_command(
     VERBATIM)
 add_custom_target(package_examples DEPENDS "${SHIPLUA_HELLO_WORLD_PACKAGE}")
 
+# O mod test runner executa pacotes .shipmod em alguns testes do ctest; o
+# pacote de exemplo precisa existir antes dele rodar.
+add_executable(shiplua_mod_test_runner tools/mod_test_runner.cpp)
+target_link_libraries(shiplua_mod_test_runner PRIVATE shiplua)
+add_dependencies(shiplua_mod_test_runner package_examples)
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------

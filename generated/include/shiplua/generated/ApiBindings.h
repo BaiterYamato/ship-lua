@@ -20,6 +20,8 @@ enum class GameId {
 
 using Subscription = std::uint64_t;
 
+using TimerHandle = std::uint64_t;
+
 struct EventOptions {
     std::optional<std::int64_t> priority;
 };
@@ -78,6 +80,13 @@ enum class FunctionId {
     ShipLogInfo,
     ShipLogWarn,
     ShipLogError,
+    ShipTimerAfter,
+    ShipTimerEvery,
+    ShipTimerCancel,
+    ShipStorageGet,
+    ShipStorageSet,
+    ShipStorageDelete,
+    ShipStorageClear,
 };
 
 struct FunctionBinding {
@@ -182,8 +191,62 @@ inline constexpr std::array<FieldBinding, 1> kShipLogErrorArguments{{
 inline constexpr std::array<std::string_view, 1> kShipLogErrorErrors{{
     "invalid_argument",
 }};
+inline constexpr std::array<FieldBinding, 2> kShipTimerAfterArguments{{
+    {"frames", "integer", true},
+    {"callback", "callback", true},
+}};
+inline constexpr std::array<std::string_view, 3> kShipTimerAfterErrors{{
+    "invalid_argument",
+    "resource_limit",
+    "unsupported",
+}};
+inline constexpr std::array<FieldBinding, 2> kShipTimerEveryArguments{{
+    {"frames", "integer", true},
+    {"callback", "callback", true},
+}};
+inline constexpr std::array<std::string_view, 3> kShipTimerEveryErrors{{
+    "invalid_argument",
+    "resource_limit",
+    "unsupported",
+}};
+inline constexpr std::array<FieldBinding, 1> kShipTimerCancelArguments{{
+    {"handle", "timer_handle", true},
+}};
+inline constexpr std::array<std::string_view, 2> kShipTimerCancelErrors{{
+    "invalid_argument",
+    "invalid_handle",
+}};
+inline constexpr std::array<FieldBinding, 2> kShipStorageGetArguments{{
+    {"key", "string", true},
+    {"default", "any", false},
+}};
+inline constexpr std::array<std::string_view, 2> kShipStorageGetErrors{{
+    "invalid_argument",
+    "unsupported",
+}};
+inline constexpr std::array<FieldBinding, 2> kShipStorageSetArguments{{
+    {"key", "string", true},
+    {"value", "any", true},
+}};
+inline constexpr std::array<std::string_view, 3> kShipStorageSetErrors{{
+    "invalid_argument",
+    "resource_limit",
+    "unsupported",
+}};
+inline constexpr std::array<FieldBinding, 1> kShipStorageDeleteArguments{{
+    {"key", "string", true},
+}};
+inline constexpr std::array<std::string_view, 2> kShipStorageDeleteErrors{{
+    "invalid_argument",
+    "unsupported",
+}};
+inline constexpr std::array<FieldBinding, 0> kShipStorageClearArguments{{
+}};
+inline constexpr std::array<std::string_view, 1> kShipStorageClearErrors{{
+    "unsupported",
+}};
 
-inline constexpr std::array<FunctionBinding, 17> kFunctions{{
+inline constexpr std::array<FunctionBinding, 24> kFunctions{{
     {FunctionId::ShipGameId, "ship.game.id", "0.1.0", "stable", "game_id", "common", {}, kShipGameIdArguments, kShipGameIdErrors},
     {FunctionId::ShipGameHostVersion, "ship.game.host_version", "0.1.0", "stable", "string", "common", {}, kShipGameHostVersionArguments, kShipGameHostVersionErrors},
     {FunctionId::ShipRuntimeVersion, "ship.runtime.version", "0.1.0", "stable", "string", "common", {}, kShipRuntimeVersionArguments, kShipRuntimeVersionErrors},
@@ -201,6 +264,13 @@ inline constexpr std::array<FunctionBinding, 17> kFunctions{{
     {FunctionId::ShipLogInfo, "ship.log.info", "0.1.0", "stable", "nil", "common", {}, kShipLogInfoArguments, kShipLogInfoErrors},
     {FunctionId::ShipLogWarn, "ship.log.warn", "0.1.0", "stable", "nil", "common", {}, kShipLogWarnArguments, kShipLogWarnErrors},
     {FunctionId::ShipLogError, "ship.log.error", "0.1.0", "stable", "nil", "common", {}, kShipLogErrorArguments, kShipLogErrorErrors},
+    {FunctionId::ShipTimerAfter, "ship.timer.after", "0.3.0", "experimental", "timer_handle", "common", "core.timers", kShipTimerAfterArguments, kShipTimerAfterErrors},
+    {FunctionId::ShipTimerEvery, "ship.timer.every", "0.3.0", "experimental", "timer_handle", "common", "core.timers", kShipTimerEveryArguments, kShipTimerEveryErrors},
+    {FunctionId::ShipTimerCancel, "ship.timer.cancel", "0.3.0", "experimental", "boolean", "common", "core.timers", kShipTimerCancelArguments, kShipTimerCancelErrors},
+    {FunctionId::ShipStorageGet, "ship.storage.get", "0.3.0", "experimental", "any", "common", "core.storage", kShipStorageGetArguments, kShipStorageGetErrors},
+    {FunctionId::ShipStorageSet, "ship.storage.set", "0.3.0", "experimental", "boolean", "common", "core.storage", kShipStorageSetArguments, kShipStorageSetErrors},
+    {FunctionId::ShipStorageDelete, "ship.storage.delete", "0.3.0", "experimental", "boolean", "common", "core.storage", kShipStorageDeleteArguments, kShipStorageDeleteErrors},
+    {FunctionId::ShipStorageClear, "ship.storage.clear", "0.3.0", "experimental", "integer", "common", "core.storage", kShipStorageClearArguments, kShipStorageClearErrors},
 }};
 
 struct EventBinding {
@@ -273,7 +343,11 @@ struct CapabilityBinding {
     bool supportsMm;
 };
 
-inline constexpr std::array<CapabilityBinding, 16> kCapabilities{{
+inline constexpr std::array<CapabilityBinding, 20> kCapabilities{{
+    {"core.events", "contract", true, true},
+    {"core.timers", "contract", true, true},
+    {"core.input", "contract", true, true},
+    {"core.storage", "contract", true, true},
     {"scene.events", "contract", true, true},
     {"actor.events", "contract", true, true},
     {"save.events", "contract", true, true},

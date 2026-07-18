@@ -1,0 +1,8 @@
+id = "fixture.passing"
+name = "Fixture Passing"
+version = "0.1.0"
+api = ">=0.1 <0.3"
+entrypoint = "main.lua"
+description = "Fixture do mod test runner: todos os testes passam."
+authors = ["BaiterYamato"]
+games = ["oot", "mm"]

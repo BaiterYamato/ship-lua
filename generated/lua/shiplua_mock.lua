@@ -8,8 +8,8 @@ local validate = require("shiplua_validate")
 local M = {}
 
 M.contract_capabilities = {
-  oot = { "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "oot.player.jump", "oot.spawn_dog" },
-  mm = { "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "mm.player.jump", "mm.spawn_dog" },
+  oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "oot.player.jump", "oot.spawn_dog" },
+  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "mm.player.jump", "mm.spawn_dog" },
 }
 
 M.host = {

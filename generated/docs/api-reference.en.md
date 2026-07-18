@@ -11,6 +11,7 @@ API version: `0.3.0`. Schema version: `1`.
 |---|---|---|---|
 | `game_id` | `enum` | `oot`, `mm` | Public identifier of the host game. |
 | `subscription` | `opaque` | Lua `integer` | Opaque event subscription identifier. |
+| `timer_handle` | `opaque` | Lua `integer` | Opaque frame timer identifier. |
 | `event_options` | `object` | `priority: integer?` | Deterministic subscription options. |
 | `actor_handle` | `object` | `slot: integer`, `generation: integer`, `game: game_id` | Handle validated by slot, generation and host. |
 | `actor_snapshot` | `object` | `handle: actor_handle`, `actor_id: integer`, `category: integer` | Minimal and stable actor snapshot. |
@@ -37,6 +38,13 @@ API version: `0.3.0`. Schema version: `1`.
 | `ship.log.info` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
 | `ship.log.warn` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
 | `ship.log.error` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.timer.after` | `frames: integer`, `callback: callback` | `timer_handle` | `common` | `experimental` | `0.3.0` | `core.timers` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.timer.every` | `frames: integer`, `callback: callback` | `timer_handle` | `common` | `experimental` | `0.3.0` | `core.timers` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.timer.cancel` | `handle: timer_handle` | `boolean` | `common` | `experimental` | `0.3.0` | `core.timers` | `invalid_argument`, `invalid_handle` |
+| `ship.storage.get` | `key: string`, `default: any?` | `any` | `common` | `experimental` | `0.3.0` | `core.storage` | `invalid_argument`, `unsupported` |
+| `ship.storage.set` | `key: string`, `value: any` | `boolean` | `common` | `experimental` | `0.3.0` | `core.storage` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.storage.delete` | `key: string` | `boolean` | `common` | `experimental` | `0.3.0` | `core.storage` | `invalid_argument`, `unsupported` |
+| `ship.storage.clear` | — | `integer` | `common` | `experimental` | `0.3.0` | `core.storage` | `unsupported` |
 
 ## Events
 
@@ -58,6 +66,10 @@ API version: `0.3.0`. Schema version: `1`.
 
 | Capability | Status | Hosts | Description |
 |---|---|---|---|
+| `core.events` | `contract` | `oot`, `mm` | Core host events and lifecycle. |
+| `core.timers` | `contract` | `oot`, `mm` | Frame timers with per-mod ownership. |
+| `core.input` | `contract` | `oot`, `mm` | Hotkey registration and input events. |
+| `core.storage` | `contract` | `oot`, `mm` | Key-value storage with per-mod namespace. |
 | `scene.events` | `contract` | `oot`, `mm` | Common scene events. |
 | `actor.events` | `contract` | `oot`, `mm` | Common actor events with handles and snapshots. |
 | `save.events` | `contract` | `oot`, `mm` | Common save loading events. |

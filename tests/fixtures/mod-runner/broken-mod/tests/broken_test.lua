@@ -1,0 +1,5 @@
+describe("quebrado", function()
+    it("nunca executa", function()
+        assert.is_true(true)
+    end)
+end)
