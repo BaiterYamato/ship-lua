@@ -1,55 +1,119 @@
-# Plans Ledger
+# ShipLua Agent Plans
 
-This file is the fixed, append-only plan ledger for this repository.
+Ledger append-only de planos de execução. Entradas anteriores não devem ser reescritas;
+o progresso é registrado em novas seções `UPDATE` com o mesmo identificador.
+
+## PLAN MODSDK-004-MSVC-20260718
+
+- Status: in_progress
+- Criado: 2026-07-18
+- Escopo: mixed
+- Título: Corrigir crash MSVC do PR 39 e integrar PRs SDK
+- Resumo: eliminar o fail-fast `0xc0000409` sem pragmas de otimização, validar
+  Release/MSVC e preparar a integração segura das PRs abertas.
+- Milestones:
+  1. Reproduzir minimamente o crash no PR 39.
+  2. Refatorar callbacks Lua para não executar `lua_error` com estado C++ vivo.
+  3. Executar build Release/MSVC e CTest completos.
+  4. Atualizar o head do PR 39 e confirmar CI verde.
+  5. Integrar as PRs 39, 36 e 32, resolvendo conflitos sem regressões.
+- Refs:
+  - https://github.com/BaiterYamato/link-span/pull/39
+  - `C:\Users\leolo\Downloads\plan(sdk).md`
+
+## UPDATE MODSDK-004-MSVC-20260718 — 2026-07-18
+
+- Status: in_progress
+- Concluído:
+  - `0xc0000409` reproduzido com `pcall(ship.storage.get)` em Release/MSVC.
+  - callbacks de events, logging, timers e storage separados em wrappers Lua e
+    helpers C++ que não executam `lua_error` com objetos não triviais vivos.
+  - regressões de argumentos inválidos adicionadas ao mock runtime.
+  - build Release/MSVC concluído e 45/45 testes CTest aprovados.
+- Próximo: publicar a correção no head do PR 39 e confirmar os checks remotos.
+
+## UPDATE MODSDK-004-MSVC-20260718 — PR 36
+
+- Status: in_progress
+- Escopo: integrar `MODSDK-001` sobre o `main` após o merge do PR 39.
+- Milestones:
+  1. Resolver os conflitos de capability registry com timers/storage.
+  2. Eliminar o `longjmp` inseguro em `CapabilityList/Info/Providers`.
+  3. Validar Release/MSVC e atualizar o head do PR 36.
+  4. Confirmar CI verde e mergear o PR 36.
+
+## UPDATE MODSDK-004-MSVC-20260718 — PR 36 validado
+
+- Status: in_progress
+- Concluído:
+  - conflitos com o PR 39 resolvidos no contexto, bindings e testes;
+  - crash `0xC0000005` reproduzido em `lua_api_binding_tests`;
+  - corrupção tardia `0xc0000409` reproduzida em `api_contract_tests`;
+  - callbacks de capabilities separados por fronteira não-inline segura;
+  - expectativa legada alinhada à API gerada `0.3.0`;
+  - build Release/MSVC e 46/46 testes CTest aprovados;
+  - sonda AddressSanitizer aprovada em OoT e MM.
+- Próximo: atualizar o PR 36, confirmar CI verde e mergear; depois resolver o PR 32.
+
+## UPDATE MODSDK-004-MSVC-20260718 — PRs 39 e 36 integradas
+
+- Status: in_progress
+- Concluído:
+  - PR #39 corrigida, validada em Release/MSVC 45/45 e integrada em `main`;
+  - PR #36 reconciliada com timers/storage/mock runtime, validada em
+    Release/MSVC 46/46 e integrada em `main`;
+  - checks remotos Linux, Windows e package verdes nas duas integrações.
+- Próximo: reconciliar a PR #32 com o SDK atual, validar launcher e pacote e
+  integrar somente com CI verde.
 
 ## [PLN-20260716-0001] English ROM-free Link-Span GitHub release
-- createdUtc: 2026-07-16T17:59:49Z
-- status: in_progress
-- scope: mixed
-- summary: Finish the English launcher UX, verify automatic single-game selection and dual-game mod gating, build a Release package with no protected assets, then publish code and artifact to GitHub.
-- milestones:
-  1. Translate every launcher-facing message to English
-  2. Extend launcher tests for single-game auto-launch, dual chooser prerequisites, and dual-mod blocking
-  3. Build and smoke-test the Release package with synthetic fixtures only
-  4. Scan repository and artifact for ROM/O2R/OTR content
-  5. Commit, push, open a draft PR, and publish a GitHub prerelease asset
-- tags: link-span, launcher, release, rom-free
-- refs:
-  - src/launcher/main.cpp
-  - tests/launcher/AssetDiscoveryTests.cpp
-  - docs/link-span-process.md
-  - coordination/claims/LINK-004.md
 
-## [PLN-20260716-0001][UPDATE] 2026-07-16T18:29:28Z
+- createdUtc: 2026-07-16T17:59:49Z
 - status: done
-- note: English launcher policy, dual-game mod gating, ROM-free packaging, Release build, 32/32 tests, visual smoke checks, GitHub branches and draft reviews completed.
+- scope: mixed
+- summary: English launcher UX, automatic single-game selection, dual-game mod
+  gating and a ROM-free Windows Release package.
 - refs:
   - https://github.com/BaiterYamato/link-span/pull/32
-  - https://github.com/BaiterYamato/Shipwright-HyliaFoundry/pull/13
-  - https://github.com/BaiterYamato/2ship2harkinian/pull/10
   - https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.1
+  - coordination/handoffs/LINK-004.md
 
 ## [PLN-20260716-0002] Restore required port archives in ROM-free release
-- createdUtc: 2026-07-16T18:44:55Z
-- status: in_progress
-- scope: mixed
-- summary: Fix the public package so it includes redistributable soh.o2r and 2ship.o2r runtime archives while excluding user ROMs and oot.o2r/mm.o2r, then rebuild, smoke-test, and publish a corrected prerelease.
-- milestones:
-  1. Classify port runtime archives separately from user-derived game archives
-  2. Add a packaging regression that requires soh.o2r and 2ship.o2r
-  3. Build and scan a corrected Windows x64 Release package
-  4. Run both real hosts with synthetic base archive names and confirm the missing-port-archive dialogs are gone
-  5. Push the hotfix and publish v0.1.0-alpha.2
-- tags: link-span, hotfix, packaging, rom-free
-- refs:
-  - coordination/claims/LINK-005.md
-  - tools/LinkSpanPackaging.psm1
-  - tests/tools/BuildLinkSpanPackagingTests.ps1
 
-## [PLN-20260716-0002][UPDATE] 2026-07-16T18:56:51Z
+- createdUtc: 2026-07-16T18:44:55Z
 - status: done
-- note: Port archives are now required and preserved, ROM/user archives remain excluded, MSVC and 32/32 tests pass, both real hosts started successfully, and the corrected alpha.2 artifact is scanned and ready for publication.
+- scope: mixed
+- summary: Preserve redistributable `soh.o2r` and `2ship.o2r` runtime archives
+  while excluding user ROMs and user-derived OoT/MM archives.
 - refs:
-  - https://github.com/BaiterYamato/link-span/pull/33
   - https://github.com/BaiterYamato/link-span/releases/tag/v0.1.0-alpha.2
   - coordination/handoffs/LINK-005.md
+
+## UPDATE MODSDK-004-MSVC-20260718 — PR 32
+
+- Status: in_progress
+- Escopo: integrar o launcher dual sobre o SDK `0.3.0` atual.
+- Preservar:
+  1. abertura automática quando somente um jogo estiver disponível;
+  2. seletor em inglês quando ambos estiverem disponíveis;
+  3. bloqueio de mod `requires_both_games` quando faltar um jogo;
+  4. pacote Release sem ROMs/archives derivados do usuário;
+  5. `ship.world.travel` com fronteira segura contra `longjmp` no MSVC.
+- Próximo: gerar contratos, resolver os conflitos restantes e executar a matriz
+  Release/MSVC, CTest e empacotamento.
+
+## UPDATE MODSDK-004-MSVC-20260718 — PR 32 validada localmente
+
+- Status: in_progress
+- Concluído:
+  - conflitos de CMake, contratos, bindings, testes e ledger resolvidos;
+  - `ship.world.travel` adaptado à capability registry e à fronteira MSVC
+    não-inline, com regressão de `pcall` inválido;
+  - fixture de contrato atualizada com handler determinístico de viagem;
+  - build Release/MSVC e 49/49 testes CTest aprovados;
+  - testes de launcher, `build-game.ps1` e pacote ROM-free aprovados;
+  - nenhum `.z64`, `.n64`, `.v64`, `.o2r`, `.otr`, save ou asset protegido
+    rastreado no repositório;
+  - commits de submódulo OoT/MM confirmados nas branches remotas declaradas.
+- Próximo: publicar no head da PR #32, aguardar CI verde, retirar draft e
+  integrar em `main`.

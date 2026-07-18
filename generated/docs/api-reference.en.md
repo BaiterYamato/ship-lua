@@ -10,34 +10,41 @@ API version: `0.3.0`. Schema version: `1`.
 | Name | Type | Contract | Description |
 |---|---|---|---|
 | `game_id` | `enum` | `oot`, `mm` | Public identifier of the host game. |
-| `subscription` | `opaque` | Lua `integer` | Opaque event registration identifier. |
-| `event_options` | `object` | `priority: integer?` | Deterministic enrollment options. |
+| `subscription` | `opaque` | Lua `integer` | Opaque event subscription identifier. |
+| `timer_handle` | `opaque` | Lua `integer` | Opaque frame timer identifier. |
+| `event_options` | `object` | `priority: integer?` | Deterministic subscription options. |
 | `actor_handle` | `object` | `slot: integer`, `generation: integer`, `game: game_id` | Handle validated by slot, generation and host. |
 | `actor_snapshot` | `object` | `handle: actor_handle`, `actor_id: integer`, `category: integer` | Minimal and stable actor snapshot. |
-| `hotkey_options` | `object` | `default: string?`, `label: string?` | Hotkey registration options. |
+| `hotkey_options` | `object` | `default: string?`, `label: string?` | Hotkey registration options (default key and label). |
 
 ## Functions
 
-| Function | Arguments | Return | Availability | Capability | Errors |
-|---|---|---|---|---|---|
-| `ship.game.id` | — | `game_id` | `common` | — | — |
-| `ship.game.host_version` | — | `string` | `common` | — | — |
-| `ship.runtime.version` | — | `string` | `common` | — | — |
-| `ship.api.version` | — | `string` | `common` | — | — |
-| `ship.capabilities.has` | `name: string` | `boolean` | `common` | — | `invalid_argument` |
-| `ship.capabilities.list` | — | `array<string>` | `common` | — | — |
-| `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | — | `invalid_argument`, `unsupported` |
-| `ship.events.off` | `subscription: subscription` | `boolean` | `common` | — | `invalid_handle` |
-| `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | — | `invalid_argument`, `unsupported` |
-| `ship.world.travel` | `world: game_id`, `destination: string` | `boolean` | `common` | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
-| `ship.mm.player.jump` | — | `boolean` | `mm` | `mm.player.jump` | — |
-| `ship.mm.spawn_dog` | — | `boolean` | `mm` | `mm.spawn_dog` | — |
-| `ship.oot.player.jump` | — | `boolean` | `oot` | `oot.player.jump` | — |
-| `ship.oot.spawn_dog` | — | `boolean` | `oot` | `oot.spawn_dog` | — |
-| `ship.log.debug` | `message: string` | `nil` | `common` | — | `invalid_argument` |
-| `ship.log.info` | `message: string` | `nil` | `common` | — | `invalid_argument` |
-| `ship.log.warn` | `message: string` | `nil` | `common` | — | `invalid_argument` |
-| `ship.log.error` | `message: string` | `nil` | `common` | — | `invalid_argument` |
+| Function | Arguments | Return | Availability | Stability | Since | Capability | Errors |
+|---|---|---|---|---|---|---|---|
+| `ship.game.id` | — | `game_id` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.game.host_version` | — | `string` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.runtime.version` | — | `string` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.api.version` | — | `string` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.capabilities.has` | `name: string` | `boolean` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.capabilities.list` | — | `array<string>` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | `stable` | `0.1.0` | — | `invalid_argument`, `unsupported` |
+| `ship.events.off` | `subscription: subscription` | `boolean` | `common` | `stable` | `0.1.0` | — | `invalid_handle` |
+| `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | `preview` | `0.2.0` | — | `invalid_argument`, `unsupported` |
+| `ship.mm.player.jump` | — | `boolean` | `mm` | `experimental` | `0.2.0` | `mm.player.jump` | — |
+| `ship.mm.spawn_dog` | — | `boolean` | `mm` | `experimental` | `0.3.0` | `mm.spawn_dog` | — |
+| `ship.oot.player.jump` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.player.jump` | — |
+| `ship.oot.spawn_dog` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.spawn_dog` | — |
+| `ship.log.debug` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.log.info` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.log.warn` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.log.error` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.timer.after` | `frames: integer`, `callback: callback` | `timer_handle` | `common` | `experimental` | `0.3.0` | `core.timers` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.timer.every` | `frames: integer`, `callback: callback` | `timer_handle` | `common` | `experimental` | `0.3.0` | `core.timers` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.timer.cancel` | `handle: timer_handle` | `boolean` | `common` | `experimental` | `0.3.0` | `core.timers` | `invalid_argument`, `invalid_handle` |
+| `ship.storage.get` | `key: string`, `default: any?` | `any` | `common` | `experimental` | `0.3.0` | `core.storage` | `invalid_argument`, `unsupported` |
+| `ship.storage.set` | `key: string`, `value: any` | `boolean` | `common` | `experimental` | `0.3.0` | `core.storage` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.storage.delete` | `key: string` | `boolean` | `common` | `experimental` | `0.3.0` | `core.storage` | `invalid_argument`, `unsupported` |
+| `ship.storage.clear` | — | `integer` | `common` | `experimental` | `0.3.0` | `core.storage` | `unsupported` |
 
 ## Events
 
@@ -59,23 +66,26 @@ API version: `0.3.0`. Schema version: `1`.
 
 | Capability | Status | Hosts | Description |
 |---|---|---|---|
+| `core.events` | `contract` | `oot`, `mm` | Core host events and lifecycle. |
+| `core.timers` | `contract` | `oot`, `mm` | Frame timers with per-mod ownership. |
+| `core.input` | `contract` | `oot`, `mm` | Hotkey registration and input events. |
+| `core.storage` | `contract` | `oot`, `mm` | Key-value storage with per-mod namespace. |
 | `scene.events` | `contract` | `oot`, `mm` | Common scene events. |
 | `actor.events` | `contract` | `oot`, `mm` | Common actor events with handles and snapshots. |
 | `save.events` | `contract` | `oot`, `mm` | Common save loading events. |
 | `text.events` | `contract` | `oot`, `mm` | Common read-only text events. |
 | `audio.sequence.events` | `contract` | `oot`, `mm` | Audio sequence start events. |
-| `world.travel` | `contract` | `oot`, `mm` | Requests an authenticated handoff to a logical destination in the other host. |
-| `mm.room.events` | `planned` | `mm` | Exclusive Majora's Mask room events. |
+| `mm.room.events` | `planned` | `mm` | Majora's Mask exclusive room events. |
 | `mm.cycle` | `planned` | `mm` | Three-day cycle lifecycle. |
-| `mm.owl_save` | `planned` | `mm` | Semantics of owl save. |
+| `mm.owl_save` | `planned` | `mm` | Owl save semantics. |
 | `mm.clock` | `planned` | `mm` | Stable MM clock reading. |
-| `mm.player.jump` | `contract` | `mm` | Applies a validated vertical impulse while the MM player is grounded. |
-| `mm.spawn_dog` | `contract` | `mm` | Spawns the Clock Town dog near the MM player. |
-| `oot.player.jump` | `contract` | `oot` | Applies a validated vertical impulse while the OoT player is grounded. |
-| `oot.spawn_dog` | `contract` | `oot` | Spawns a dog near the OoT player. |
-| `oot.ocarina` | `planned` | `oot` | OoT ocarina events and status. |
-| `oot.dungeon_keys` | `planned` | `oot` | OoT dungeon key status. |
-| `oot.equipment` | `planned` | `oot` | Specific OoT equipment. |
+| `mm.player.jump` | `contract` | `mm` | Applies a validated vertical impulse to the Majora's Mask player while on the ground. |
+| `mm.spawn_dog` | `contract` | `mm` | Spawns the Clock Town dog (En_Dg) near the Majora's Mask player. |
+| `oot.player.jump` | `contract` | `oot` | Applies a validated vertical impulse to the OoT player while on the ground. |
+| `oot.spawn_dog` | `contract` | `oot` | Spawns a dog (En_Dog) near the OoT player. |
+| `oot.ocarina` | `planned` | `oot` | OoT ocarina events and state. |
+| `oot.dungeon_keys` | `planned` | `oot` | OoT dungeon key state. |
+| `oot.equipment` | `planned` | `oot` | OoT-specific equipment. |
 
 ## Error codes
 

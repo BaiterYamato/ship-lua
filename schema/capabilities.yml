@@ -2,6 +2,10 @@
   "schema_version": 1,
   "api_version": "0.3.0",
   "capabilities": [
+    {"name": "core.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos e lifecycle centrais do host."},
+    {"name": "core.timers", "status": "contract", "hosts": ["oot", "mm"], "description": "Timers por frame com ownership por mod."},
+    {"name": "core.input", "status": "contract", "hosts": ["oot", "mm"], "description": "Registro de hotkeys e eventos de input."},
+    {"name": "core.storage", "status": "contract", "hosts": ["oot", "mm"], "description": "Armazenamento chave-valor com namespace por mod."},
     {"name": "scene.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de cena."},
     {"name": "actor.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de ator com handles e snapshots."},
     {"name": "save.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de carregamento de save."},

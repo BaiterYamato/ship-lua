@@ -8,6 +8,9 @@
 --- Identificador opaco de inscrição em evento.
 ---@alias ShipLuaSubscription integer
 
+--- Identificador opaco de timer em frames.
+---@alias ShipLuaTimerHandle integer
+
 --- Opções determinísticas de inscrição.
 ---@class ShipLuaEventOptions
 ---@field priority? integer
@@ -78,92 +81,132 @@ ship.log = ship.log or {}
 ship.mm = ship.mm or {}
 ship.oot = ship.oot or {}
 ship.runtime = ship.runtime or {}
+ship.storage = ship.storage or {}
+ship.timer = ship.timer or {}
 ship.world = ship.world or {}
 ship.mm.player = ship.mm.player or {}
 ship.oot.player = ship.oot.player or {}
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return ShipLuaGameId
 function ship.game.id() end
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return string
 function ship.game.host_version() end
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return string
 function ship.runtime.version() end
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return string
 function ship.api.version() end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param name string
 ---@return boolean
 function ship.capabilities.has(name) end
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return string[]
 function ship.capabilities.list() end
 
---- API common; capability: comum; erros: invalid_argument, unsupported.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument, unsupported.
 ---@param event ShipLuaEventName
 ---@param options_or_callback any
 ---@param callback? function
 ---@return ShipLuaSubscription
 function ship.events.on(event, options_or_callback, callback) end
 
---- API common; capability: comum; erros: invalid_handle.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_handle.
 ---@param subscription ShipLuaSubscription
 ---@return boolean
 function ship.events.off(subscription) end
 
---- API common; capability: comum; erros: invalid_argument, unsupported.
+--- API common; estabilidade: preview; desde: 0.2.0; capability: comum; erros: invalid_argument, unsupported.
 ---@param id string
 ---@param options? ShipLuaHotkeyOptions
 ---@param callback function
 ---@return boolean
 function ship.hotkeys.register(id, options, callback) end
 
---- API common; capability: world.travel; erros: invalid_argument, unsupported, invalid_state, host_failure.
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: world.travel; erros: invalid_argument, unsupported, invalid_state, host_failure.
 ---@param world ShipLuaGameId
 ---@param destination string
 ---@return boolean
 function ship.world.travel(world, destination) end
 
---- API mm; capability: mm.player.jump; erros: nenhum.
+--- API mm; estabilidade: experimental; desde: 0.2.0; capability: mm.player.jump; erros: nenhum.
 ---@return boolean
 function ship.mm.player.jump() end
 
---- API mm; capability: mm.spawn_dog; erros: nenhum.
+--- API mm; estabilidade: experimental; desde: 0.3.0; capability: mm.spawn_dog; erros: nenhum.
 ---@return boolean
 function ship.mm.spawn_dog() end
 
---- API oot; capability: oot.player.jump; erros: nenhum.
+--- API oot; estabilidade: experimental; desde: 0.3.0; capability: oot.player.jump; erros: nenhum.
 ---@return boolean
 function ship.oot.player.jump() end
 
---- API oot; capability: oot.spawn_dog; erros: nenhum.
+--- API oot; estabilidade: experimental; desde: 0.3.0; capability: oot.spawn_dog; erros: nenhum.
 ---@return boolean
 function ship.oot.spawn_dog() end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param message string
 ---@return nil
 function ship.log.debug(message) end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param message string
 ---@return nil
 function ship.log.info(message) end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param message string
 ---@return nil
 function ship.log.warn(message) end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param message string
 ---@return nil
 function ship.log.error(message) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.timers; erros: invalid_argument, resource_limit, unsupported.
+---@param frames integer
+---@param callback function
+---@return ShipLuaTimerHandle
+function ship.timer.after(frames, callback) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.timers; erros: invalid_argument, resource_limit, unsupported.
+---@param frames integer
+---@param callback function
+---@return ShipLuaTimerHandle
+function ship.timer.every(frames, callback) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.timers; erros: invalid_argument, invalid_handle.
+---@param handle ShipLuaTimerHandle
+---@return boolean
+function ship.timer.cancel(handle) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.storage; erros: invalid_argument, unsupported.
+---@param key string
+---@param default? any
+---@return any
+function ship.storage.get(key, default) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.storage; erros: invalid_argument, resource_limit, unsupported.
+---@param key string
+---@param value any
+---@return boolean
+function ship.storage.set(key, value) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.storage; erros: invalid_argument, unsupported.
+---@param key string
+---@return boolean
+function ship.storage.delete(key) end
+
+--- API common; estabilidade: experimental; desde: 0.3.0; capability: core.storage; erros: unsupported.
+---@return integer
+function ship.storage.clear() end

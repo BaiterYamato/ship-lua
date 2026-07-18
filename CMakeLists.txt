@@ -34,6 +34,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(miniz)
 
+# miniz injects /Zi on MSVC, which conflicts with the project-wide /Z7 and
+# makes sccache abort when it cannot find miniz.pdb. Pin miniz to a proper
+# per-target program-database PDB so the Windows CI build stays cacheable.
+if (MSVC)
+    set_target_properties(miniz PROPERTIES MSVC_DEBUG_INFORMATION_FORMAT ProgramDatabase)
+endif()
+
 if(NOT EXISTS "${lua_SOURCE_DIR}/lua.h")
     message(FATAL_ERROR
         "Lua sources were not fetched (network problem?). "
@@ -89,8 +96,6 @@ if(WIN32)
     target_link_libraries(linkspan_launcher PRIVATE comctl32)
 endif()
 if(MINGW)
-    # The GUI entry point is wWinMain. MinGW only selects the Unicode Windows
-    # startup object when -municode is passed; MSVC does this automatically.
     target_link_options(linkspan_launcher PRIVATE -municode)
 endif()
 set_target_properties(linkspan_launcher PROPERTIES
@@ -139,6 +144,12 @@ add_custom_command(
     COMMENT "Empacotando link-home-to-clock-tower.shipmod"
     VERBATIM)
 add_custom_target(package_linkspan_demo DEPENDS "${SHIPLUA_LINKSPAN_DEMO_PACKAGE}")
+
+# O mod test runner executa pacotes .shipmod em alguns testes do ctest; o
+# pacote de exemplo precisa existir antes dele rodar.
+add_executable(shiplua_mod_test_runner tools/mod_test_runner.cpp)
+target_link_libraries(shiplua_mod_test_runner PRIVATE shiplua)
+add_dependencies(shiplua_mod_test_runner package_examples)
 
 # ---------------------------------------------------------------------------
 # Tests

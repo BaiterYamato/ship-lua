@@ -64,6 +64,21 @@ class SchemaValidationTests(unittest.TestCase):
         events["events"][0]["payload"][0]["type"] = "internal_layout"
         self.assertTrue(any("tipo desconhecido" in error for error in self.validate(events=events)))
 
+    def test_function_without_version_is_rejected(self):
+        api = copy.deepcopy(self.api)
+        del api["functions"][0]["version"]
+        self.assertTrue(any("version" in error for error in self.validate(api=api)))
+
+    def test_function_with_invalid_stability_is_rejected(self):
+        api = copy.deepcopy(self.api)
+        api["functions"][0]["stability"] = "internal"
+        self.assertTrue(any("stability" in error for error in self.validate(api=api)))
+
+    def test_function_version_after_api_version_is_rejected(self):
+        api = copy.deepcopy(self.api)
+        api["functions"][0]["version"] = "99.0.0"
+        self.assertTrue(any("posterior" in error for error in self.validate(api=api)))
+
     def test_cli_emits_utf8_on_windows(self):
         result = subprocess.run(
             [sys.executable, str(ROOT / "tools" / "validate_api_schemas.py")],

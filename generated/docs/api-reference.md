@@ -9,6 +9,7 @@ Versão da API: `0.3.0`. Versão do schema: `1`.
 |---|---|---|---|
 | `game_id` | `enum` | `oot`, `mm` | Identificador público do jogo host. |
 | `subscription` | `opaque` | Lua `integer` | Identificador opaco de inscrição em evento. |
+| `timer_handle` | `opaque` | Lua `integer` | Identificador opaco de timer em frames. |
 | `event_options` | `object` | `priority: integer?` | Opções determinísticas de inscrição. |
 | `actor_handle` | `object` | `slot: integer`, `generation: integer`, `game: game_id` | Handle validado por slot, geração e host. |
 | `actor_snapshot` | `object` | `handle: actor_handle`, `actor_id: integer`, `category: integer` | Snapshot mínimo e estável de ator. |
@@ -16,26 +17,33 @@ Versão da API: `0.3.0`. Versão do schema: `1`.
 
 ## Funções
 
-| Função | Argumentos | Retorno | Disponibilidade | Capability | Erros |
-|---|---|---|---|---|---|
-| `ship.game.id` | — | `game_id` | `common` | — | — |
-| `ship.game.host_version` | — | `string` | `common` | — | — |
-| `ship.runtime.version` | — | `string` | `common` | — | — |
-| `ship.api.version` | — | `string` | `common` | — | — |
-| `ship.capabilities.has` | `name: string` | `boolean` | `common` | — | `invalid_argument` |
-| `ship.capabilities.list` | — | `array<string>` | `common` | — | — |
-| `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | — | `invalid_argument`, `unsupported` |
-| `ship.events.off` | `subscription: subscription` | `boolean` | `common` | — | `invalid_handle` |
-| `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | — | `invalid_argument`, `unsupported` |
-| `ship.world.travel` | `world: game_id`, `destination: string` | `boolean` | `common` | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
-| `ship.mm.player.jump` | — | `boolean` | `mm` | `mm.player.jump` | — |
-| `ship.mm.spawn_dog` | — | `boolean` | `mm` | `mm.spawn_dog` | — |
-| `ship.oot.player.jump` | — | `boolean` | `oot` | `oot.player.jump` | — |
-| `ship.oot.spawn_dog` | — | `boolean` | `oot` | `oot.spawn_dog` | — |
-| `ship.log.debug` | `message: string` | `nil` | `common` | — | `invalid_argument` |
-| `ship.log.info` | `message: string` | `nil` | `common` | — | `invalid_argument` |
-| `ship.log.warn` | `message: string` | `nil` | `common` | — | `invalid_argument` |
-| `ship.log.error` | `message: string` | `nil` | `common` | — | `invalid_argument` |
+| Função | Argumentos | Retorno | Disponibilidade | Estabilidade | Desde | Capability | Erros |
+|---|---|---|---|---|---|---|---|
+| `ship.game.id` | — | `game_id` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.game.host_version` | — | `string` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.runtime.version` | — | `string` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.api.version` | — | `string` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.capabilities.has` | `name: string` | `boolean` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.capabilities.list` | — | `array<string>` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | `stable` | `0.1.0` | — | `invalid_argument`, `unsupported` |
+| `ship.events.off` | `subscription: subscription` | `boolean` | `common` | `stable` | `0.1.0` | — | `invalid_handle` |
+| `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | `preview` | `0.2.0` | — | `invalid_argument`, `unsupported` |
+| `ship.world.travel` | `world: game_id`, `destination: string` | `boolean` | `common` | `experimental` | `0.3.0` | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
+| `ship.mm.player.jump` | — | `boolean` | `mm` | `experimental` | `0.2.0` | `mm.player.jump` | — |
+| `ship.mm.spawn_dog` | — | `boolean` | `mm` | `experimental` | `0.3.0` | `mm.spawn_dog` | — |
+| `ship.oot.player.jump` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.player.jump` | — |
+| `ship.oot.spawn_dog` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.spawn_dog` | — |
+| `ship.log.debug` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.log.info` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.log.warn` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.log.error` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.timer.after` | `frames: integer`, `callback: callback` | `timer_handle` | `common` | `experimental` | `0.3.0` | `core.timers` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.timer.every` | `frames: integer`, `callback: callback` | `timer_handle` | `common` | `experimental` | `0.3.0` | `core.timers` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.timer.cancel` | `handle: timer_handle` | `boolean` | `common` | `experimental` | `0.3.0` | `core.timers` | `invalid_argument`, `invalid_handle` |
+| `ship.storage.get` | `key: string`, `default: any?` | `any` | `common` | `experimental` | `0.3.0` | `core.storage` | `invalid_argument`, `unsupported` |
+| `ship.storage.set` | `key: string`, `value: any` | `boolean` | `common` | `experimental` | `0.3.0` | `core.storage` | `invalid_argument`, `resource_limit`, `unsupported` |
+| `ship.storage.delete` | `key: string` | `boolean` | `common` | `experimental` | `0.3.0` | `core.storage` | `invalid_argument`, `unsupported` |
+| `ship.storage.clear` | — | `integer` | `common` | `experimental` | `0.3.0` | `core.storage` | `unsupported` |
 
 ## Eventos
 
@@ -57,6 +65,10 @@ Versão da API: `0.3.0`. Versão do schema: `1`.
 
 | Capability | Estado | Hosts | Descrição |
 |---|---|---|---|
+| `core.events` | `contract` | `oot`, `mm` | Eventos e lifecycle centrais do host. |
+| `core.timers` | `contract` | `oot`, `mm` | Timers por frame com ownership por mod. |
+| `core.input` | `contract` | `oot`, `mm` | Registro de hotkeys e eventos de input. |
+| `core.storage` | `contract` | `oot`, `mm` | Armazenamento chave-valor com namespace por mod. |
 | `scene.events` | `contract` | `oot`, `mm` | Eventos comuns de cena. |
 | `actor.events` | `contract` | `oot`, `mm` | Eventos comuns de ator com handles e snapshots. |
 | `save.events` | `contract` | `oot`, `mm` | Eventos comuns de carregamento de save. |

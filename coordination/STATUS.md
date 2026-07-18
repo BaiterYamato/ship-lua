@@ -36,7 +36,7 @@ sem depender dos forks BaiterYamato.
 
 ## Tarefa ativa recomendada
 
-Resolver os gates da auditoria antes de integrar as pilhas (8 OoT + 9 MM = 17 PRs),
+Mergear a pilha de PRs dos dois hosts (8 OoT + 8 MM = 16 PRs) em `lua/main`,
 do mais antigo ao mais recente (submódulo → bootstrap → shutdown → identidade →
 mods dir → hotkey → pulo/save → sondagem de assets). Após cada merge, atualizar
 o submódulo `extern/ship-lua` para o topo de `main`.
@@ -81,12 +81,18 @@ o submódulo `extern/ship-lua` para o topo de `main`.
 - `WORLD-002` — done (envelope v1 com HMAC-SHA-256, anti-replay e publicação atômica; 28/28 testes MinGW/MSVC; PR #28 merged).
 - `WORLD-004` — done (catálogo de assets por owner/contrato, sondas autenticadas e 29/29 testes MinGW/MSVC; PR #30 merged).
 - `DOC-005` — done (conjunto completo de documentação em inglês; PR #29 merged).
+- `MODSDK-001` — done (PR #36 integrada após correção das fronteiras Lua/MSVC;
+  capability registry, Release/MSVC 46/46 e CI Linux/Windows/package verdes).
+- `MODSDK-004` — done (mock runtime e mod test runner integrados pela PR #39;
+  callbacks Lua sem `longjmp` sobre estado C++; Release/MSVC 45/45 e CI verde).
 - `TOOL-006` — review (`build-game.ps1` portátil entre raiz do host/submódulo,
-  detecção testada e auditoria de integração registrada; 30/30 testes verdes).
-- `LINK-002` — review (gating de assets do launcher; fixture de parser de
-  `requires_both_games` true/false/ausente; decisão documentada de scanner
-  `.shipmod`; mensagem de bloqueio consistente no código 8; 32/32 testes
-  verdes MinGW na worktree `agent/LINK-002-asset-gating`).
+  detecção testada e auditoria de integração registrada).
+- `LINK-002` — review (gating de assets do launcher, parser de
+  `requires_both_games` e mensagens de bloqueio cobertos por testes).
+- `LINK-003` — in_progress (PR #32 sendo reconciliada com `main` após as PRs
+  #36/#39; launcher dual, pacote ROM-free e `world.travel` preservados).
+- `LINK-003-CONFLICTS` — review (conflitos da PR #32 resolvidos sobre `main`;
+  Release/MSVC e 49/49 testes verdes, sem arquivos protegidos rastreados).
 
 > Observação: o núcleo estável, mas não há formalização de "review aceito" para
 > CORE/MOD/API/EVENT/CODEGEN/BIND originais — estão em `main` e os testes
@@ -123,67 +129,24 @@ o submódulo `extern/ship-lua` para o topo de `main`.
 - `OOT-006`/`MM-006` (menu/console mínimo).
 - `OOT-EVT-001` a `OOT-EVT-004` / `MM-EVT-001` a `MM-EVT-004` (ponte de eventos do `GameInteractor`).
 - `HANDLE-001/002`, `PLAYER-001` a `PLAYER-004`, `ACTOR-001` a `ACTOR-004`, `SECURITY-001`.
+- `STORE-001/002/004`, `CONSOLE-001/002`, `RELOAD-001` a `RELOAD-003`, `SECURITY-002/003`.
 - `OOT-OCARINA`, `OOT-EQUIPMENT`, etc.; `MM-CYCLE`, `MM-CLOCK`, `MM-MASKS`, etc. (Fase 8).
 - `DOC-001` a `DOC-004`, `TOOL-002` a `TOOL-005`, `EXAMPLE-002` a `EXAMPLE-004` (Fase 9).
 - `CI-001` a `CI-004` (baseline hosts Linux), workflows de drift, conformance.
 
-### Fase 7 (núcleo) — implementado (review)
-
-Implementação no núcleo compartilhado; integração aos bindings Lua e ModHost
-fica para um próximo ciclo. 35/35 testes verdes MinGW.
-
-- `STORE-001/002/004` + `SECURITY-002` — done (`ModStorage`: VFS por mod, quota
-  bytes/arquivos, path traversal negado em todos os pontos de entrada).
-- `CONSOLE-001/002` — done (`ConsoleRegistry`: registro, names únicos globais,
-  remoção no unload via `UnregisterMod`).
-- `RELOAD-001/002/003` — done (`ModReloader`: watch por mtime, reload
-  transacional, preservação opcional de estado via hooks capture/restore).
-- `SECURITY-003` — done (zip slip já coberto por `PackageExtractor` +
-  `TestUnsafePathsAreTransactional`).
-- Handoff: `coordination/handoffs/PHASE-007.md`.
-
 ## Bloqueios
 
-- Link-Span PR #31 altera API pública sem RFC e usa `0.2.1` para adição compatível
-  que exige decisão SemVer `MINOR`.
-- Shipwright PRs #5–#12: Linux, Windows e clang-format vermelhos.
-- 2Ship PRs #1–#9: sem checks de CI associados.
-- Topos dos dois hosts apontam `extern/ship-lua` para `cf14417`, oito commits
-  atrás de `link-span/main` e sem o PR #31.
+Nenhum registrado.
 
 ## Última integração
 
-Link-Span `main` em `29e7f2f` (inclui WORLD-001 a WORLD-004, STORE-003,
-HOTKEY-001, EXAMPLE-001, MM-JUMP-001 e o helper inicial de build). O PR #31 está aberto.
+ship-lua `main` em `cf14417` (WORLD-001 a WORLD-004, STORE-003, HOTKEY-001, EXAMPLE-001, MM-JUMP-001 e núcleo das Fases 0–3 todos publicados em origin). Sem PRs abertos no `ship-lua`.
 
 ## Próxima ação
 
-1. Formalizar/corrigir o contrato do PR Link-Span #31 (RFC + SemVer) e integrá-lo com CI verde.
-2. Corrigir o CI OoT e adicionar CI Linux/Windows à pilha MM.
-3. Atualizar o submódulo `extern/ship-lua` nos dois hosts para o topo aprovado de `main`.
-4. Mergear os 17 PRs dos hosts em `lua/main` (na ordem: submódulo → bootstrap → shutdown → identidade → mods dir → hotkey → pulo/save → assets).
-5. Sincronizar drift do Shipwright upstream (`585530f68`) para o fork `lua/main` quando pertinente (PLAN.md §11); o 2ship upstream já coincide com o baseline.
-6. Validar runtime com ativos legítimos dos dois jogos (builds MSVC verdes, mas sem runtime testado com ROM).
-7. Adicionar builds Linux/macOS (só Windows verificado).
-8. Publicar `v0.1.0` após atender os critérios restantes do PLAN.md §16.
-
-## LINK-004 — launcher público ROM-free (review)
-
-- Launcher em inglês com abertura automática do único jogo disponível, seletor
-  quando ambos estão presentes e bloqueio explicativo para mods dual-game.
-- Pacote Windows x64 Release gerado sem ROM/O2R/OTR e validado por scanner.
-- MSVC Release e 32/32 testes verdes; diálogos validados visualmente.
-- PRs de runtime dos hosts: OoT #13 e MM #10 (draft, stacked).
-- Entrega pública: `v0.1.0-alpha.1`; `v0.1.0` permanece dependente dos critérios
-  de estabilização já listados acima.
-
-## LINK-005 — hotfix dos archives runtime (review)
-
-- Causa de `Missing soh.o2r`/`Missing 2ship.o2r` confirmada: o scanner ROM-free
-  removia também os archives redistribuíveis próprios dos ports.
-- Empacotamento corrigido para exigir `soh.o2r` e `2ship.o2r`, mantendo ROMs e
-  `oot.o2r`/`oot.otr`/`mm.o2r` fora do release.
-- MSVC Release e 32/32 testes verdes; regressões `V-LINK-7` e `V-LINK-8` verdes.
-- Smoke real com os assets do usuário: OoT e MM iniciaram sem diálogo de archive
-  ausente.
-- Correção pública destinada a `v0.1.0-alpha.2`; `alpha.1` fica obsoleta.
+1. Mergear os 16 PRs dos hosts em `lua/main` (na ordem: submódulo → bootstrap → shutdown → identidade → mods dir → hotkey → pulo/save → assets).
+2. Após cada merge de host, atualizar o submódulo `extern/ship-lua` para o topo de `main`.
+3. Sincronizar drift do Shipwright upstream (`585530f68`) para o fork `lua/main` quando pertinente (PLAN.md §11); o 2ship upstream já coincide com o baseline.
+4. Validar runtime com ativos legítimos dos dois jogos (builds MSVC verdes, mas sem runtime testado com ROM).
+5. Adicionar builds Linux/macOS (só Windows verificado).
+6. Publicar `v0.1.0` após atender os critérios restantes do PLAN.md §16.

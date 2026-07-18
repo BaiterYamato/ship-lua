@@ -1,0 +1,22 @@
+# MODSDK-001-MSVC handoff
+
+- Status: ready_for_review
+- Pull request: https://github.com/BaiterYamato/link-span/pull/36
+- Integration base: `origin/main` after PR 39 (`1433a8a937a532bec2f19d775eed0963d29498bd`)
+- Root cause:
+  - `lua_error` uses `longjmp` on MSVC.
+  - Capability callbacks could cross C++ exception/destructor state in optimized Release builds.
+  - MSVC partial inlining could collapse the safe wrapper/helper boundary.
+- Resolution:
+  - Merged capability registry with timer/storage/mock runtime host context.
+  - Moved capability operations into helpers that never call `lua_error`.
+  - Marked the helper boundary non-inline on MSVC, GCC and Clang.
+  - Updated the legacy synthesized capability version expectation to API `0.3.0`.
+- Validation:
+  - `lua_api_binding_tests`: passed.
+  - `api_contract_tests`: passed on OoT and MM.
+  - Release/MSVC CTest: 46/46 passed.
+  - RelWithDebInfo/MSVC AddressSanitizer contract probe: passed.
+- Preserved:
+  - The old dirty `modsdk-001` worktree was not modified or discarded.
+  - No ROM, O2R, Z64, save or generated debug artifact is included.
