@@ -5,6 +5,7 @@
 - Platform: Windows 11 / MSVC 2022 / CMake
 - Repository: BaiterYamato/ship-lua
 - Branch: agent/MODSDK-005-actor-api
+- PR: https://github.com/BaiterYamato/link-span/pull/41
 - Started: 2026-07-18T15:31:00-03:00
 - Depends on: MODSDK-001, MODSDK-002, MODSDK-003, MODSDK-004, OOT-MODSDK-001
 - Files:

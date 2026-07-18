@@ -4,6 +4,8 @@
 
 review
 
+PR: https://github.com/BaiterYamato/link-span/pull/41
+
 ## Resultado
 
 - API pública elevada para `0.4.0` pelo RFC 0009.

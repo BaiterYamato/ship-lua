@@ -76,7 +76,8 @@ None registered.
 
 ## Latest integration
 
-ship-lua `main` at `fff5785`; MODSDK-005 is based on that published baseline.
+ship-lua `main` at `fff5785`; MODSDK-005 is based on that published baseline
+and published for review as link-span PR #41.
 
 ## Next action
 

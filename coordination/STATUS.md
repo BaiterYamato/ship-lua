@@ -85,7 +85,7 @@ o submódulo `extern/ship-lua` para o topo de `main`.
   capability registry, Release/MSVC 46/46 e CI Linux/Windows/package verdes).
 - `MODSDK-004` — done (mock runtime e mod test runner integrados pela PR #39;
   callbacks Lua sem `longjmp` sobre estado C++; Release/MSVC 45/45 e CI verde).
-- `MODSDK-005` — review (RFC 0009, `ActorProvider`, `ship.actor.spawn/destroy/exists`,
+- `MODSDK-005` — review (PR #41; RFC 0009, `ActorProvider`, `ship.actor.spawn/destroy/exists`,
   permissões/limites por manifesto, mock ROM-free e exemplos OoT/MM; Release/MSVC
   56/56 e schemas/codegen 30/30 verdes).
 - `TOOL-006` — review (`build-game.ps1` portátil entre raiz do host/submódulo,
