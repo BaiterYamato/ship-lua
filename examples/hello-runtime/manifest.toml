@@ -1,0 +1,8 @@
+id = "example.hello_runtime"
+name = "Hello, runtime"
+version = "0.1.0"
+api = ">=0.1 <0.3"
+entrypoint = "main.lua"
+description = "Exemplo mínimo do runtime: log, detecção de capabilities, eventos e hotkeys."
+authors = ["BaiterYamato"]
+games = ["oot", "mm"]
