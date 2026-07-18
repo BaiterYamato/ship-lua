@@ -95,10 +95,10 @@ target_link_libraries(key_value_storage_tests PRIVATE shiplua)
 
 add_test(NAME key_value_storage_tests COMMAND key_value_storage_tests)
 
-add_executable(mock_runtime_tests unit/MockRuntimeTests.cpp)
-target_link_libraries(mock_runtime_tests PRIVATE shiplua)
+add_executable(mock_runtime_unit_tests unit/MockRuntimeTests.cpp)
+target_link_libraries(mock_runtime_unit_tests PRIVATE shiplua)
 
-add_test(NAME mock_runtime_tests COMMAND mock_runtime_tests)
+add_test(NAME mock_runtime_unit_tests COMMAND mock_runtime_unit_tests)
 
 add_executable(mod_test_runner_tests unit/ModTestRunnerTests.cpp)
 target_link_libraries(mod_test_runner_tests PRIVATE shiplua)
