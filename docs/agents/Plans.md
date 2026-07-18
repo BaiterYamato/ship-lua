@@ -117,3 +117,13 @@ o progresso é registrado em novas seções `UPDATE` com o mesmo identificador.
   - commits de submódulo OoT/MM confirmados nas branches remotas declaradas.
 - Próximo: publicar no head da PR #32, aguardar CI verde, retirar draft e
   integrar em `main`.
+
+## UPDATE MODSDK-004-MSVC-20260718 — PR 32 CI Ubuntu
+
+- Status: in_progress
+- Falha encontrada: `Publish-LinkSpanPackage` montava o prefixo de contenção
+  com `\\` fixo; no Linux, o destino normalizado usa `/` e o teste V-LINK-6
+  recusava todos os arquivos como escape do pacote.
+- Correção: usar `System.IO.Path.DirectorySeparatorChar` após remover ambos os
+  separadores possíveis.
+- Próximo: repetir os testes locais, publicar e confirmar nova matriz remota.

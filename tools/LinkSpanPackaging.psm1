@@ -155,7 +155,8 @@ function Publish-LinkSpanPackage {
     )
     foreach ($relative in $generated) {
         $target = [System.IO.Path]::GetFullPath((Join-Path $destinationFull $relative))
-        $prefix = $destinationFull.TrimEnd('\') + '\'
+        $prefix = $destinationFull.TrimEnd('\', '/') +
+            [System.IO.Path]::DirectorySeparatorChar
         if (-not $target.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
             throw "Link-Span: destino gerado escapou do pacote: $target"
         }
