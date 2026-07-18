@@ -34,6 +34,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(miniz)
 
+# miniz injects /Zi on MSVC, which conflicts with the project-wide /Z7 and
+# makes sccache abort when it cannot find miniz.pdb. Pin miniz to a proper
+# per-target program-database PDB so the Windows CI build stays cacheable.
+if (MSVC)
+    set_target_properties(miniz PROPERTIES MSVC_DEBUG_INFORMATION_FORMAT ProgramDatabase)
+endif()
+
 if(NOT EXISTS "${lua_SOURCE_DIR}/lua.h")
     message(FATAL_ERROR
         "Lua sources were not fetched (network problem?). "
