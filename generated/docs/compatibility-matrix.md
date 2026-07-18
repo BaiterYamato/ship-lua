@@ -86,3 +86,4 @@ nunca registra `ship.oot.*` ou `ship.mm.*` (RFC 0001).
 | `stable` | 12 |
 | `preview` | 1 |
 | `experimental` | 11 |
+
