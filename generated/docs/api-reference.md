@@ -1,7 +1,7 @@
 <!-- Gerado por tools/generate_api_docs.py. Não edite manualmente. -->
 # Referência da API ShipLua
 
-Versão da API: `0.2.1`. Versão do schema: `1`.
+Versão da API: `0.3.0`. Versão do schema: `1`.
 
 ## Tipos
 

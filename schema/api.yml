@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "api_version": "0.2.1",
+  "api_version": "0.3.0",
   "types": [
     {"name": "game_id", "kind": "enum", "values": ["oot", "mm"], "description": "Identificador público do jogo host."},
     {"name": "subscription", "kind": "opaque", "lua_type": "integer", "description": "Identificador opaco de inscrição em evento."},

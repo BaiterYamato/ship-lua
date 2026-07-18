@@ -1,6 +1,6 @@
 ---@meta ShipLua
 -- Gerado por tools/generate_api_docs.py. Não edite manualmente.
--- API 0.2.1 / schema 1
+-- API 0.3.0 / schema 1
 
 --- Identificador público do jogo host.
 ---@alias ShipLuaGameId "oot"|"mm"

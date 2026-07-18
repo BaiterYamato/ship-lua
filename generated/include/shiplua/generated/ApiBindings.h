@@ -10,7 +10,7 @@
 
 namespace ShipLua::Generated {
 
-inline constexpr std::string_view kApiVersion = "0.2.1";
+inline constexpr std::string_view kApiVersion = "0.3.0";
 inline constexpr std::uint32_t kSchemaVersion = 1;
 
 enum class GameId {
