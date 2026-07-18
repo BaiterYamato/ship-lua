@@ -3,6 +3,16 @@ target_link_libraries(runtime_tests PRIVATE shiplua)
 
 add_test(NAME runtime_tests COMMAND runtime_tests)
 
+add_executable(handle_registry_tests unit/HandleRegistryTests.cpp)
+target_link_libraries(handle_registry_tests PRIVATE shiplua)
+
+add_test(NAME handle_registry_tests COMMAND handle_registry_tests)
+
+add_executable(mod_lifecycle_tests unit/ModLifecycleTests.cpp)
+target_link_libraries(mod_lifecycle_tests PRIVATE shiplua)
+
+add_test(NAME mod_lifecycle_tests COMMAND mod_lifecycle_tests)
+
 add_executable(manifest_host_tests unit/ManifestHostTests.cpp)
 target_link_libraries(manifest_host_tests PRIVATE shiplua)
 
