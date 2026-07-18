@@ -14,9 +14,17 @@ BUILTIN_TYPES = {"any", "boolean", "callback", "integer", "nil", "number", "stri
 HOSTS = {"oot", "mm"}
 EVENT_KINDS = {"observe", "filter", "transform", "consume"}
 AVAILABILITY = {"common", "oot", "mm"}
+# Níveis públicos de estabilidade (plan-sdk.md §15.5). "internal" nunca aparece
+# na IDL pública: símbolos internos simplesmente não são declarados aqui.
+STABILITIES = {"experimental", "preview", "stable", "deprecated"}
 SEMVER = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
 FUNCTION_NAME = re.compile(r"^ship(?:\.[a-z][a-z0-9_]*){2,}$")
 DOTTED_NAME = re.compile(r"^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$")
+
+
+def semver_tuple(version: str) -> tuple[int, int, int]:
+    parts = version.split(".")
+    return (int(parts[0]), int(parts[1]), int(parts[2]))
 
 
 def load_document(path: Path) -> dict[str, Any]:
@@ -133,6 +141,18 @@ def validate_documents(api: dict[str, Any], events: dict[str, Any],
         name = function.get("name")
         if name in function_names and not FUNCTION_NAME.fullmatch(name):
             errors.append(f"função '{name}': nome inválido")
+        version = function.get("version")
+        if not isinstance(version, str) or not SEMVER.fullmatch(version):
+            errors.append(f"função '{name}': version ausente ou não é SemVer completo")
+        else:
+            api_version = next(iter(versions))
+            if (isinstance(api_version, str) and SEMVER.fullmatch(api_version)
+                    and semver_tuple(version) > semver_tuple(api_version)):
+                errors.append(
+                    f"função '{name}': version {version} posterior à api_version {api_version}")
+        stability = function.get("stability")
+        if stability not in STABILITIES:
+            errors.append(f"função '{name}': stability inválida ou ausente")
         availability = function.get("availability")
         capability = function.get("capability")
         if availability not in AVAILABILITY:

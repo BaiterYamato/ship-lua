@@ -16,25 +16,25 @@ Versão da API: `0.3.0`. Versão do schema: `1`.
 
 ## Funções
 
-| Função | Argumentos | Retorno | Disponibilidade | Capability | Erros |
-|---|---|---|---|---|---|
-| `ship.game.id` | — | `game_id` | `common` | — | — |
-| `ship.game.host_version` | — | `string` | `common` | — | — |
-| `ship.runtime.version` | — | `string` | `common` | — | — |
-| `ship.api.version` | — | `string` | `common` | — | — |
-| `ship.capabilities.has` | `name: string` | `boolean` | `common` | — | `invalid_argument` |
-| `ship.capabilities.list` | — | `array<string>` | `common` | — | — |
-| `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | — | `invalid_argument`, `unsupported` |
-| `ship.events.off` | `subscription: subscription` | `boolean` | `common` | — | `invalid_handle` |
-| `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | — | `invalid_argument`, `unsupported` |
-| `ship.mm.player.jump` | — | `boolean` | `mm` | `mm.player.jump` | — |
-| `ship.mm.spawn_dog` | — | `boolean` | `mm` | `mm.spawn_dog` | — |
-| `ship.oot.player.jump` | — | `boolean` | `oot` | `oot.player.jump` | — |
-| `ship.oot.spawn_dog` | — | `boolean` | `oot` | `oot.spawn_dog` | — |
-| `ship.log.debug` | `message: string` | `nil` | `common` | — | `invalid_argument` |
-| `ship.log.info` | `message: string` | `nil` | `common` | — | `invalid_argument` |
-| `ship.log.warn` | `message: string` | `nil` | `common` | — | `invalid_argument` |
-| `ship.log.error` | `message: string` | `nil` | `common` | — | `invalid_argument` |
+| Função | Argumentos | Retorno | Disponibilidade | Estabilidade | Desde | Capability | Erros |
+|---|---|---|---|---|---|---|---|
+| `ship.game.id` | — | `game_id` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.game.host_version` | — | `string` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.runtime.version` | — | `string` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.api.version` | — | `string` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.capabilities.has` | `name: string` | `boolean` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.capabilities.list` | — | `array<string>` | `common` | `stable` | `0.1.0` | — | — |
+| `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | `stable` | `0.1.0` | — | `invalid_argument`, `unsupported` |
+| `ship.events.off` | `subscription: subscription` | `boolean` | `common` | `stable` | `0.1.0` | — | `invalid_handle` |
+| `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | `preview` | `0.2.0` | — | `invalid_argument`, `unsupported` |
+| `ship.mm.player.jump` | — | `boolean` | `mm` | `experimental` | `0.2.0` | `mm.player.jump` | — |
+| `ship.mm.spawn_dog` | — | `boolean` | `mm` | `experimental` | `0.3.0` | `mm.spawn_dog` | — |
+| `ship.oot.player.jump` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.player.jump` | — |
+| `ship.oot.spawn_dog` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.spawn_dog` | — |
+| `ship.log.debug` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.log.info` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.log.warn` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
+| `ship.log.error` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
 
 ## Eventos
 

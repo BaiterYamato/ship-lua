@@ -97,7 +97,8 @@ def generate_luadoc(api: dict[str, Any], events: dict[str, Any],
         capability = function.get("capability") or "comum"
         error_list = ", ".join(function.get("errors", [])) or "nenhum"
         lines.extend([
-            f"--- API {function['availability']}; capability: {capability}; erros: {error_list}.",
+            f"--- API {function['availability']}; estabilidade: {function['stability']}; "
+            f"desde: {function['version']}; capability: {capability}; erros: {error_list}.",
         ])
         arguments = function.get("arguments", [])
         for argument in arguments:
@@ -151,14 +152,15 @@ def generate_markdown(api: dict[str, Any], events: dict[str, Any],
 
     lines.extend([
         "", "## Funções", "",
-        "| Função | Argumentos | Retorno | Disponibilidade | Capability | Erros |",
-        "|---|---|---|---|---|---|",
+        "| Função | Argumentos | Retorno | Disponibilidade | Estabilidade | Desde | Capability | Erros |",
+        "|---|---|---|---|---|---|---|---|",
     ])
     for function in api["functions"]:
         errors_text = ", ".join(f"`{code}`" for code in function.get("errors", [])) or "—"
         capability = f"`{function['capability']}`" if function.get("capability") else "—"
         lines.append(f"| `{function['name']}` | {field_list(function.get('arguments', []))} | "
-                     f"`{function['returns']}` | `{function['availability']}` | {capability} | "
+                     f"`{function['returns']}` | `{function['availability']}` | "
+                     f"`{function['stability']}` | `{function['version']}` | {capability} | "
                      f"{errors_text} |")
 
     lines.extend([

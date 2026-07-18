@@ -83,6 +83,8 @@ enum class FunctionId {
 struct FunctionBinding {
     FunctionId id;
     std::string_view name;
+    std::string_view version;
+    std::string_view stability;
     std::string_view returnType;
     std::string_view availability;
     std::string_view capability;
@@ -182,23 +184,23 @@ inline constexpr std::array<std::string_view, 1> kShipLogErrorErrors{{
 }};
 
 inline constexpr std::array<FunctionBinding, 17> kFunctions{{
-    {FunctionId::ShipGameId, "ship.game.id", "game_id", "common", {}, kShipGameIdArguments, kShipGameIdErrors},
-    {FunctionId::ShipGameHostVersion, "ship.game.host_version", "string", "common", {}, kShipGameHostVersionArguments, kShipGameHostVersionErrors},
-    {FunctionId::ShipRuntimeVersion, "ship.runtime.version", "string", "common", {}, kShipRuntimeVersionArguments, kShipRuntimeVersionErrors},
-    {FunctionId::ShipApiVersion, "ship.api.version", "string", "common", {}, kShipApiVersionArguments, kShipApiVersionErrors},
-    {FunctionId::ShipCapabilitiesHas, "ship.capabilities.has", "boolean", "common", {}, kShipCapabilitiesHasArguments, kShipCapabilitiesHasErrors},
-    {FunctionId::ShipCapabilitiesList, "ship.capabilities.list", "array<string>", "common", {}, kShipCapabilitiesListArguments, kShipCapabilitiesListErrors},
-    {FunctionId::ShipEventsOn, "ship.events.on", "subscription", "common", {}, kShipEventsOnArguments, kShipEventsOnErrors},
-    {FunctionId::ShipEventsOff, "ship.events.off", "boolean", "common", {}, kShipEventsOffArguments, kShipEventsOffErrors},
-    {FunctionId::ShipHotkeysRegister, "ship.hotkeys.register", "boolean", "common", {}, kShipHotkeysRegisterArguments, kShipHotkeysRegisterErrors},
-    {FunctionId::ShipMmPlayerJump, "ship.mm.player.jump", "boolean", "mm", "mm.player.jump", kShipMmPlayerJumpArguments, kShipMmPlayerJumpErrors},
-    {FunctionId::ShipMmSpawnDog, "ship.mm.spawn_dog", "boolean", "mm", "mm.spawn_dog", kShipMmSpawnDogArguments, kShipMmSpawnDogErrors},
-    {FunctionId::ShipOotPlayerJump, "ship.oot.player.jump", "boolean", "oot", "oot.player.jump", kShipOotPlayerJumpArguments, kShipOotPlayerJumpErrors},
-    {FunctionId::ShipOotSpawnDog, "ship.oot.spawn_dog", "boolean", "oot", "oot.spawn_dog", kShipOotSpawnDogArguments, kShipOotSpawnDogErrors},
-    {FunctionId::ShipLogDebug, "ship.log.debug", "nil", "common", {}, kShipLogDebugArguments, kShipLogDebugErrors},
-    {FunctionId::ShipLogInfo, "ship.log.info", "nil", "common", {}, kShipLogInfoArguments, kShipLogInfoErrors},
-    {FunctionId::ShipLogWarn, "ship.log.warn", "nil", "common", {}, kShipLogWarnArguments, kShipLogWarnErrors},
-    {FunctionId::ShipLogError, "ship.log.error", "nil", "common", {}, kShipLogErrorArguments, kShipLogErrorErrors},
+    {FunctionId::ShipGameId, "ship.game.id", "0.1.0", "stable", "game_id", "common", {}, kShipGameIdArguments, kShipGameIdErrors},
+    {FunctionId::ShipGameHostVersion, "ship.game.host_version", "0.1.0", "stable", "string", "common", {}, kShipGameHostVersionArguments, kShipGameHostVersionErrors},
+    {FunctionId::ShipRuntimeVersion, "ship.runtime.version", "0.1.0", "stable", "string", "common", {}, kShipRuntimeVersionArguments, kShipRuntimeVersionErrors},
+    {FunctionId::ShipApiVersion, "ship.api.version", "0.1.0", "stable", "string", "common", {}, kShipApiVersionArguments, kShipApiVersionErrors},
+    {FunctionId::ShipCapabilitiesHas, "ship.capabilities.has", "0.1.0", "stable", "boolean", "common", {}, kShipCapabilitiesHasArguments, kShipCapabilitiesHasErrors},
+    {FunctionId::ShipCapabilitiesList, "ship.capabilities.list", "0.1.0", "stable", "array<string>", "common", {}, kShipCapabilitiesListArguments, kShipCapabilitiesListErrors},
+    {FunctionId::ShipEventsOn, "ship.events.on", "0.1.0", "stable", "subscription", "common", {}, kShipEventsOnArguments, kShipEventsOnErrors},
+    {FunctionId::ShipEventsOff, "ship.events.off", "0.1.0", "stable", "boolean", "common", {}, kShipEventsOffArguments, kShipEventsOffErrors},
+    {FunctionId::ShipHotkeysRegister, "ship.hotkeys.register", "0.2.0", "preview", "boolean", "common", {}, kShipHotkeysRegisterArguments, kShipHotkeysRegisterErrors},
+    {FunctionId::ShipMmPlayerJump, "ship.mm.player.jump", "0.2.0", "experimental", "boolean", "mm", "mm.player.jump", kShipMmPlayerJumpArguments, kShipMmPlayerJumpErrors},
+    {FunctionId::ShipMmSpawnDog, "ship.mm.spawn_dog", "0.3.0", "experimental", "boolean", "mm", "mm.spawn_dog", kShipMmSpawnDogArguments, kShipMmSpawnDogErrors},
+    {FunctionId::ShipOotPlayerJump, "ship.oot.player.jump", "0.3.0", "experimental", "boolean", "oot", "oot.player.jump", kShipOotPlayerJumpArguments, kShipOotPlayerJumpErrors},
+    {FunctionId::ShipOotSpawnDog, "ship.oot.spawn_dog", "0.3.0", "experimental", "boolean", "oot", "oot.spawn_dog", kShipOotSpawnDogArguments, kShipOotSpawnDogErrors},
+    {FunctionId::ShipLogDebug, "ship.log.debug", "0.1.0", "stable", "nil", "common", {}, kShipLogDebugArguments, kShipLogDebugErrors},
+    {FunctionId::ShipLogInfo, "ship.log.info", "0.1.0", "stable", "nil", "common", {}, kShipLogInfoArguments, kShipLogInfoErrors},
+    {FunctionId::ShipLogWarn, "ship.log.warn", "0.1.0", "stable", "nil", "common", {}, kShipLogWarnArguments, kShipLogWarnErrors},
+    {FunctionId::ShipLogError, "ship.log.error", "0.1.0", "stable", "nil", "common", {}, kShipLogErrorArguments, kShipLogErrorErrors},
 }};
 
 struct EventBinding {

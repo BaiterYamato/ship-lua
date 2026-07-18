@@ -12,6 +12,23 @@ The files `schema/api.yml`, `schema/events.yml`, and `schema/capabilities.yml` a
 
 A capability with status `planned` is roadmap documentation and cannot be referenced by function or public event. Only status `contract` integrates the `0.1.0` API.
 
+## Declarative IDL
+
+Each function in `api.yml` carries, besides name, arguments, return and errors:
+
+- `version`: SemVer of the API in which the function entered the contract (never later than the document's `api_version`);
+- `stability`: `experimental`, `preview`, `stable` or `deprecated` (plan-sdk.md §15.5 taxonomy; `internal` symbols are not part of the public IDL).
+
+## Generated artifacts
+
+| Tool | Artifact |
+|---|---|
+| `tools/generate_cpp_api.py` | `generated/include/shiplua/generated/ApiBindings.h` (C++ stubs/bindings) |
+| `tools/generate_api_docs.py` | `generated/lua/shiplua.lua` (LuaDoc/autocomplete) and `generated/docs/api-reference.md` |
+| `tools/generate_api_contracts.py` | `generated/lua/shiplua_validate.lua` (validators), `generated/lua/shiplua_mock.lua` (mock runtime), `generated/tests/api_contract.lua` and `generated/tests/mock_contract.lua` (contract tests), `generated/docs/compatibility-matrix.md` (OoT/MM matrix) |
+
+All of them have a drift gate in ctest (`--check`): editing the schemas without regenerating breaks the test build.
+
 ## Automatic invariants
 
 The command below validates the three documents together:
@@ -24,6 +41,8 @@ The validator rejects:
 
 - divergent versions;
 - duplicate or invalid names;
+- functions without SemVer `version` or with invalid `stability`;
+- function `version` later than `api_version`;
 - non-existent error types and codes;
 - pointers, addresses and internal layouts;
 - orphan or still planned capabilities;
