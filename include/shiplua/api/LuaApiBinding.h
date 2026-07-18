@@ -85,17 +85,28 @@ class LuaApiBinding {
     static int LogInfo(lua_State* state) noexcept;
     static int LogWarn(lua_State* state) noexcept;
     static int LogError(lua_State* state) noexcept;
+    static int Log(lua_State* state, LogLevel level) noexcept;
 
     Result<Subscription> RegisterEvent(lua_State* state, const std::string& eventName,
                                        int callbackIndex, int callbackPriority);
     Result<void> RemoveEvent(Subscription subscription);
+    // lua_error usa longjmp no MSVC. Estes helpers nunca o chamam: retornam o
+    // erro ao wrapper somente depois de destruir todo estado C++ não trivial.
+    int RegisterEventFromLua(lua_State* state, const char*& error);
+    int RemoveEventFromLua(lua_State* state, const char*& error);
     int RegisterHotkey(lua_State* state, const char*& error);
     static int ScheduleTimer(lua_State* state, bool repeating) noexcept;
+    int ScheduleTimerFromLua(lua_State* state, bool repeating, const char*& error);
     Result<TimerHandle> DoScheduleTimer(lua_State* state, bool repeating, std::uint64_t frames,
                                         int callbackIndex);
+    int CancelTimer(lua_State* state, const char*& error);
+    int GetStorage(lua_State* state, const char*& error);
+    int SetStorage(lua_State* state, const char*& error);
+    int DeleteStorage(lua_State* state, const char*& error);
+    int ClearStorage(lua_State* state, const char*& error);
     EventFlow InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
                              EventPayload& payload);
-    int WriteLog(lua_State* state, LogLevel level) noexcept;
+    int WriteLog(lua_State* state, LogLevel level, const char*& error);
     void BuildModule(lua_State* state);
     void Uninstall() noexcept;
 
