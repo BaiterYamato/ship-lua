@@ -128,3 +128,22 @@ add_test(NAME api_docs_codegen_check
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_api_docs.py" --check)
 add_test(NAME api_docs_codegen_tests
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_api_docs.py")
+
+add_executable(api_contract_tests contract/ApiContractTests.cpp)
+target_link_libraries(api_contract_tests PRIVATE shiplua)
+target_compile_definitions(api_contract_tests PRIVATE
+    SHIPLUA_GENERATED_DIR="${CMAKE_SOURCE_DIR}/generated")
+
+add_test(NAME api_contract_tests COMMAND api_contract_tests)
+
+add_executable(mock_runtime_tests contract/MockRuntimeTests.cpp)
+target_link_libraries(mock_runtime_tests PRIVATE shiplua lua_static)
+target_compile_definitions(mock_runtime_tests PRIVATE
+    SHIPLUA_GENERATED_DIR="${CMAKE_SOURCE_DIR}/generated")
+
+add_test(NAME mock_runtime_tests COMMAND mock_runtime_tests)
+
+add_test(NAME api_contract_codegen_check
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tools/generate_api_contracts.py" --check)
+add_test(NAME api_contract_codegen_tests
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/schema/test_generate_api_contracts.py")

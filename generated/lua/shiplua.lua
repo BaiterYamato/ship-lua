@@ -81,82 +81,82 @@ ship.runtime = ship.runtime or {}
 ship.mm.player = ship.mm.player or {}
 ship.oot.player = ship.oot.player or {}
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return ShipLuaGameId
 function ship.game.id() end
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return string
 function ship.game.host_version() end
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return string
 function ship.runtime.version() end
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return string
 function ship.api.version() end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param name string
 ---@return boolean
 function ship.capabilities.has(name) end
 
---- API common; capability: comum; erros: nenhum.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: nenhum.
 ---@return string[]
 function ship.capabilities.list() end
 
---- API common; capability: comum; erros: invalid_argument, unsupported.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument, unsupported.
 ---@param event ShipLuaEventName
 ---@param options_or_callback any
 ---@param callback? function
 ---@return ShipLuaSubscription
 function ship.events.on(event, options_or_callback, callback) end
 
---- API common; capability: comum; erros: invalid_handle.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_handle.
 ---@param subscription ShipLuaSubscription
 ---@return boolean
 function ship.events.off(subscription) end
 
---- API common; capability: comum; erros: invalid_argument, unsupported.
+--- API common; estabilidade: preview; desde: 0.2.0; capability: comum; erros: invalid_argument, unsupported.
 ---@param id string
 ---@param options? ShipLuaHotkeyOptions
 ---@param callback function
 ---@return boolean
 function ship.hotkeys.register(id, options, callback) end
 
---- API mm; capability: mm.player.jump; erros: nenhum.
+--- API mm; estabilidade: experimental; desde: 0.2.0; capability: mm.player.jump; erros: nenhum.
 ---@return boolean
 function ship.mm.player.jump() end
 
---- API mm; capability: mm.spawn_dog; erros: nenhum.
+--- API mm; estabilidade: experimental; desde: 0.3.0; capability: mm.spawn_dog; erros: nenhum.
 ---@return boolean
 function ship.mm.spawn_dog() end
 
---- API oot; capability: oot.player.jump; erros: nenhum.
+--- API oot; estabilidade: experimental; desde: 0.3.0; capability: oot.player.jump; erros: nenhum.
 ---@return boolean
 function ship.oot.player.jump() end
 
---- API oot; capability: oot.spawn_dog; erros: nenhum.
+--- API oot; estabilidade: experimental; desde: 0.3.0; capability: oot.spawn_dog; erros: nenhum.
 ---@return boolean
 function ship.oot.spawn_dog() end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param message string
 ---@return nil
 function ship.log.debug(message) end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param message string
 ---@return nil
 function ship.log.info(message) end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param message string
 ---@return nil
 function ship.log.warn(message) end
 
---- API common; capability: comum; erros: invalid_argument.
+--- API common; estabilidade: stable; desde: 0.1.0; capability: comum; erros: invalid_argument.
 ---@param message string
 ---@return nil
 function ship.log.error(message) end
