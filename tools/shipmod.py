@@ -15,6 +15,7 @@ Códigos de saída: 0 = sucesso; 1 = falha (inválido/testes falharam/checks fal
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import platform
 import re
@@ -79,13 +80,13 @@ def find_repo_tool(executable: str, env_var: str) -> Path | None:
 # ---------------------------------------------------------------------------
 
 MANIFEST_TEMPLATE = """\
-id = "{mod_id}"
-name = "{display_name}"
+id = {mod_id}
+name = {display_name}
 version = "0.1.0"
-api = ">=0.1 <0.3"
+api = ">=0.1 <0.4"
 entrypoint = "main.lua"
-description = "{description}"
-authors = ["{author}"]
+description = {description}
+authors = [{author}]
 games = ["oot", "mm"]
 """
 
@@ -93,7 +94,7 @@ MAIN_LUA_TEMPLATE = """\
 local ship = require("ship")
 
 ship.events.on("game.ready", function()
-    ship.log.info("{mod_id} carregado em " .. ship.game.id())
+    ship.log.info({mod_id} .. " carregado em " .. ship.game.id())
 end)
 """
 
@@ -175,12 +176,14 @@ def cmd_new(args: argparse.Namespace) -> int:
 
     files = {
         target / "manifest.toml": MANIFEST_TEMPLATE.format(
-            mod_id=mod_id,
-            display_name=display_name,
-            description=description,
-            author=author,
+            mod_id=json.dumps(mod_id, ensure_ascii=False),
+            display_name=json.dumps(display_name, ensure_ascii=False),
+            description=json.dumps(description, ensure_ascii=False),
+            author=json.dumps(author, ensure_ascii=False),
         ),
-        target / "main.lua": MAIN_LUA_TEMPLATE.format(mod_id=mod_id),
+        target / "main.lua": MAIN_LUA_TEMPLATE.format(
+            mod_id=json.dumps(mod_id, ensure_ascii=False)
+        ),
         target / "README.md": README_TEMPLATE.format(
             display_name=display_name, description=description, name=name
         ),
@@ -314,11 +317,11 @@ def cmd_test(args: argparse.Namespace) -> int:
     if runner is None:
         print("Erro: shiplua_mod_test_runner não encontrado.", file=sys.stderr)
         print(
-            "O executor de testes de mods (mock runtime) faz parte da tarefa "
-            "MODSDK-004, que ainda não integrou a main.",
+            "O executor de testes de mods (mock runtime) faz parte do MODSDK-004 "
+            "e precisa ser compilado antes do uso.",
             file=sys.stderr,
         )
-        print("Quando o código estiver disponível, compile:", file=sys.stderr)
+        print("Compile o runner com:", file=sys.stderr)
         print("  cmake --build build --target shiplua_mod_test_runner", file=sys.stderr)
         print(
             "Ou aponte um executável existente com a variável de ambiente "
@@ -411,7 +414,12 @@ def _check_compiler() -> tuple[str, str, str]:
 
 
 def _check_repo_python_tools() -> tuple[str, str, str]:
-    expected = ["generate_api_docs.py", "generate_cpp_api.py", "validate_api_schemas.py"]
+    expected = [
+        "generate_api_docs.py",
+        "generate_cpp_api.py",
+        "generate_api_contracts.py",
+        "validate_api_schemas.py",
+    ]
     missing = [name for name in expected if not (REPO_ROOT / "tools" / name).is_file()]
     if missing:
         return "falha", "Ferramentas Python do repo", "ausentes: " + ", ".join(missing)
@@ -451,7 +459,11 @@ def _check_schemas() -> tuple[str, str, str]:
 
 def _check_codegen() -> tuple[str, str, str]:
     problems: list[str] = []
-    for script in ("generate_cpp_api.py", "generate_api_docs.py"):
+    for script in (
+        "generate_cpp_api.py",
+        "generate_api_docs.py",
+        "generate_api_contracts.py",
+    ):
         ok, detail = _run_repo_script(script, "--check")
         if not ok:
             problems.append(f"{script}: {detail}")
@@ -516,7 +528,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         _check_cpp_tool(
             "shiplua_mod_test_runner",
             "SHIPLUA_MOD_TEST_RUNNER",
-            "não disponível — depende do MODSDK-004 (mock runtime), ainda fora da main",
+            "não compilado — cmake --build build --target shiplua_mod_test_runner",
         ),
         _check_schemas(),
         _check_codegen(),

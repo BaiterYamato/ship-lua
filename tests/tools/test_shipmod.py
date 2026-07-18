@@ -42,6 +42,7 @@ class NewCommandTests(unittest.TestCase):
             mod_dir = Path(temporary) / "kafei-puppet"
             manifest = (mod_dir / "manifest.toml").read_text(encoding="utf-8")
             self.assertIn('id = "community.kafei_puppet"', manifest)
+            self.assertIn('api = ">=0.1 <0.4"', manifest)
             self.assertIn('entrypoint = "main.lua"', manifest)
             self.assertTrue((mod_dir / "main.lua").is_file())
             self.assertTrue((mod_dir / "README.md").is_file())
@@ -71,6 +72,21 @@ class NewCommandTests(unittest.TestCase):
             self.assertIn('id = "baiteryamato.meu_mod"', manifest)
             self.assertIn('authors = ["Kimi"]', manifest)
             self.assertIn('description = "Descrição personalizada."', manifest)
+
+    def test_scaffold_escapes_toml_and_lua_strings(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            code, _, _ = run_cli([
+                "new", "meu-mod", "--dir", temporary,
+                "--id", 'community.meu_mod"quoted',
+                "--autor", 'Autor "Teste"',
+                "--desc", "Linha 1\nLinha 2",
+            ])
+            self.assertEqual(code, shipmod.EXIT_OK)
+            mod_dir = Path(temporary) / "meu-mod"
+            ok, message = shipmod._validate_basic(mod_dir)
+            self.assertTrue(ok, message)
+            main_lua = (mod_dir / "main.lua").read_text(encoding="utf-8")
+            self.assertIn(r'community.meu_mod\"quoted', main_lua)
 
     def test_scaffold_refuses_invalid_name(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

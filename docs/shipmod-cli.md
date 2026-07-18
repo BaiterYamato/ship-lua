@@ -21,7 +21,7 @@ python tools/shipmod.py new kafei-puppet --dir mods
 Estrutura gerada em `mods/kafei-puppet/`:
 
 ```text
-manifest.toml              # id community.kafei_puppet, api ">=0.1 <0.3"
+manifest.toml              # id community.kafei_puppet, api ">=0.1 <0.4"
 main.lua                   # entrypoint mínimo com game.ready + log
 README.md                  # instruções de validação e teste
 tests/kafei_puppet_test.lua  # teste smoke na DSL describe/it/assert
@@ -59,9 +59,9 @@ python tools/shipmod.py test examples/hello-runtime --game oot
 python tools/shipmod.py test mods/kafei-puppet --capability core.input
 ```
 
-As opções `--game` e `--capability` são repassadas ao runner. Enquanto o
-MODSDK-004 não integra a `main`, o subcomando falha com código `3` e instruções
-de compilação; um executável existente pode ser apontado pela variável
+As opções `--game` e `--capability` são repassadas ao runner. Se o runner ainda
+não estiver compilado, o subcomando falha com código `3` e instruções de
+compilação; um executável existente pode ser apontado pela variável
 `SHIPLUA_MOD_TEST_RUNNER`.
 
 ## `shipmod doctor`
@@ -78,7 +78,8 @@ Verificações:
 - ferramentas Python do repo presentes em `tools/`;
 - `shiplua_manifest_validator` e `shiplua_mod_test_runner` compilados;
 - schemas da API válidos (`tools/validate_api_schemas.py`);
-- codegen sem drift (`generate_cpp_api.py --check`, `generate_api_docs.py --check`);
+- codegen sem drift (`generate_cpp_api.py --check`, `generate_api_docs.py --check`,
+  `generate_api_contracts.py --check`);
 - manifestos de `examples/` válidos.
 
 Cada verificação resulta em `ok`, `aviso` ou `falha`; o comando sai com código

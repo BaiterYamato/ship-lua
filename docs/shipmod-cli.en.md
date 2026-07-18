@@ -23,7 +23,7 @@ python tools/shipmod.py new kafei-puppet --dir mods
 Structure generated under `mods/kafei-puppet/`:
 
 ```text
-manifest.toml              # id community.kafei_puppet, api ">=0.1 <0.3"
+manifest.toml              # id community.kafei_puppet, api ">=0.1 <0.4"
 main.lua                   # minimal entrypoint with game.ready + log
 README.md                  # validation and test instructions
 tests/kafei_puppet_test.lua  # smoke test in the describe/it/assert DSL
@@ -62,9 +62,9 @@ python tools/shipmod.py test examples/hello-runtime --game oot
 python tools/shipmod.py test mods/kafei-puppet --capability core.input
 ```
 
-The `--game` and `--capability` options are forwarded to the runner. Until
-MODSDK-004 lands on `main`, the subcommand fails with exit code `3` and build
-instructions; an existing executable can be pointed to with the
+The `--game` and `--capability` options are forwarded to the runner. If the
+runner has not been built yet, the subcommand fails with exit code `3` and
+build instructions; an existing executable can be pointed to with the
 `SHIPLUA_MOD_TEST_RUNNER` variable.
 
 ## `shipmod doctor`
@@ -81,7 +81,8 @@ Checks:
 - repo Python tools present under `tools/`;
 - `shiplua_manifest_validator` and `shiplua_mod_test_runner` built;
 - valid API schemas (`tools/validate_api_schemas.py`);
-- drift-free codegen (`generate_cpp_api.py --check`, `generate_api_docs.py --check`);
+- drift-free codegen (`generate_cpp_api.py --check`, `generate_api_docs.py --check`,
+  `generate_api_contracts.py --check`);
 - valid `examples/` manifests.
 
 Each check reports `ok`, `aviso` (warning) or `falha` (failure); the command

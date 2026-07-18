@@ -89,10 +89,12 @@ o submódulo `extern/ship-lua` para o topo de `main`.
   detecção testada e auditoria de integração registrada).
 - `LINK-002` — review (gating de assets do launcher, parser de
   `requires_both_games` e mensagens de bloqueio cobertos por testes).
-- `LINK-003` — in_progress (PR #32 sendo reconciliada com `main` após as PRs
-  #36/#39; launcher dual, pacote ROM-free e `world.travel` preservados).
-- `LINK-003-CONFLICTS` — review (conflitos da PR #32 resolvidos sobre `main`;
-  Release/MSVC e 49/49 testes verdes, sem arquivos protegidos rastreados).
+- `LINK-003` — done (PR #32 integrada; launcher dual, pacote ROM-free e
+  `world.travel` preservados sobre o SDK 0.3.0).
+- `LINK-003-CONFLICTS` — done (conflitos resolvidos; Release/MSVC, Ubuntu e
+  package CI verdes, sem arquivos protegidos rastreados).
+- `MODSDK-006` — review (CLI `shipmod` com `new`/`validate`/`test`/`doctor`,
+  exemplo `hello-runtime` executável nos dois hosts e 53/53 testes MSVC).
 
 > Observação: o núcleo estável, mas não há formalização de "review aceito" para
 > CORE/MOD/API/EVENT/CODEGEN/BIND originais — estão em `main` e os testes
