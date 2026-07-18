@@ -25,7 +25,7 @@ int main() {
     static_assert(kEvents.size() == 11);
     static_assert(kCapabilities.size() == 16);
 
-    Check(kApiVersion == "0.2.1", "API version should derive from the schema");
+    Check(kApiVersion == "0.3.0", "API version should derive from the schema");
     Check(kFunctions.front().name == "ship.game.id", "first function should preserve schema order");
     Check(kFunctions[6].arguments.size() == 3 && !kFunctions[6].arguments[2].required,
           "optional callback metadata should be generated");
