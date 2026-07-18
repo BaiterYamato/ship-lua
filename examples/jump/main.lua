@@ -19,10 +19,10 @@ ship.events.on("game.ready", function()
         return
     end
 
-    ship.hotkeys.register("jump", { default = "K", label = "Pulo" }, function()
+    ship.hotkeys.register("jump", { default = "J", label = "Pulo" }, function()
         if not jump() then
             ship.log.debug("pulo ignorado: o jogador precisa estar no chão")
         end
     end)
-    ship.log.info("Pulo pronto — aperte K ou altere o atalho nas configurações do ShipLua")
+    ship.log.info("Pulo pronto — aperte J ou altere o atalho nas configurações do ShipLua")
 end)
