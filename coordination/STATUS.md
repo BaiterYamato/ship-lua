@@ -81,6 +81,7 @@ o submódulo `extern/ship-lua` para o topo de `main`.
 - `WORLD-002` — done (envelope v1 com HMAC-SHA-256, anti-replay e publicação atômica; 28/28 testes MinGW/MSVC; PR #28 merged).
 - `WORLD-004` — done (catálogo de assets por owner/contrato, sondas autenticadas e 29/29 testes MinGW/MSVC; PR #30 merged).
 - `DOC-005` — done (conjunto completo de documentação em inglês; PR #29 merged).
+- `MODSDK-001` — review (capability registry com descritores, múltiplos providers, seleção determinística e `ship.capabilities.has/list/info/providers` com feature detection por range SemVer; RFC 0008; 30/30 testes MinGW).
 
 > Observação: o núcleo estável, mas não há formalização de "review aceito" para
 > CORE/MOD/API/EVENT/CODEGEN/BIND originais — estão em `main` e os testes

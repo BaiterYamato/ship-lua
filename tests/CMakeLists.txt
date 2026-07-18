@@ -40,6 +40,11 @@ target_link_libraries(event_dispatcher_tests PRIVATE shiplua)
 
 add_test(NAME event_dispatcher_tests COMMAND event_dispatcher_tests)
 
+add_executable(capability_registry_tests unit/CapabilityRegistryTests.cpp)
+target_link_libraries(capability_registry_tests PRIVATE shiplua)
+
+add_test(NAME capability_registry_tests COMMAND capability_registry_tests)
+
 add_executable(frame_timer_scheduler_tests unit/FrameTimerSchedulerTests.cpp)
 target_link_libraries(frame_timer_scheduler_tests PRIVATE shiplua)
 

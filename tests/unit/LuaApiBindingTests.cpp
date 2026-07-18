@@ -391,6 +391,196 @@ assert(not ok, "registration without a host registry must report unsupported")
     host.UnloadAll();
 }
 
+ShipLua::SemVersion MakeVersion(std::uint64_t major, std::uint64_t minor, std::uint64_t patch) {
+    ShipLua::SemVersion version;
+    version.major = major;
+    version.minor = minor;
+    version.patch = patch;
+    return version;
+}
+
+std::shared_ptr<ShipLua::CapabilityRegistry> MakeTestRegistry() {
+    auto registry = std::make_shared<ShipLua::CapabilityRegistry>();
+
+    ShipLua::CapabilityProvider spawnNative;
+    spawnNative.name = "shipwright-native";
+    spawnNative.providerVersion = MakeVersion(0, 4, 0);
+    spawnNative.capabilityVersion = MakeVersion(1, 1, 0);
+    spawnNative.games = {"oot"};
+    spawnNative.stability = ShipLua::CapabilityStability::Preview;
+    spawnNative.permissions = {"world.entities.create"};
+    spawnNative.limits.perMod = 16;
+    spawnNative.description = "Spawn nativo de atores";
+    Check(registry->Register("actor.spawn", spawnNative).isOk(), "native spawn offer registers");
+
+    ShipLua::CapabilityProvider spawnMock;
+    spawnMock.name = "mock-runtime";
+    spawnMock.providerVersion = MakeVersion(0, 4, 3);
+    spawnMock.capabilityVersion = MakeVersion(1, 0, 0);
+    spawnMock.games = {"oot", "mm"};
+    spawnMock.stability = ShipLua::CapabilityStability::Experimental;
+    Check(registry->Register("actor.spawn", spawnMock).isOk(), "mock spawn offer registers");
+
+    ShipLua::CapabilityProvider cycle;
+    cycle.name = "2ship-native";
+    cycle.providerVersion = MakeVersion(0, 3, 1);
+    cycle.capabilityVersion = MakeVersion(1, 0, 0);
+    cycle.games = {"mm"};
+    cycle.stability = ShipLua::CapabilityStability::Stable;
+    Check(registry->Register("mm.cycle", cycle).isOk(), "mm cycle offer registers");
+
+    ShipLua::CapabilityProvider events;
+    events.name = "shipwright-native";
+    events.providerVersion = MakeVersion(0, 4, 0);
+    events.capabilityVersion = MakeVersion(1, 0, 0);
+    events.games = {"oot", "mm"};
+    events.stability = ShipLua::CapabilityStability::Stable;
+    Check(registry->Register("core.events", events).isOk(), "core events offer registers");
+
+    return registry;
+}
+
+void TestCapabilityRegistryLuaApi() {
+    auto registry = MakeTestRegistry();
+    ShipLua::LuaApiHostContext context{"oot", "9.1.0", "0.1.0", {}, nullptr, registry};
+    ShipLua::ModHost host(context, ShipLua::Logger([](auto, const auto&, const auto&) {}));
+    const auto loaded = host.LoadModFromManifestAndSource(
+        MakeManifest("test.capability_registry"), "local ship = require('ship')");
+    Check(loaded.isOk(), "capability registry mod should load: " + loaded.message);
+    auto* runtime = host.GetRuntime("test.capability_registry");
+    Check(runtime != nullptr, "capability registry runtime should exist");
+    if (runtime == nullptr) {
+        return;
+    }
+    struct Section {
+        const char* name;
+        const char* source;
+    };
+    const std::vector<Section> sections = {
+        {"has", R"lua(
+local ship = require("ship")
+assert(ship.capabilities.has("actor.spawn"))
+assert(ship.capabilities.has("actor.spawn", ">=1.0"))
+assert(ship.capabilities.has("actor.spawn", ">=1.1 <2.0"))
+assert(not ship.capabilities.has("actor.spawn", ">=2.0"))
+assert(ship.capabilities.has("core.events"))
+assert(not ship.capabilities.has("mm.cycle"))          -- exclusiva de MM em host OoT
+assert(not ship.capabilities.has("missing.thing"))
+)lua"},
+        {"info", R"lua(
+local ship = require("ship")
+local info = ship.capabilities.info("actor.spawn")
+assert(info.id == "actor.spawn")
+assert(info.version == "1.1.0")
+assert(info.provider == "shipwright-native")
+assert(info.provider_version == "0.4.0")
+assert(info.stability == "preview")
+assert(info.permissions[1] == "world.entities.create")
+assert(info.limits.per_mod == 16)
+assert(#info.games == 1 and info.games[1] == "oot")
+assert(info.description == "Spawn nativo de atores")
+assert(ship.capabilities.info("mm.cycle") == nil)      -- filtro de jogo
+assert(ship.capabilities.info("missing.thing") == nil)
+)lua"},
+        {"providers", R"lua(
+local ship = require("ship")
+local providers = ship.capabilities.providers("actor.spawn")
+assert(#providers == 2)
+assert(providers[1] == "mock-runtime")
+assert(providers[2] == "shipwright-native")
+assert(#ship.capabilities.providers("missing.thing") == 0)
+)lua"},
+        {"list", R"lua(
+local ship = require("ship")
+local all = ship.capabilities.list()
+assert(#all == 2 and all[1] == "actor.spawn" and all[2] == "core.events")
+local mm = ship.capabilities.list({ game = "mm" })
+assert(#mm == 3 and mm[1] == "actor.spawn" and mm[2] == "core.events" and mm[3] == "mm.cycle")
+local stable = ship.capabilities.list({ stability = "stable" })
+assert(#stable == 1 and stable[1] == "core.events")
+local preview = ship.capabilities.list({ stability = "preview" })
+assert(#preview == 1 and preview[1] == "actor.spawn")
+)lua"},
+        {"err_has_range", R"lua(
+local ship = require("ship")
+assert(not pcall(ship.capabilities.has, "actor.spawn", "banana"))
+)lua"},
+        {"err_has_type", R"lua(
+local ship = require("ship")
+assert(not pcall(ship.capabilities.has, 123))
+)lua"},
+        {"err_list_type", R"lua(
+local ship = require("ship")
+assert(not pcall(ship.capabilities.list, "oot"))
+)lua"},
+        {"err_list_game", R"lua(
+local ship = require("ship")
+assert(not pcall(ship.capabilities.list, { game = "n64" }))
+)lua"},
+        {"err_list_stability", R"lua(
+local ship = require("ship")
+assert(not pcall(ship.capabilities.list, { stability = "beta" }))
+)lua"},
+        {"err_info_noarg", R"lua(
+local ship = require("ship")
+assert(not pcall(ship.capabilities.info))
+)lua"},
+    };
+    for (const Section& section : sections) {
+        const auto result = runtime->DoString(section.source);
+        Check(result.isOk(), std::string("section '") + section.name +
+                                 "' should pass: " + result.message);
+    }
+    host.UnloadAll();
+}
+
+void TestLegacyContextSynthesizesCapabilityDescriptors() {
+    ShipLua::LuaApiHostContext context{"oot", "9.1.0", "0.1.0", {"scene.events", "actor.events"}};
+    ShipLua::ModHost host(context, ShipLua::Logger([](auto, const auto&, const auto&) {}));
+    const auto loaded = host.LoadModFromManifestAndSource(
+        MakeManifest("test.legacy_capabilities"), R"lua(
+local ship = require("ship")
+assert(ship.capabilities.has("scene.events"))
+assert(ship.capabilities.has("scene.events", ">=0.2"))
+assert(not ship.capabilities.has("scene.events", ">=1.0"))
+assert(not ship.capabilities.has("mm.cycle"))
+local all = ship.capabilities.list()
+assert(#all == 2 and all[1] == "actor.events" and all[2] == "scene.events")
+local info = ship.capabilities.info("scene.events")
+assert(info ~= nil)
+assert(info.provider == "legacy-host")
+assert(info.version == "0.2.0")
+assert(info.provider_version == "9.1.0")
+assert(info.stability == "stable")
+assert(#info.games == 2)
+local providers = ship.capabilities.providers("scene.events")
+assert(#providers == 1 and providers[1] == "legacy-host")
+assert(ship.capabilities.info("mm.cycle") == nil)
+)lua");
+    Check(loaded.isOk(),
+          "legacy flat context should synthesize descriptors: " + loaded.message);
+    host.UnloadAll();
+}
+
+void TestCapabilityRegistrySharedAcrossMods() {
+    auto registry = MakeTestRegistry();
+    ShipLua::LuaApiHostContext context{"mm", "4.2.0", "0.1.0", {}, nullptr, registry};
+    ShipLua::ModHost host(context, ShipLua::Logger([](auto, const auto&, const auto&) {}));
+    Check(host.LoadModFromManifestAndSource(MakeManifest("cap.first"), R"lua(
+local ship = require("ship")
+assert(ship.capabilities.has("mm.cycle"))
+assert(ship.capabilities.info("mm.cycle").stability == "stable")
+)lua").isOk(), "first mod should read the shared registry");
+    Check(host.LoadModFromManifestAndSource(MakeManifest("cap.second"), R"lua(
+local ship = require("ship")
+local providers = ship.capabilities.providers("mm.cycle")
+assert(#providers == 1 and providers[1] == "2ship-native")
+assert(not ship.capabilities.has("actor.spawn", ">=1.1"))  -- oferta 1.1 é exclusiva de OoT
+assert(ship.capabilities.has("actor.spawn"))               -- mock-runtime cobre MM
+)lua").isOk(), "second mod should see the same registry with mm filtering");
+    host.UnloadAll();
+}
+
 } // namespace
 
 int main() {
@@ -405,6 +595,9 @@ int main() {
     TestHotkeyReplacementAndValidation();
     TestHotkeyFailureIsolationAndDisable();
     TestHotkeysNullRegistryIsNoOp();
+    TestCapabilityRegistryLuaApi();
+    TestLegacyContextSynthesizesCapabilityDescriptors();
+    TestCapabilityRegistrySharedAcrossMods();
     if (failures != 0) {
         std::cerr << failures << " check(s) failed\n";
         return 1;

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <exception>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
@@ -148,6 +149,103 @@ Result<void> ValidateHostContext(const LuaApiHostContext& context) {
     return Result<void>::ok();
 }
 
+std::string FormatVersion(const SemVersion& version) {
+    std::string text = std::to_string(version.major) + "." + std::to_string(version.minor) +
+                       "." + std::to_string(version.patch);
+    if (!version.prerelease.empty()) {
+        text += '-';
+        for (std::size_t i = 0; i < version.prerelease.size(); ++i) {
+            text += version.prerelease[i];
+            if (i + 1 < version.prerelease.size()) {
+                text += '.';
+            }
+        }
+    }
+    if (!version.build.empty()) {
+        text += '+';
+        for (std::size_t i = 0; i < version.build.size(); ++i) {
+            text += version.build[i];
+            if (i + 1 < version.build.size()) {
+                text += '.';
+            }
+        }
+    }
+    return text;
+}
+
+void PushStringArray(lua_State* state, const std::vector<std::string>& values) {
+    lua_createtable(state, static_cast<int>(values.size()), 0);
+    lua_Integer index = 1;
+    for (const std::string& value : values) {
+        lua_pushlstring(state, value.data(), value.size());
+        lua_seti(state, -2, index++);
+    }
+}
+
+void SetTableString(lua_State* state, const char* name, const std::string& value) {
+    lua_pushlstring(state, value.data(), value.size());
+    lua_setfield(state, -2, name);
+}
+
+void PushCapabilityDescriptor(lua_State* state, const CapabilityDescriptor& descriptor) {
+    lua_createtable(state, 0, 10);
+    SetTableString(state, "id", descriptor.id);
+    SetTableString(state, "version", FormatVersion(descriptor.version));
+    SetTableString(state, "provider", descriptor.provider);
+    SetTableString(state, "provider_version", FormatVersion(descriptor.providerVersion));
+    PushStringArray(state, descriptor.games);
+    lua_setfield(state, -2, "games");
+    const std::string_view stability = CapabilityStabilityName(descriptor.stability);
+    lua_pushlstring(state, stability.data(), stability.size());
+    lua_setfield(state, -2, "stability");
+    PushStringArray(state, descriptor.permissions);
+    lua_setfield(state, -2, "permissions");
+    lua_createtable(state, 0, 1);
+    if (descriptor.limits.perMod.has_value()) {
+        lua_pushinteger(state, static_cast<lua_Integer>(*descriptor.limits.perMod));
+        lua_setfield(state, -2, "per_mod");
+    }
+    lua_setfield(state, -2, "limits");
+    SetTableString(state, "description", descriptor.description);
+}
+
+// Hosts legados anunciam apenas uma lista plana de nomes; os descritores são
+// sintetizados do catálogo gerado (API-003) para que has/list/info/providers
+// tenham um único caminho de consulta (RFC 0008).
+std::shared_ptr<CapabilityRegistry> SynthesizeLegacyRegistry(const LuaApiHostContext& context) {
+    auto registry = std::make_shared<CapabilityRegistry>();
+    const auto capabilityVersion = SemVersion::Parse(std::string(Generated::kApiVersion));
+    const auto providerVersion = SemVersion::Parse(context.hostVersion);
+    if (!capabilityVersion.isOk()) {
+        return registry;
+    }
+    for (const std::string& name : context.capabilities) {
+        const auto found = std::find_if(
+            Generated::kCapabilities.begin(), Generated::kCapabilities.end(),
+            [&](const Generated::CapabilityBinding& capability) {
+                return capability.name == name;
+            });
+        if (found == Generated::kCapabilities.end()) {
+            continue; // ValidateHostContext rejeita nomes desconhecidos no Install
+        }
+        CapabilityProvider offer;
+        offer.name = "legacy-host";
+        offer.providerVersion = providerVersion.isOk() ? *providerVersion.value : SemVersion{};
+        offer.capabilityVersion = *capabilityVersion.value;
+        if (found->supportsOot) {
+            offer.games.emplace_back("oot");
+        }
+        if (found->supportsMm) {
+            offer.games.emplace_back("mm");
+        }
+        offer.stability = found->status == "contract"   ? CapabilityStability::Stable
+                          : found->status == "deprecated" ? CapabilityStability::Deprecated
+                                                          : CapabilityStability::Internal;
+        (void)registry->Register(name, std::move(offer));
+    }
+    return registry;
+}
+
 } // namespace
 
 LuaApiBinding::LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logger logger,
@@ -165,6 +263,9 @@ LuaApiBinding::LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logge
     mHostContext.capabilities.erase(
         std::unique(mHostContext.capabilities.begin(), mHostContext.capabilities.end()),
         mHostContext.capabilities.end());
+    mCapabilities = mHostContext.capabilityRegistry != nullptr
+                        ? mHostContext.capabilityRegistry
+                        : SynthesizeLegacyRegistry(mHostContext);
 }
 
 LuaApiBinding::~LuaApiBinding() {
@@ -241,6 +342,8 @@ void LuaApiBinding::BuildModule(lua_State* state) {
     lua_newtable(state);
     SetFunction(state, -1, "has", &LuaApiBinding::CapabilityHas, this);
     SetFunction(state, -1, "list", &LuaApiBinding::CapabilityList, this);
+    SetFunction(state, -1, "info", &LuaApiBinding::CapabilityInfo, this);
+    SetFunction(state, -1, "providers", &LuaApiBinding::CapabilityProviders, this);
     lua_setfield(state, ship, "capabilities");
 
     lua_newtable(state);
@@ -371,31 +474,175 @@ int LuaApiBinding::ApiVersion(lua_State* state) noexcept {
 int LuaApiBinding::CapabilityHas(lua_State* state) noexcept {
     LuaApiBinding* binding = FromUpvalue(state);
     if (lua_type(state, 1) != LUA_TSTRING) {
-        return Fail(state, "ship.capabilities.has exige um nome textual");
+        return Fail(state, "ship.capabilities.has exige um id textual");
     }
     size_t length = 0;
-    const char* name = lua_tolstring(state, 1, &length);
-    if (binding == nullptr || name == nullptr) {
-        return Fail(state, "ship.capabilities.has exige um nome textual");
+    const char* id = lua_tolstring(state, 1, &length);
+    if (binding == nullptr || id == nullptr || binding->mCapabilities == nullptr) {
+        return Fail(state, "contexto da API ship indisponível");
     }
-    const std::string_view requested(name, length);
-    const bool present = std::binary_search(binding->mHostContext.capabilities.begin(),
-                                            binding->mHostContext.capabilities.end(), requested);
+    const bool hasRange = lua_gettop(state) >= 2 && !lua_isnil(state, 2);
+    if (hasRange && lua_type(state, 2) != LUA_TSTRING) {
+        return Fail(state, "ship.capabilities.has exige um intervalo de versão textual");
+    }
+    size_t rangeLength = 0;
+    const char* rangeText = hasRange ? lua_tolstring(state, 2, &rangeLength) : nullptr;
+    if (hasRange && rangeText == nullptr) {
+        return Fail(state, "ship.capabilities.has exige um intervalo de versão textual");
+    }
+    // lua_error faz longjmp: Fail só pode ocorrer fora de try e sem locais C++
+    // não triviais vivos (padrão EventsOn). Resultados saem por variáveis POD.
+    ErrorCode error = ErrorCode::Ok;
+    bool present = false;
+    bool invalidRange = false;
+    try {
+        if (hasRange) {
+            auto range = VersionRange::Parse(std::string(rangeText, rangeLength));
+            if (range.isOk()) {
+                present = binding->mCapabilities->Has(std::string(id, length), *range.value,
+                                                      binding->mHostContext.gameId);
+            } else {
+                invalidRange = true;
+            }
+        } else {
+            present = binding->mCapabilities->Has(std::string(id, length),
+                                                  binding->mHostContext.gameId);
+        }
+    } catch (...) {
+        error = ErrorCode::HostFailure;
+    }
+    if (invalidRange) {
+        return Fail(state, "intervalo de versão inválido em ship.capabilities.has");
+    }
+    if (error != ErrorCode::Ok) {
+        return Fail(state, "falha do host ao consultar capabilities");
+    }
     lua_pushboolean(state, present);
     return 1;
 }
 
 int LuaApiBinding::CapabilityList(lua_State* state) noexcept {
     LuaApiBinding* binding = FromUpvalue(state);
-    if (binding == nullptr) {
+    if (binding == nullptr || binding->mCapabilities == nullptr) {
         return Fail(state, "contexto da API ship indisponível");
     }
-    lua_createtable(state, static_cast<int>(binding->mHostContext.capabilities.size()), 0);
-    lua_Integer index = 1;
-    for (const std::string& capability : binding->mHostContext.capabilities) {
-        lua_pushlstring(state, capability.data(), capability.size());
-        lua_seti(state, -2, index++);
+    const bool hasFilter = lua_gettop(state) >= 1 && !lua_isnil(state, 1);
+    if (hasFilter && !lua_istable(state, 1)) {
+        return Fail(state, "ship.capabilities.list exige uma tabela de filtro");
     }
+    ErrorCode error = ErrorCode::Ok;
+    bool invalidGame = false;
+    bool invalidStability = false;
+    std::vector<std::string> ids;
+    try {
+        std::string game = binding->mHostContext.gameId;
+        std::optional<CapabilityStability> stability;
+        if (hasFilter) {
+            lua_getfield(state, 1, "game");
+            if (!lua_isnil(state, -1)) {
+                size_t gameLength = 0;
+                const char* gameText = lua_type(state, -1) == LUA_TSTRING
+                                           ? lua_tolstring(state, -1, &gameLength)
+                                           : nullptr;
+                if (gameText == nullptr ||
+                    (std::string_view(gameText, gameLength) != "oot" &&
+                     std::string_view(gameText, gameLength) != "mm")) {
+                    invalidGame = true;
+                } else {
+                    game.assign(gameText, gameLength);
+                }
+            }
+            lua_pop(state, 1);
+            lua_getfield(state, 1, "stability");
+            if (!lua_isnil(state, -1) && !invalidGame) {
+                size_t stabilityLength = 0;
+                const char* stabilityText = lua_type(state, -1) == LUA_TSTRING
+                                                ? lua_tolstring(state, -1, &stabilityLength)
+                                                : nullptr;
+                if (stabilityText == nullptr) {
+                    invalidStability = true;
+                } else {
+                    auto parsed =
+                        ParseCapabilityStability(std::string(stabilityText, stabilityLength));
+                    if (parsed.isOk()) {
+                        stability = *parsed.value;
+                    } else {
+                        invalidStability = true;
+                    }
+                }
+            }
+            lua_pop(state, 1);
+        }
+        if (!invalidGame && !invalidStability) {
+            ids = binding->mCapabilities->List(game, stability);
+        }
+    } catch (...) {
+        error = ErrorCode::HostFailure;
+    }
+    if (invalidGame) {
+        return Fail(state, "filtro game de ship.capabilities.list deve ser 'oot' ou 'mm'");
+    }
+    if (invalidStability) {
+        return Fail(state, "filtro stability de ship.capabilities.list é inválido");
+    }
+    if (error != ErrorCode::Ok) {
+        return Fail(state, "falha do host ao listar capabilities");
+    }
+    PushStringArray(state, ids);
+    return 1;
+}
+
+int LuaApiBinding::CapabilityInfo(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (lua_type(state, 1) != LUA_TSTRING) {
+        return Fail(state, "ship.capabilities.info exige um id textual");
+    }
+    size_t length = 0;
+    const char* id = lua_tolstring(state, 1, &length);
+    if (binding == nullptr || id == nullptr || binding->mCapabilities == nullptr) {
+        return Fail(state, "contexto da API ship indisponível");
+    }
+    ErrorCode error = ErrorCode::Ok;
+    std::optional<CapabilityDescriptor> descriptor;
+    try {
+        descriptor = binding->mCapabilities->Info(std::string(id, length),
+                                                  binding->mHostContext.gameId);
+    } catch (...) {
+        error = ErrorCode::HostFailure;
+    }
+    if (error != ErrorCode::Ok) {
+        return Fail(state, "falha do host ao consultar capability");
+    }
+    if (!descriptor.has_value()) {
+        lua_pushnil(state);
+        return 1;
+    }
+    PushCapabilityDescriptor(state, *descriptor);
+    return 1;
+}
+
+int LuaApiBinding::CapabilityProviders(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (lua_type(state, 1) != LUA_TSTRING) {
+        return Fail(state, "ship.capabilities.providers exige um id textual");
+    }
+    size_t length = 0;
+    const char* id = lua_tolstring(state, 1, &length);
+    if (binding == nullptr || id == nullptr || binding->mCapabilities == nullptr) {
+        return Fail(state, "contexto da API ship indisponível");
+    }
+    ErrorCode error = ErrorCode::Ok;
+    std::vector<std::string> providers;
+    try {
+        providers = binding->mCapabilities->Providers(std::string(id, length),
+                                                      binding->mHostContext.gameId);
+    } catch (...) {
+        error = ErrorCode::HostFailure;
+    }
+    if (error != ErrorCode::Ok) {
+        return Fail(state, "falha do host ao consultar providers");
+    }
+    PushStringArray(state, providers);
     return 1;
 }
 
