@@ -25,6 +25,10 @@
     Preserva `soh.o2r` e `2ship.o2r`, que são archives runtime públicos dos
     ports e são obrigatórios pelos respectivos executáveis.
 
+.PARAMETER CreateZip
+    Gera um ZIP com cabeçalhos nativos do Windows usando 7-Zip e exige uma
+    extração completa via `Expand-Archive` antes de concluir.
+
 .PARAMETER SkipHostBuild
     Reutiliza executáveis Release já validados e executa apenas launcher e pacote.
 
@@ -43,6 +47,8 @@ param(
     [switch]$SkipSubmodules,
     [switch]$SkipAssets,
     [switch]$RomFree,
+    [switch]$CreateZip,
+    [string]$ZipPath,
     [switch]$SkipHostBuild,
     [ValidateSet('auto','oot','mm','dual')]
     [string]$Games = 'auto',
@@ -233,3 +239,22 @@ try {
 Write-Host ""
 Write-Host "Build concluído ($profile): $(Join-Path $outputDir 'link-span.exe')" -ForegroundColor Green
 Write-Host 'Coloque os assets legítimos ao lado do executável e abra link-span.exe.'
+
+if ($CreateZip) {
+    Step 'Gerando e validando ZIP nativo do Windows'
+    $archivePath = if ($ZipPath) {
+        if ([System.IO.Path]::IsPathRooted($ZipPath)) {
+            [System.IO.Path]::GetFullPath($ZipPath)
+        } else {
+            [System.IO.Path]::GetFullPath((Join-Path $root $ZipPath))
+        }
+    } else {
+        [System.IO.Path]::GetFullPath($outputDir + '.zip')
+    }
+    New-LinkSpanWindowsArchive -SourceDir $outputDir -Destination $archivePath | Out-Null
+    $requiredEntries = @('link-span.exe')
+    if ($hasOot) { $requiredEntries += @('hosts/oot/soh.exe', 'soh.o2r') }
+    if ($hasMm) { $requiredEntries += @('hosts/mm/2ship.exe', '2ship.o2r') }
+    Test-LinkSpanWindowsArchive -Archive $archivePath -RequiredEntries $requiredEntries | Out-Null
+    Write-Host "    [OK] ZIP extraído integralmente pelo Windows: $archivePath" -ForegroundColor Green
+}

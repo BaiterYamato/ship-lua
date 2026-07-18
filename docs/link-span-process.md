@@ -69,7 +69,8 @@ Para produzir um artefato redistribuível sem ROMs nem archives derivados do jog
 
 ```powershell
 .\build-linkspan.ps1 -Config Release -Games dual -RomFree `
-  -OutputDir .\build\release\Link-Span-Windows-x64
+  -OutputDir .\build\release\Link-Span-Windows-x64 `
+  -CreateZip -ZipPath .\build\release\Link-Span-Windows-x64.zip
 ```
 
 O modo `-RomFree` não copia `.z64`, `.n64`, `.v64`, `oot.o2r`, `oot.otr` ou
@@ -77,11 +78,22 @@ O modo `-RomFree` não copia `.z64`, `.n64`, `.v64`, `oot.o2r`, `oot.otr` ou
 redistribuíveis próprios dos ports e ambos os executáveis falham sem eles. Uma
 segunda varredura sobre toda a saída confirma essa distinção antes de concluir.
 
+O modo `-CreateZip` exige `7z.exe`, cria entradas ZIP com cabeçalhos Windows e
+executa um round-trip integral com `Expand-Archive`. A publicação deve falhar se
+o ZIP contiver uma raiz Unix `./`, estiver truncado ou não puder ser extraído
+pelo descompactador nativo do Windows.
+
 ### Invariante de empacotamento V-LINK-8
 
 Todo pacote público que contenha `soh.exe` deve conter `soh.o2r`, e todo pacote
 que contenha `2ship.exe` deve conter `2ship.o2r`. Esses arquivos não substituem
 `oot.o2r`/`mm.o2r` nem uma ROM legítima fornecida pelo usuário.
+
+### Invariante de release V-LINK-9
+
+Todo ZIP público para Windows deve ser extraído integralmente por
+`Expand-Archive` antes do upload. Validação apenas com `tar` ou 7-Zip não é
+suficiente para provar compatibilidade com o Explorador do Windows.
 
 ## Teleporte entre jogos
 

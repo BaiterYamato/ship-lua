@@ -122,6 +122,19 @@ try {
     }
     Write-Host 'V-LINK-8: pacote público exige o archive redistribuível do port.' -ForegroundColor Green
 
+    if ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT) {
+        $archiveStage = Join-Path $root 'windows-archive-stage'
+        $archivePath = Join-Path $root 'Link-Span-Windows-x64.zip'
+        New-Item -ItemType Directory -Path (Join-Path $archiveStage 'hosts/oot') -Force | Out-Null
+        [System.IO.File]::WriteAllText((Join-Path $archiveStage 'link-span.exe'), 'launcher')
+        [System.IO.File]::WriteAllText((Join-Path $archiveStage 'soh.o2r'), 'port archive')
+        [System.IO.File]::WriteAllText((Join-Path $archiveStage 'hosts/oot/soh.exe'), 'host')
+        New-LinkSpanWindowsArchive -SourceDir $archiveStage -Destination $archivePath | Out-Null
+        Test-LinkSpanWindowsArchive -Archive $archivePath `
+            -RequiredEntries @('link-span.exe', 'soh.o2r', 'hosts/oot/soh.exe') | Out-Null
+        Write-Host 'V-LINK-9: ZIP público completa round-trip pelo extrator nativo do Windows.' -ForegroundColor Green
+    }
+
     $stage = Join-Path $root 'stage'
     $publish = Join-Path $root 'publish-existing'
     New-Item -ItemType Directory -Path (Join-Path $stage 'hosts/oot') -Force | Out-Null

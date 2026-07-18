@@ -187,3 +187,13 @@ HOTKEY-001, EXAMPLE-001, MM-JUMP-001 e o helper inicial de build). O PR #31 est�
 - Smoke real com os assets do usuário: OoT e MM iniciaram sem diálogo de archive
   ausente.
 - Correção pública destinada a `v0.1.0-alpha.2`; `alpha.1` fica obsoleta.
+
+## LINK-006 — ZIP compatível com Explorer (review)
+
+- Causa do erro “Pasta Compactada inválida” confirmada: ZIP criado por `tar.exe`
+  continha metadados Unix e raiz `./`, aceitos pelo 7-Zip mas não pelo Windows.
+- Geração oficial agora usa ZIP/FAT via 7-Zip e exige extração integral por
+  `Expand-Archive` antes do upload (`V-LINK-9`).
+- 32/32 testes verdes; pacote real com 9.051 arquivos extraído integralmente.
+- Asset corrigido da `v0.1.0-alpha.2`: SHA-256
+  `28ebeba4fe07a61a6563b35cae8365bbdff36205b680a30acd67f9115a5f64a6`.
