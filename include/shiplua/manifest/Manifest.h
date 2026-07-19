@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <utility>
@@ -50,6 +51,11 @@ struct Manifest {
     bool permStorage = false;   // key: storage
     bool permNetwork = false;   // key: network
     bool permClipboard = false; // key: clipboard
+    // Generic capability permissions, e.g. "world.entities.create".
+    std::vector<std::string> permissionGrants; // key: grants
+
+    // [limits]
+    std::size_t limitActors = 16; // key: actors; 0 disables actor spawning
 };
 
 } // namespace ShipLua

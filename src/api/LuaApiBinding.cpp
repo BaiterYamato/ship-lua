@@ -1,6 +1,8 @@
 #include "shiplua/api/LuaApiBinding.h"
 
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <exception>
 #include <limits>
 #include <optional>
@@ -129,6 +131,175 @@ const char* ErrorMessage(ErrorCode code) {
     return "falha desconhecida da API ship";
 }
 
+const char* ErrorCodeName(ErrorCode code) {
+    switch (code) {
+        case ErrorCode::Unsupported: return "unsupported";
+        case ErrorCode::InvalidArgument: return "invalid_argument";
+        case ErrorCode::InvalidHandle: return "invalid_handle";
+        case ErrorCode::InvalidState: return "invalid_state";
+        case ErrorCode::PermissionDenied: return "permission_denied";
+        case ErrorCode::ResourceLimit: return "resource_limit";
+        case ErrorCode::HostFailure: return "host_failure";
+        case ErrorCode::ScriptFailure: return "script_failure";
+        case ErrorCode::Ok: return "ok";
+    }
+    return "host_failure";
+}
+
+int PushApiError(lua_State* state, ErrorCode code, const std::string& message) {
+    lua_pushnil(state);
+    lua_createtable(state, 0, 2);
+    lua_pushstring(state, ErrorCodeName(code));
+    lua_setfield(state, -2, "code");
+    lua_pushlstring(state, message.data(), message.size());
+    lua_setfield(state, -2, "message");
+    return 2;
+}
+
+void PushActorHandle(lua_State* state, const Handle& handle) {
+    lua_createtable(state, 0, 4);
+    lua_pushstring(state, "actor");
+    lua_setfield(state, -2, "kind");
+    lua_pushinteger(state, static_cast<lua_Integer>(handle.slot));
+    lua_setfield(state, -2, "slot");
+    lua_pushinteger(state, static_cast<lua_Integer>(handle.generation));
+    lua_setfield(state, -2, "generation");
+    lua_pushinteger(state, static_cast<lua_Integer>(handle.sceneGeneration));
+    lua_setfield(state, -2, "scene_generation");
+}
+
+Result<std::uint32_t> ReadHandleField(lua_State* state, int tableIndex,
+                                      const char* field, bool allowZero) {
+    tableIndex = lua_absindex(state, tableIndex);
+    lua_getfield(state, tableIndex, field);
+    if (!lua_isinteger(state, -1)) {
+        lua_pop(state, 1);
+        return Result<std::uint32_t>::err(
+            ErrorCode::InvalidArgument,
+            std::string("actor handle field '") + field + "' must be an integer");
+    }
+    const lua_Integer value = lua_tointeger(state, -1);
+    lua_pop(state, 1);
+    if (value < (allowZero ? 0 : 1) ||
+        static_cast<std::uint64_t>(value) > std::numeric_limits<std::uint32_t>::max()) {
+        return Result<std::uint32_t>::err(
+            ErrorCode::InvalidArgument,
+            std::string("actor handle field '") + field + "' is out of range");
+    }
+    return Result<std::uint32_t>::ok(static_cast<std::uint32_t>(value));
+}
+
+Result<Handle> ReadActorHandle(lua_State* state, int index) {
+    if (lua_type(state, index) != LUA_TTABLE) {
+        return Result<Handle>::err(ErrorCode::InvalidArgument,
+                                   "actor handle must be a table");
+    }
+    index = lua_absindex(state, index);
+    lua_getfield(state, index, "kind");
+    size_t kindLength = 0;
+    const char* kind = lua_tolstring(state, -1, &kindLength);
+    const bool actorKind = kind != nullptr && std::string_view(kind, kindLength) == "actor";
+    lua_pop(state, 1);
+    if (!actorKind) {
+        return Result<Handle>::err(ErrorCode::InvalidArgument,
+                                   "actor handle kind must be 'actor'");
+    }
+    auto slot = ReadHandleField(state, index, "slot", true);
+    auto generation = ReadHandleField(state, index, "generation", false);
+    auto scene = ReadHandleField(state, index, "scene_generation", false);
+    if (!slot.isOk()) {
+        return Result<Handle>::err(slot.code, slot.message);
+    }
+    if (!generation.isOk()) {
+        return Result<Handle>::err(generation.code, generation.message);
+    }
+    if (!scene.isOk()) {
+        return Result<Handle>::err(scene.code, scene.message);
+    }
+    return Result<Handle>::ok(
+        Handle{HandleKind::Actor, *slot.value, *generation.value, *scene.value});
+}
+
+Result<double> ReadNumberField(lua_State* state, int tableIndex, const char* field) {
+    tableIndex = lua_absindex(state, tableIndex);
+    lua_getfield(state, tableIndex, field);
+    if (lua_type(state, -1) != LUA_TNUMBER) {
+        lua_pop(state, 1);
+        return Result<double>::err(
+            ErrorCode::InvalidArgument,
+            std::string("actor transform field '") + field + "' must be a number");
+    }
+    const double value = static_cast<double>(lua_tonumber(state, -1));
+    lua_pop(state, 1);
+    if (!std::isfinite(value)) {
+        return Result<double>::err(
+            ErrorCode::InvalidArgument,
+            std::string("actor transform field '") + field + "' must be finite");
+    }
+    return Result<double>::ok(value);
+}
+
+Result<void> ReadVector(lua_State* state, int tableIndex, const char* field,
+                        bool required, double& x, double& y, double& z) {
+    tableIndex = lua_absindex(state, tableIndex);
+    lua_getfield(state, tableIndex, field);
+    if (lua_isnil(state, -1) && !required) {
+        lua_pop(state, 1);
+        return Result<void>::ok();
+    }
+    if (lua_type(state, -1) != LUA_TTABLE) {
+        lua_pop(state, 1);
+        return Result<void>::err(ErrorCode::InvalidArgument,
+                                 std::string("actor option '") + field + "' must be a table");
+    }
+    const int vectorIndex = lua_gettop(state);
+    auto readX = ReadNumberField(state, vectorIndex, "x");
+    auto readY = ReadNumberField(state, vectorIndex, "y");
+    auto readZ = ReadNumberField(state, vectorIndex, "z");
+    lua_pop(state, 1);
+    if (!readX.isOk()) {
+        return Result<void>::err(readX.code, readX.message);
+    }
+    if (!readY.isOk()) {
+        return Result<void>::err(readY.code, readY.message);
+    }
+    if (!readZ.isOk()) {
+        return Result<void>::err(readZ.code, readZ.message);
+    }
+    x = *readX.value;
+    y = *readY.value;
+    z = *readZ.value;
+    return Result<void>::ok();
+}
+
+Result<ActorSpawnRequest> ReadActorSpawnRequest(lua_State* state) {
+    if (lua_type(state, 1) != LUA_TSTRING || lua_type(state, 2) != LUA_TTABLE) {
+        return Result<ActorSpawnRequest>::err(
+            ErrorCode::InvalidArgument,
+            "ship.actor.spawn expects actor type string and options table");
+    }
+    size_t actorLength = 0;
+    const char* actor = lua_tolstring(state, 1, &actorLength);
+    if (actor == nullptr || actorLength == 0 || actorLength > 128) {
+        return Result<ActorSpawnRequest>::err(
+            ErrorCode::InvalidArgument,
+            "actor type must be a non-empty logical id");
+    }
+    ActorSpawnRequest request;
+    request.actor.assign(actor, actorLength);
+    auto position = ReadVector(state, 2, "position", true,
+                               request.x, request.y, request.z);
+    if (!position.isOk()) {
+        return Result<ActorSpawnRequest>::err(position.code, position.message);
+    }
+    auto rotation = ReadVector(state, 2, "rotation", false,
+                               request.rotationX, request.rotationY, request.rotationZ);
+    if (!rotation.isOk()) {
+        return Result<ActorSpawnRequest>::err(rotation.code, rotation.message);
+    }
+    return Result<ActorSpawnRequest>::ok(std::move(request));
+}
+
 bool IsValidHotkeyId(std::string_view id) {
     if (id.empty() || id.size() > 64 || id.front() < 'a' || id.front() > 'z') {
         return false;
@@ -168,6 +339,20 @@ Result<void> ValidateLuaApiHostContext(const LuaApiHostContext& context) {
             return Result<void>::err(ErrorCode::InvalidState,
                                      "host advertised world.travel without a travel handler");
         }
+        if ((requested == "actor.spawn" || requested == "actor.destroy" ||
+             requested == "actor.exists") && context.actors == nullptr) {
+            return Result<void>::err(
+                ErrorCode::InvalidState,
+                "host advertised actor capability without an actor provider");
+        }
+    }
+    if (context.capabilityRegistry != nullptr && context.actors == nullptr &&
+        (context.capabilityRegistry->Has("actor.spawn", context.gameId) ||
+         context.capabilityRegistry->Has("actor.destroy", context.gameId) ||
+         context.capabilityRegistry->Has("actor.exists", context.gameId))) {
+        return Result<void>::err(
+            ErrorCode::InvalidState,
+            "host registered actor capabilities without an actor provider");
     }
     return Result<void>::ok();
 }
@@ -266,6 +451,14 @@ std::shared_ptr<CapabilityRegistry> SynthesizeLegacyRegistry(const LuaApiHostCon
         offer.stability = found->status == "contract"   ? CapabilityStability::Stable
                           : found->status == "deprecated" ? CapabilityStability::Deprecated
                                                           : CapabilityStability::Internal;
+        if (name == "actor.spawn") {
+            offer.permissions = {"world.entities.create"};
+            offer.limits.perMod = 256;
+        } else if (name == "actor.destroy") {
+            offer.permissions = {"world.entities.destroy"};
+        } else if (name == "actor.exists") {
+            offer.permissions = {"world.entities.read"};
+        }
         (void)registry->Register(name, std::move(offer));
     }
     return registry;
@@ -275,7 +468,8 @@ std::shared_ptr<CapabilityRegistry> SynthesizeLegacyRegistry(const LuaApiHostCon
 
 LuaApiBinding::LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logger logger,
                              LuaApiHostContext hostContext, std::size_t modLoadOrder,
-                             int modPriority, std::size_t maxConsecutiveFailures)
+                             int modPriority, std::size_t maxConsecutiveFailures,
+                             LuaApiModPolicy modPolicy)
     : mRuntime(runtime),
       mEvents(events),
       mLogger(std::move(logger)),
@@ -283,6 +477,8 @@ LuaApiBinding::LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logge
       mHotkeys(mHostContext.hotkeys),
       mTimers(mHostContext.timers),
       mStorage(mHostContext.storage),
+      mActors(mHostContext.actors),
+      mModPolicy(std::move(modPolicy)),
       mModLoadOrder(modLoadOrder),
       mModPriority(modPriority),
       mMaxConsecutiveFailures(std::max<std::size_t>(1, maxConsecutiveFailures)) {
@@ -293,6 +489,10 @@ LuaApiBinding::LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logge
     mCapabilities = mHostContext.capabilityRegistry != nullptr
                         ? mHostContext.capabilityRegistry
                         : SynthesizeLegacyRegistry(mHostContext);
+    std::sort(mModPolicy.permissions.begin(), mModPolicy.permissions.end());
+    mModPolicy.permissions.erase(
+        std::unique(mModPolicy.permissions.begin(), mModPolicy.permissions.end()),
+        mModPolicy.permissions.end());
 }
 
 LuaApiBinding::~LuaApiBinding() {
@@ -406,6 +606,12 @@ void LuaApiBinding::BuildModule(lua_State* state) {
     SetFunction(state, -1, "travel", &LuaApiBinding::WorldTravel, this);
     lua_setfield(state, ship, "world");
 
+    lua_newtable(state);
+    SetFunction(state, -1, "spawn", &LuaApiBinding::ActorSpawn, this);
+    SetFunction(state, -1, "destroy", &LuaApiBinding::ActorDestroy, this);
+    SetFunction(state, -1, "exists", &LuaApiBinding::ActorExists, this);
+    lua_setfield(state, ship, "actor");
+
     lua_pushvalue(state, ship);
     mShipReference = luaL_ref(state, LUA_REGISTRYINDEX);
     lua_pop(state, 1);
@@ -417,6 +623,14 @@ void LuaApiBinding::BuildModule(lua_State* state) {
 
 void LuaApiBinding::Uninstall() noexcept {
     lua_State* state = mRuntime.State();
+    if (mActors != nullptr) {
+        try {
+            (void)mActors->ReleaseMod(mRuntime.ModId());
+        } catch (...) {
+            // Unload must continue even when a host cleanup hook is broken.
+        }
+    }
+    mActorHandles.clear();
     for (auto& [id, callback] : mHotkeyCallbacks) {
         (void)id;
         callback->active = false;
@@ -1507,6 +1721,180 @@ SHIPLUA_WORLD_NOINLINE int LuaApiBinding::WorldTravelFromLua(lua_State* state,
 }
 
 #undef SHIPLUA_WORLD_NOINLINE
+
+bool LuaApiBinding::HasPermission(const std::string& permission) const {
+    return std::binary_search(mModPolicy.permissions.begin(),
+                              mModPolicy.permissions.end(), permission);
+}
+
+std::size_t LuaApiBinding::EffectiveActorLimit() const {
+    std::size_t limit = mModPolicy.maxActors;
+    if (mCapabilities != nullptr) {
+        const auto descriptor = mCapabilities->Info("actor.spawn", mHostContext.gameId);
+        if (descriptor.has_value() && descriptor->limits.perMod.has_value()) {
+            limit = std::min<std::size_t>(
+                limit, static_cast<std::size_t>(*descriptor->limits.perMod));
+        }
+    }
+    return limit;
+}
+
+void LuaApiBinding::PruneDeadActors() noexcept {
+    if (mActors == nullptr) {
+        mActorHandles.clear();
+        return;
+    }
+    for (auto handle = mActorHandles.begin(); handle != mActorHandles.end();) {
+        bool alive = false;
+        try {
+            auto exists = mActors->Exists(mRuntime.ModId(), *handle);
+            alive = exists.isOk() && exists.value.has_value() && *exists.value;
+        } catch (...) {
+            // A provider exception cannot make a stale accounting entry keep
+            // consuming a manifest slot forever.
+        }
+        if (!alive) {
+            handle = mActorHandles.erase(handle);
+        } else {
+            ++handle;
+        }
+    }
+}
+
+int LuaApiBinding::ActorSpawn(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr) {
+        return PushApiError(state, ErrorCode::HostFailure,
+                            "ship API context is unavailable");
+    }
+    try {
+        return binding->ActorSpawnFromLua(state);
+    } catch (...) {
+        return PushApiError(state, ErrorCode::HostFailure,
+                            "actor provider raised an unexpected exception");
+    }
+}
+
+int LuaApiBinding::ActorSpawnFromLua(lua_State* state) {
+    if (mCapabilities == nullptr ||
+        !mCapabilities->Has("actor.spawn", mHostContext.gameId) ||
+        mActors == nullptr) {
+        return PushApiError(state, ErrorCode::Unsupported,
+                            "actor.spawn is not available in this host");
+    }
+    if (!HasPermission("world.entities.create")) {
+        return PushApiError(
+            state, ErrorCode::PermissionDenied,
+            "manifest permission 'world.entities.create' is required");
+    }
+    auto request = ReadActorSpawnRequest(state);
+    if (!request.isOk()) {
+        return PushApiError(state, request.code, request.message);
+    }
+    PruneDeadActors();
+    const std::size_t limit = EffectiveActorLimit();
+    if (limit == 0 || mActorHandles.size() >= limit) {
+        return PushApiError(state, ErrorCode::ResourceLimit,
+                            "mod actor limit of " + std::to_string(limit) + " reached");
+    }
+    auto spawned = mActors->Spawn(mRuntime.ModId(), *request.value);
+    if (!spawned.isOk()) {
+        return PushApiError(state, spawned.code, spawned.message);
+    }
+    mActorHandles.push_back(*spawned.value);
+    PushActorHandle(state, *spawned.value);
+    lua_pushnil(state);
+    return 2;
+}
+
+int LuaApiBinding::ActorDestroy(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr) {
+        return PushApiError(state, ErrorCode::HostFailure,
+                            "ship API context is unavailable");
+    }
+    try {
+        return binding->ActorDestroyFromLua(state);
+    } catch (...) {
+        return PushApiError(state, ErrorCode::HostFailure,
+                            "actor provider raised an unexpected exception");
+    }
+}
+
+int LuaApiBinding::ActorDestroyFromLua(lua_State* state) {
+    if (mCapabilities == nullptr ||
+        !mCapabilities->Has("actor.destroy", mHostContext.gameId) ||
+        mActors == nullptr) {
+        return PushApiError(state, ErrorCode::Unsupported,
+                            "actor.destroy is not available in this host");
+    }
+    if (!HasPermission("world.entities.destroy")) {
+        return PushApiError(
+            state, ErrorCode::PermissionDenied,
+            "manifest permission 'world.entities.destroy' is required");
+    }
+    auto handle = ReadActorHandle(state, 1);
+    if (!handle.isOk()) {
+        return PushApiError(state, handle.code, handle.message);
+    }
+    auto destroyed = mActors->Destroy(mRuntime.ModId(), *handle.value);
+    if (!destroyed.isOk()) {
+        return PushApiError(state, destroyed.code, destroyed.message);
+    }
+    mActorHandles.erase(
+        std::remove(mActorHandles.begin(), mActorHandles.end(), *handle.value),
+        mActorHandles.end());
+    lua_pushboolean(state, 1);
+    lua_pushnil(state);
+    return 2;
+}
+
+int LuaApiBinding::ActorExists(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    if (binding == nullptr) {
+        return PushApiError(state, ErrorCode::HostFailure,
+                            "ship API context is unavailable");
+    }
+    try {
+        return binding->ActorExistsFromLua(state);
+    } catch (...) {
+        return PushApiError(state, ErrorCode::HostFailure,
+                            "actor provider raised an unexpected exception");
+    }
+}
+
+int LuaApiBinding::ActorExistsFromLua(lua_State* state) {
+    if (mCapabilities == nullptr ||
+        !mCapabilities->Has("actor.exists", mHostContext.gameId) ||
+        mActors == nullptr) {
+        return PushApiError(state, ErrorCode::Unsupported,
+                            "actor.exists is not available in this host");
+    }
+    if (!HasPermission("world.entities.read")) {
+        return PushApiError(
+            state, ErrorCode::PermissionDenied,
+            "manifest permission 'world.entities.read' is required");
+    }
+    auto handle = ReadActorHandle(state, 1);
+    if (!handle.isOk()) {
+        return PushApiError(state, handle.code, handle.message);
+    }
+    auto exists = mActors->Exists(mRuntime.ModId(), *handle.value);
+    if (!exists.isOk() && exists.code == ErrorCode::InvalidHandle) {
+        mActorHandles.erase(
+            std::remove(mActorHandles.begin(), mActorHandles.end(), *handle.value),
+            mActorHandles.end());
+        lua_pushboolean(state, 0);
+        lua_pushnil(state);
+        return 2;
+    }
+    if (!exists.isOk()) {
+        return PushApiError(state, exists.code, exists.message);
+    }
+    lua_pushboolean(state, *exists.value ? 1 : 0);
+    lua_pushnil(state);
+    return 2;
+}
 
 EventFlow LuaApiBinding::InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
                                         EventPayload& payload) {

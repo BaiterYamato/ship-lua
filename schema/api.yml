@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "api_version": "0.3.0",
+  "api_version": "0.4.0",
   "types": [
     {"name": "game_id", "kind": "enum", "values": ["oot", "mm"], "description": "Identificador público do jogo host."},
     {"name": "subscription", "kind": "opaque", "lua_type": "integer", "description": "Identificador opaco de inscrição em evento."},
@@ -9,10 +9,29 @@
       {"name": "priority", "type": "integer", "required": false}
     ], "description": "Opções determinísticas de inscrição."},
     {"name": "actor_handle", "kind": "object", "fields": [
+      {"name": "kind", "type": "string", "required": true},
       {"name": "slot", "type": "integer", "required": true},
       {"name": "generation", "type": "integer", "required": true},
-      {"name": "game", "type": "game_id", "required": true}
-    ], "description": "Handle validado por slot, geração e host."},
+      {"name": "scene_generation", "type": "integer", "required": true}
+    ], "description": "Handle opaco validado por kind, slot, geração e cena."},
+    {"name": "actor_position", "kind": "object", "fields": [
+      {"name": "x", "type": "number", "required": true},
+      {"name": "y", "type": "number", "required": true},
+      {"name": "z", "type": "number", "required": true}
+    ], "description": "Posição absoluta finita em coordenadas do mundo."},
+    {"name": "actor_rotation", "kind": "object", "fields": [
+      {"name": "x", "type": "number", "required": true},
+      {"name": "y", "type": "number", "required": true},
+      {"name": "z", "type": "number", "required": true}
+    ], "description": "Rotação XYZ em graus."},
+    {"name": "actor_spawn_options", "kind": "object", "fields": [
+      {"name": "position", "type": "actor_position", "required": true},
+      {"name": "rotation", "type": "actor_rotation", "required": false}
+    ], "description": "Transform seguro para criação de ator."},
+    {"name": "operation_error", "kind": "object", "fields": [
+      {"name": "code", "type": "string", "required": true},
+      {"name": "message", "type": "string", "required": true}
+    ], "description": "Erro estruturado retornado sem lançar lua_error."},
     {"name": "actor_snapshot", "kind": "object", "fields": [
       {"name": "handle", "type": "actor_handle", "required": true},
       {"name": "actor_id", "type": "integer", "required": true},
@@ -33,6 +52,9 @@
     {"name": "ship.events.on", "version": "0.1.0", "stability": "stable", "arguments": [{"name": "event", "type": "string"}, {"name": "options_or_callback", "type": "any"}, {"name": "callback", "type": "callback", "required": false}], "returns": "subscription", "availability": "common", "capability": null, "errors": ["invalid_argument", "unsupported"]},
     {"name": "ship.events.off", "version": "0.1.0", "stability": "stable", "arguments": [{"name": "subscription", "type": "subscription"}], "returns": "boolean", "availability": "common", "capability": null, "errors": ["invalid_handle"]},
     {"name": "ship.hotkeys.register", "version": "0.2.0", "stability": "preview", "arguments": [{"name": "id", "type": "string"}, {"name": "options", "type": "hotkey_options", "required": false}, {"name": "callback", "type": "callback"}], "returns": "boolean", "availability": "common", "capability": null, "errors": ["invalid_argument", "unsupported"]},
+    {"name": "ship.actor.spawn", "version": "0.4.0", "stability": "experimental", "arguments": [{"name": "actor_type", "type": "string"}, {"name": "options", "type": "actor_spawn_options"}], "returns": "actor_handle", "error_mode": "return", "error_type": "operation_error", "availability": "common", "capability": "actor.spawn", "errors": ["invalid_argument", "unsupported", "permission_denied", "invalid_state", "resource_limit", "host_failure"]},
+    {"name": "ship.actor.destroy", "version": "0.4.0", "stability": "experimental", "arguments": [{"name": "handle", "type": "actor_handle"}], "returns": "boolean", "error_mode": "return", "error_type": "operation_error", "availability": "common", "capability": "actor.destroy", "errors": ["invalid_argument", "unsupported", "permission_denied", "invalid_handle", "host_failure"]},
+    {"name": "ship.actor.exists", "version": "0.4.0", "stability": "experimental", "arguments": [{"name": "handle", "type": "actor_handle"}], "returns": "boolean", "error_mode": "return", "error_type": "operation_error", "availability": "common", "capability": "actor.exists", "errors": ["invalid_argument", "unsupported", "permission_denied", "host_failure"]},
     {"name": "ship.world.travel", "version": "0.3.0", "stability": "experimental", "arguments": [{"name": "world", "type": "game_id"}, {"name": "destination", "type": "string"}], "returns": "boolean", "availability": "common", "capability": "world.travel", "errors": ["invalid_argument", "unsupported", "invalid_state", "host_failure"]},
     {"name": "ship.mm.player.jump", "version": "0.2.0", "stability": "experimental", "arguments": [], "returns": "boolean", "availability": "mm", "capability": "mm.player.jump", "errors": []},
     {"name": "ship.mm.spawn_dog", "version": "0.3.0", "stability": "experimental", "arguments": [], "returns": "boolean", "availability": "mm", "capability": "mm.spawn_dog", "errors": []},

@@ -4,34 +4,37 @@
 -- Derivados da IDL (schema/*.yml); qualquer falha aborta a carga do mod.
 local ship = require("ship")
 
-local API_VERSION = "0.3.0"
+local API_VERSION = "0.4.0"
 
 local FUNCTIONS = {
-  { name = "ship.game.id", availability = "common", required_arguments = 0 },
-  { name = "ship.game.host_version", availability = "common", required_arguments = 0 },
-  { name = "ship.runtime.version", availability = "common", required_arguments = 0 },
-  { name = "ship.api.version", availability = "common", required_arguments = 0 },
-  { name = "ship.capabilities.has", availability = "common", required_arguments = 1 },
-  { name = "ship.capabilities.list", availability = "common", required_arguments = 0 },
-  { name = "ship.events.on", availability = "common", required_arguments = 2 },
-  { name = "ship.events.off", availability = "common", required_arguments = 1 },
-  { name = "ship.hotkeys.register", availability = "common", required_arguments = 2 },
-  { name = "ship.world.travel", availability = "common", required_arguments = 2 },
-  { name = "ship.mm.player.jump", availability = "mm", required_arguments = 0 },
-  { name = "ship.mm.spawn_dog", availability = "mm", required_arguments = 0 },
-  { name = "ship.oot.player.jump", availability = "oot", required_arguments = 0 },
-  { name = "ship.oot.spawn_dog", availability = "oot", required_arguments = 0 },
-  { name = "ship.log.debug", availability = "common", required_arguments = 1 },
-  { name = "ship.log.info", availability = "common", required_arguments = 1 },
-  { name = "ship.log.warn", availability = "common", required_arguments = 1 },
-  { name = "ship.log.error", availability = "common", required_arguments = 1 },
-  { name = "ship.timer.after", availability = "common", required_arguments = 2 },
-  { name = "ship.timer.every", availability = "common", required_arguments = 2 },
-  { name = "ship.timer.cancel", availability = "common", required_arguments = 1 },
-  { name = "ship.storage.get", availability = "common", required_arguments = 1 },
-  { name = "ship.storage.set", availability = "common", required_arguments = 2 },
-  { name = "ship.storage.delete", availability = "common", required_arguments = 1 },
-  { name = "ship.storage.clear", availability = "common", required_arguments = 0 },
+  { name = "ship.game.id", availability = "common", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.game.host_version", availability = "common", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.runtime.version", availability = "common", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.api.version", availability = "common", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.capabilities.has", availability = "common", required_arguments = 1, error_mode = "raise" },
+  { name = "ship.capabilities.list", availability = "common", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.events.on", availability = "common", required_arguments = 2, error_mode = "raise" },
+  { name = "ship.events.off", availability = "common", required_arguments = 1, error_mode = "raise" },
+  { name = "ship.hotkeys.register", availability = "common", required_arguments = 2, error_mode = "raise" },
+  { name = "ship.actor.spawn", availability = "common", required_arguments = 2, error_mode = "return" },
+  { name = "ship.actor.destroy", availability = "common", required_arguments = 1, error_mode = "return" },
+  { name = "ship.actor.exists", availability = "common", required_arguments = 1, error_mode = "return" },
+  { name = "ship.world.travel", availability = "common", required_arguments = 2, error_mode = "raise" },
+  { name = "ship.mm.player.jump", availability = "mm", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.mm.spawn_dog", availability = "mm", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.oot.player.jump", availability = "oot", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.oot.spawn_dog", availability = "oot", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.log.debug", availability = "common", required_arguments = 1, error_mode = "raise" },
+  { name = "ship.log.info", availability = "common", required_arguments = 1, error_mode = "raise" },
+  { name = "ship.log.warn", availability = "common", required_arguments = 1, error_mode = "raise" },
+  { name = "ship.log.error", availability = "common", required_arguments = 1, error_mode = "raise" },
+  { name = "ship.timer.after", availability = "common", required_arguments = 2, error_mode = "raise" },
+  { name = "ship.timer.every", availability = "common", required_arguments = 2, error_mode = "raise" },
+  { name = "ship.timer.cancel", availability = "common", required_arguments = 1, error_mode = "raise" },
+  { name = "ship.storage.get", availability = "common", required_arguments = 1, error_mode = "raise" },
+  { name = "ship.storage.set", availability = "common", required_arguments = 2, error_mode = "raise" },
+  { name = "ship.storage.delete", availability = "common", required_arguments = 1, error_mode = "raise" },
+  { name = "ship.storage.clear", availability = "common", required_arguments = 0, error_mode = "raise" },
 }
 
 local EVENTS = { "game.ready", "game.frame", "game.shutdown", "scene.enter", "actor.init", "actor.update", "actor.destroy", "save.loaded", "text.open", "audio.sequence_started", "input.hotkey" }
@@ -41,8 +44,8 @@ local ENUM_VALUES = {
 }
 
 local CONTRACT_CAPABILITIES = {
-  oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "world.travel", "oot.player.jump", "oot.spawn_dog" },
-  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "world.travel", "mm.player.jump", "mm.spawn_dog" },
+  oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "oot.player.jump", "oot.spawn_dog" },
+  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "mm.player.jump", "mm.spawn_dog" },
 }
 
 local failures = {}
@@ -111,7 +114,14 @@ for _, spec in ipairs(FUNCTIONS) do
   local fn = resolve((spec.name:gsub("^ship%.", "")))
   if spec.availability == "common" and spec.required_arguments > 0
       and type(fn) == "function" then
-    check(not pcall(fn), spec.name .. " deveria falhar sem argumentos obrigatórios")
+    if spec.error_mode == "return" then
+      local ok, value, err = pcall(fn)
+      check(ok and value == nil and type(err) == "table"
+          and err.code == "invalid_argument",
+        spec.name .. " deveria retornar invalid_argument estruturado")
+    else
+      check(not pcall(fn), spec.name .. " deveria falhar sem argumentos obrigatórios")
+    end
   end
 end
 

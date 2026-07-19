@@ -99,7 +99,7 @@ Result<void> EnsureDirectory(const std::filesystem::path& path, const std::strin
 
 Result<void> ValidateCompatibility(const Manifest& manifest, const LuaApiHostContext& context) {
     if (context.gameId != "oot" && context.gameId != "mm") {
-        return Result<void>::err(ErrorCode::InvalidState,
+        return Result<void>::err(ErrorCode::InvalidArgument,
                                  "host game id must be 'oot' or 'mm' before loading mods");
     }
     if (!manifest.games.empty() &&
@@ -141,6 +141,18 @@ Result<void> ValidateCompatibility(const Manifest& manifest, const LuaApiHostCon
             return Result<void>::err(ErrorCode::Unsupported,
                                      "mod host range '" + *hostRange + "' does not include " +
                                          context.hostVersion);
+        }
+    }
+    for (const std::string& capability : manifest.capabilitiesRequired) {
+        const bool available = context.capabilityRegistry != nullptr
+                                   ? context.capabilityRegistry->Has(capability, context.gameId)
+                                   : std::find(context.capabilities.begin(),
+                                               context.capabilities.end(), capability) !=
+                                         context.capabilities.end();
+        if (!available) {
+            return Result<void>::err(ErrorCode::Unsupported,
+                                     "required capability '" + capability +
+                                         "' is unavailable");
         }
     }
     return Result<void>::ok();
@@ -231,6 +243,13 @@ Result<void> ModHost::LoadModFromManifestAndSource(const Manifest& manifest,
         return Result<void>::err(ErrorCode::InvalidState,
                                  "mod '" + manifest.id + "' is already loaded");
     }
+    if (!mHostContext.gameId.empty()) {
+        auto compatible = ValidateCompatibility(manifest, mHostContext);
+        if (!compatible.isOk()) {
+            return Result<void>::err(compatible.code,
+                                     "mod '" + manifest.id + "': " + compatible.message);
+        }
+    }
 
     auto runtime = std::make_unique<LuaRuntime>(manifest.id, mLogger, memoryLimitBytes);
     if (runtime->State() == nullptr) {
@@ -238,8 +257,12 @@ Result<void> ModHost::LoadModFromManifestAndSource(const Manifest& manifest,
                                  "mod '" + manifest.id + "': failed to create Lua runtime");
     }
 
-    auto binding = std::make_unique<LuaApiBinding>(*runtime, *mEvents, mLogger, mHostContext,
-                                                   mNextModLoadOrder, manifest.loadPriority);
+    LuaApiModPolicy policy;
+    policy.permissions = manifest.permissionGrants;
+    policy.maxActors = manifest.limitActors;
+    auto binding = std::make_unique<LuaApiBinding>(
+        *runtime, *mEvents, mLogger, mHostContext, mNextModLoadOrder,
+        manifest.loadPriority, 3, std::move(policy));
     const auto installed = binding->Install();
     if (!installed.isOk()) {
         return Result<void>::err(installed.code,

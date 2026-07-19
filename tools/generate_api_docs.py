@@ -105,7 +105,13 @@ def generate_luadoc(api: dict[str, Any], events: dict[str, Any],
             optional = "?" if not argument.get("required", True) else ""
             lines.append(f"---@param {argument['name']}{optional} "
                          f"{argument_lua_type(function['name'], argument, custom_types)}")
-        lines.append(f"---@return {lua_type(function['returns'], custom_types)}")
+        return_type = lua_type(function['returns'], custom_types)
+        if function.get("error_mode") == "return":
+            lines.append(f"---@return {return_type}? value")
+            lines.append(
+                f"---@return {lua_type(function['error_type'], custom_types)}? error")
+        else:
+            lines.append(f"---@return {return_type}")
         parameters = ", ".join(argument["name"] for argument in arguments)
         lines.extend([f"function {function['name']}({parameters}) end", ""])
     return "\n".join(lines)
@@ -158,8 +164,11 @@ def generate_markdown(api: dict[str, Any], events: dict[str, Any],
     for function in api["functions"]:
         errors_text = ", ".join(f"`{code}`" for code in function.get("errors", [])) or "—"
         capability = f"`{function['capability']}`" if function.get("capability") else "—"
+        return_text = function['returns']
+        if function.get("error_mode") == "return":
+            return_text += f", {function['error_type']}?"
         lines.append(f"| `{function['name']}` | {field_list(function.get('arguments', []))} | "
-                     f"`{function['returns']}` | `{function['availability']}` | "
+                     f"`{return_text}` | `{function['availability']}` | "
                      f"`{function['stability']}` | `{function['version']}` | {capability} | "
                      f"{errors_text} |")
 

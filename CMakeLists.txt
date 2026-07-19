@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 project(ShipLua LANGUAGES C CXX)
 
+# Keep repository-relative paths stable when ShipLua is consumed through
+# add_subdirectory() by a host project whose CMAKE_SOURCE_DIR points elsewhere.
+set(SHIPLUA_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

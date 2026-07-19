@@ -107,7 +107,8 @@ Logger CaptureLogger(std::shared_ptr<std::vector<MockLogEntry>> logs) {
 LuaApiHostContext BuildHostContext(const MockHostOptions& options,
                                    std::shared_ptr<MockHotkeyRegistry> hotkeys,
                                    std::shared_ptr<FrameTimerScheduler> timers,
-                                   std::shared_ptr<KeyValueStorage> storage) {
+                                   std::shared_ptr<KeyValueStorage> storage,
+                                   std::shared_ptr<MockActorProvider> actors) {
     LuaApiHostContext context;
     context.gameId = options.gameId;
     context.hostVersion = options.hostVersion;
@@ -119,6 +120,7 @@ LuaApiHostContext BuildHostContext(const MockHostOptions& options,
     context.hotkeys = std::move(hotkeys);
     context.timers = std::move(timers);
     context.storage = std::move(storage);
+    context.actors = std::move(actors);
     return context;
 }
 
@@ -131,10 +133,12 @@ MockRuntime::MockRuntime(MockHostOptions options)
       mTimers(std::make_shared<FrameTimerScheduler>()),
       mStorage(std::make_shared<KeyValueStorage>()),
       mHotkeys(std::make_shared<MockHotkeyRegistry>()),
-      mHost(BuildHostContext(mOptions, mHotkeys, mTimers, mStorage), mLogger) {}
+      mActors(std::make_shared<MockActorProvider>(mOptions.gameId)),
+      mHost(BuildHostContext(mOptions, mHotkeys, mTimers, mStorage, mActors), mLogger) {}
 
 std::vector<std::string> MockRuntime::CoreCapabilities() {
-    return {"core.events", "core.timers", "core.storage", "core.input"};
+    return {"core.events", "core.timers", "core.storage", "core.input",
+            "actor.spawn", "actor.destroy", "actor.exists"};
 }
 
 Result<MockRuntime> MockRuntime::Create(MockHostOptions options) {
@@ -143,7 +147,8 @@ Result<MockRuntime> MockRuntime::Create(MockHostOptions options) {
                                         "mock exige game id 'oot' ou 'mm'");
     }
     const auto valid = ValidateLuaApiHostContext(
-        BuildHostContext(options, nullptr, nullptr, nullptr));
+        BuildHostContext(options, nullptr, nullptr, nullptr,
+                         std::make_shared<MockActorProvider>(options.gameId)));
     if (!valid.isOk()) {
         return Result<MockRuntime>::err(valid.code, valid.message);
     }
@@ -319,6 +324,14 @@ MockHotkeyRegistry& MockRuntime::Hotkeys() {
 
 const MockHotkeyRegistry& MockRuntime::Hotkeys() const {
     return *mHotkeys;
+}
+
+MockActorProvider& MockRuntime::Actors() {
+    return *mActors;
+}
+
+const MockActorProvider& MockRuntime::Actors() const {
+    return *mActors;
 }
 
 ModHost& MockRuntime::Host() {
