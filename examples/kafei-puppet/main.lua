@@ -29,10 +29,10 @@ local function spawn_puppet()
 end
 
 ship.events.on("game.ready", function()
-    ship.log.info("Kafei Puppet pronto — aperte K para spawnar/remover o puppet")
+    ship.log.info("Kafei Puppet pronto — aperte H para spawnar/remover o puppet")
 end)
 
 ship.hotkeys.register("kafei_puppet", {
-    default = "K",
+    default = "H",
     label = "Kafei Puppet",
 }, spawn_puppet)
