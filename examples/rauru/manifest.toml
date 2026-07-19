@@ -1,0 +1,17 @@
+id = "baiteryamato.rauru"
+name = "Rauru (OOT em MM)"
+version = "0.1.0"
+api = ">=0.4 <0.5"
+entrypoint = "main.lua"
+description = "Aperte K para spawnar Rauru, o Sábio da Luz de Ocarina of Time, dentro de Majora's Mask — o reverso da estátua da Elegia."
+authors = ["BaiterYamato"]
+games = ["mm"]
+
+[capabilities]
+required = ["actor.spawn", "actor.destroy", "actor.exists"]
+
+[permissions]
+grants = ["world.entities.create", "world.entities.destroy", "world.entities.read"]
+
+[limits]
+actors = 1
