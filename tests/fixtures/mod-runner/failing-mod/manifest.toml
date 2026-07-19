@@ -1,7 +1,7 @@
 id = "fixture.failing"
 name = "Fixture Failing"
 version = "0.1.0"
-api = ">=0.1 <0.3"
+api = ">=0.1 <0.5"
 entrypoint = "main.lua"
 description = "Fixture do mod test runner: contém uma falha proposital."
 authors = ["BaiterYamato"]

@@ -13,6 +13,7 @@
 #include "shiplua/host/ModHost.h"
 #include "shiplua/input/HotkeyRegistry.h"
 #include "shiplua/manifest/Manifest.h"
+#include "shiplua/mock/MockActorProvider.h"
 #include "shiplua/runtime/Logger.h"
 #include "shiplua/runtime/Result.h"
 #include "shiplua/storage/KeyValueStorage.h"
@@ -126,6 +127,8 @@ class MockRuntime {
     const FrameTimerScheduler& Timers() const;
     MockHotkeyRegistry& Hotkeys();
     const MockHotkeyRegistry& Hotkeys() const;
+    MockActorProvider& Actors();
+    const MockActorProvider& Actors() const;
     ModHost& Host();
     const MockHostOptions& Options() const;
 
@@ -141,6 +144,7 @@ class MockRuntime {
     std::shared_ptr<FrameTimerScheduler> mTimers;
     std::shared_ptr<KeyValueStorage> mStorage;
     std::shared_ptr<MockHotkeyRegistry> mHotkeys;
+    std::shared_ptr<MockActorProvider> mActors;
     ModHost mHost;
     std::string mModId;
 };

@@ -1,5 +1,5 @@
 name = "Fixture Broken"
 version = "0.1.0"
-api = ">=0.1 <0.3"
+api = ">=0.1 <0.5"
 entrypoint = "main.lua"
 description = "Manifesto inválido (sem id) para exercitar erro de carregamento no runner."

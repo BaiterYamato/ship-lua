@@ -4,7 +4,7 @@
 --   local ok, code, message = validate.validate("ship.events.on", "game.ready", fn)
 local M = {}
 
-M.api_version = "0.3.0"
+M.api_version = "0.4.0"
 
 M.types = {
   ["game_id"] = { kind = "enum",
@@ -23,9 +23,36 @@ M.types = {
   },
   ["actor_handle"] = { kind = "object",
     fields = {
+      { name = "kind", type = "string", required = true },
       { name = "slot", type = "integer", required = true },
       { name = "generation", type = "integer", required = true },
-      { name = "game", type = "game_id", required = true },
+      { name = "scene_generation", type = "integer", required = true },
+    },
+  },
+  ["actor_position"] = { kind = "object",
+    fields = {
+      { name = "x", type = "number", required = true },
+      { name = "y", type = "number", required = true },
+      { name = "z", type = "number", required = true },
+    },
+  },
+  ["actor_rotation"] = { kind = "object",
+    fields = {
+      { name = "x", type = "number", required = true },
+      { name = "y", type = "number", required = true },
+      { name = "z", type = "number", required = true },
+    },
+  },
+  ["actor_spawn_options"] = { kind = "object",
+    fields = {
+      { name = "position", type = "actor_position", required = true },
+      { name = "rotation", type = "actor_rotation", required = false },
+    },
+  },
+  ["operation_error"] = { kind = "object",
+    fields = {
+      { name = "code", type = "string", required = true },
+      { name = "message", type = "string", required = true },
     },
   },
   ["actor_snapshot"] = { kind = "object",
@@ -50,6 +77,7 @@ M.functions = {
     availability = "common",
     arguments = {},
     returns = "game_id",
+    error_mode = "raise",
     errors = {},
   },
   ["ship.game.host_version"] = {
@@ -58,6 +86,7 @@ M.functions = {
     availability = "common",
     arguments = {},
     returns = "string",
+    error_mode = "raise",
     errors = {},
   },
   ["ship.runtime.version"] = {
@@ -66,6 +95,7 @@ M.functions = {
     availability = "common",
     arguments = {},
     returns = "string",
+    error_mode = "raise",
     errors = {},
   },
   ["ship.api.version"] = {
@@ -74,6 +104,7 @@ M.functions = {
     availability = "common",
     arguments = {},
     returns = "string",
+    error_mode = "raise",
     errors = {},
   },
   ["ship.capabilities.has"] = {
@@ -84,6 +115,7 @@ M.functions = {
       { name = "name", type = "string", required = true },
     },
     returns = "boolean",
+    error_mode = "raise",
     errors = { "invalid_argument" },
   },
   ["ship.capabilities.list"] = {
@@ -92,6 +124,7 @@ M.functions = {
     availability = "common",
     arguments = {},
     returns = "array<string>",
+    error_mode = "raise",
     errors = {},
   },
   ["ship.events.on"] = {
@@ -104,6 +137,7 @@ M.functions = {
       { name = "callback", type = "callback", required = false },
     },
     returns = "subscription",
+    error_mode = "raise",
     errors = { "invalid_argument", "unsupported" },
     requires_callback = true,
   },
@@ -115,6 +149,7 @@ M.functions = {
       { name = "subscription", type = "subscription", required = true },
     },
     returns = "boolean",
+    error_mode = "raise",
     errors = { "invalid_handle" },
   },
   ["ship.hotkeys.register"] = {
@@ -127,7 +162,48 @@ M.functions = {
       { name = "callback", type = "callback", required = true },
     },
     returns = "boolean",
+    error_mode = "raise",
     errors = { "invalid_argument", "unsupported" },
+  },
+  ["ship.actor.spawn"] = {
+    version = "0.4.0",
+    stability = "experimental",
+    availability = "common",
+    capability = "actor.spawn",
+    arguments = {
+      { name = "actor_type", type = "string", required = true },
+      { name = "options", type = "actor_spawn_options", required = true },
+    },
+    returns = "actor_handle",
+    error_mode = "return",
+    error_type = "operation_error",
+    errors = { "invalid_argument", "unsupported", "permission_denied", "invalid_state", "resource_limit", "host_failure" },
+  },
+  ["ship.actor.destroy"] = {
+    version = "0.4.0",
+    stability = "experimental",
+    availability = "common",
+    capability = "actor.destroy",
+    arguments = {
+      { name = "handle", type = "actor_handle", required = true },
+    },
+    returns = "boolean",
+    error_mode = "return",
+    error_type = "operation_error",
+    errors = { "invalid_argument", "unsupported", "permission_denied", "invalid_handle", "host_failure" },
+  },
+  ["ship.actor.exists"] = {
+    version = "0.4.0",
+    stability = "experimental",
+    availability = "common",
+    capability = "actor.exists",
+    arguments = {
+      { name = "handle", type = "actor_handle", required = true },
+    },
+    returns = "boolean",
+    error_mode = "return",
+    error_type = "operation_error",
+    errors = { "invalid_argument", "unsupported", "permission_denied", "host_failure" },
   },
   ["ship.world.travel"] = {
     version = "0.3.0",
@@ -139,6 +215,7 @@ M.functions = {
       { name = "destination", type = "string", required = true },
     },
     returns = "boolean",
+    error_mode = "raise",
     errors = { "invalid_argument", "unsupported", "invalid_state", "host_failure" },
   },
   ["ship.mm.player.jump"] = {
@@ -148,6 +225,7 @@ M.functions = {
     capability = "mm.player.jump",
     arguments = {},
     returns = "boolean",
+    error_mode = "raise",
     errors = {},
   },
   ["ship.mm.spawn_dog"] = {
@@ -157,6 +235,7 @@ M.functions = {
     capability = "mm.spawn_dog",
     arguments = {},
     returns = "boolean",
+    error_mode = "raise",
     errors = {},
   },
   ["ship.oot.player.jump"] = {
@@ -166,6 +245,7 @@ M.functions = {
     capability = "oot.player.jump",
     arguments = {},
     returns = "boolean",
+    error_mode = "raise",
     errors = {},
   },
   ["ship.oot.spawn_dog"] = {
@@ -175,6 +255,7 @@ M.functions = {
     capability = "oot.spawn_dog",
     arguments = {},
     returns = "boolean",
+    error_mode = "raise",
     errors = {},
   },
   ["ship.log.debug"] = {
@@ -185,6 +266,7 @@ M.functions = {
       { name = "message", type = "string", required = true },
     },
     returns = "nil",
+    error_mode = "raise",
     errors = { "invalid_argument" },
   },
   ["ship.log.info"] = {
@@ -195,6 +277,7 @@ M.functions = {
       { name = "message", type = "string", required = true },
     },
     returns = "nil",
+    error_mode = "raise",
     errors = { "invalid_argument" },
   },
   ["ship.log.warn"] = {
@@ -205,6 +288,7 @@ M.functions = {
       { name = "message", type = "string", required = true },
     },
     returns = "nil",
+    error_mode = "raise",
     errors = { "invalid_argument" },
   },
   ["ship.log.error"] = {
@@ -215,6 +299,7 @@ M.functions = {
       { name = "message", type = "string", required = true },
     },
     returns = "nil",
+    error_mode = "raise",
     errors = { "invalid_argument" },
   },
   ["ship.timer.after"] = {
@@ -227,6 +312,7 @@ M.functions = {
       { name = "callback", type = "callback", required = true },
     },
     returns = "timer_handle",
+    error_mode = "raise",
     errors = { "invalid_argument", "resource_limit", "unsupported" },
   },
   ["ship.timer.every"] = {
@@ -239,6 +325,7 @@ M.functions = {
       { name = "callback", type = "callback", required = true },
     },
     returns = "timer_handle",
+    error_mode = "raise",
     errors = { "invalid_argument", "resource_limit", "unsupported" },
   },
   ["ship.timer.cancel"] = {
@@ -250,6 +337,7 @@ M.functions = {
       { name = "handle", type = "timer_handle", required = true },
     },
     returns = "boolean",
+    error_mode = "raise",
     errors = { "invalid_argument", "invalid_handle" },
   },
   ["ship.storage.get"] = {
@@ -262,6 +350,7 @@ M.functions = {
       { name = "default", type = "any", required = false },
     },
     returns = "any",
+    error_mode = "raise",
     errors = { "invalid_argument", "unsupported" },
   },
   ["ship.storage.set"] = {
@@ -274,6 +363,7 @@ M.functions = {
       { name = "value", type = "any", required = true },
     },
     returns = "boolean",
+    error_mode = "raise",
     errors = { "invalid_argument", "resource_limit", "unsupported" },
   },
   ["ship.storage.delete"] = {
@@ -285,6 +375,7 @@ M.functions = {
       { name = "key", type = "string", required = true },
     },
     returns = "boolean",
+    error_mode = "raise",
     errors = { "invalid_argument", "unsupported" },
   },
   ["ship.storage.clear"] = {
@@ -294,6 +385,7 @@ M.functions = {
     capability = "core.storage",
     arguments = {},
     returns = "integer",
+    error_mode = "raise",
     errors = { "unsupported" },
   },
 }

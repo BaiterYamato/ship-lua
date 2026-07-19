@@ -11,6 +11,7 @@
 
 #include "shiplua/generated/ApiBindings.h"
 #include "shiplua/host/ModHost.h"
+#include "shiplua/mock/MockActorProvider.h"
 #include "shiplua/storage/KeyValueStorage.h"
 #include "shiplua/timer/FrameTimerScheduler.h"
 #include "shiplua/input/HotkeyRegistry.h"
@@ -77,9 +78,11 @@ ShipLua::Manifest MakeManifest(std::string id) {
     manifest.id = std::move(id);
     manifest.name = "IDL contract probe";
     manifest.version = "0.1.0";
-    manifest.apiRange = ">=0.1 <0.3";
+    manifest.apiRange = ">=0.1 <0.5";
     manifest.entrypoint = "main.lua";
     manifest.loadPriority = 50;
+    manifest.permissionGrants = {"world.entities.create",
+                                 "world.entities.destroy", "world.entities.read"};
     return manifest;
 }
 
@@ -107,6 +110,7 @@ void RunContractOnHost(const std::string& game, const std::string& source) {
     // serviços em memória, como o mock runtime faz (MODSDK-004).
     context.timers = std::make_shared<ShipLua::FrameTimerScheduler>();
     context.storage = std::make_shared<ShipLua::KeyValueStorage>();
+    context.actors = std::make_shared<ShipLua::MockActorProvider>(game);
     context.worldTravel = [](const ShipLua::WorldDestination&) {
         return ShipLua::Result<void>::ok();
     };

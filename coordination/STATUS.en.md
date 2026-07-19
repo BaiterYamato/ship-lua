@@ -8,7 +8,7 @@ ShipLua
 
 ## Global status
 
-bootstrap-done + Phases 2 and 3 in review + loading mods on hosts in review
+stable core on `main`; generic `ship.actor` API 0.4.0 completed and validated on a review branch, pending OoT provider integration
 
 ## Repositories
 
@@ -66,6 +66,9 @@ in parallel, review the EXAMPLE-001 common package.
 - `OOT-005` — review (writable folder `mods`, common load and `game.ready`; `soh.exe` generated; PR #9).
 - `MM-005` — review (writable folder `mods`, common load and `game.ready`; `2ship.exe` generated; PR #5).
 - `EXAMPLE-001` — review (reproducible common package, OoT/MM compliance and CI artifact; PR #20).
+- `MODSDK-005` — review (RFC 0009, `ActorProvider`, generic spawn/destroy/exists,
+  manifest permissions/limits, ROM-free mock and OoT/MM examples; MSVC Release
+  56/56 and schema/codegen 30/30 green).
 
 ## Locks
 
@@ -73,10 +76,11 @@ None registered.
 
 ## Latest integration
 
-ship-lua `main` published in origin (BaiterYamato/ship-lua).
+ship-lua `main` at `fff5785`; MODSDK-005 is based on that published baseline
+and published for review as link-span PR #41.
 
 ## Next action
 
-Integrate the stacked PRs in order and confirm the package workflow
-EXAMPLE-001. Windows/MSVC builds are green on both hosts; execution with
-legitimate assets, Linux and macOS remain outstanding.
+Integrate MODSDK-005 into the OoT provider: update `extern/ship-lua`, implement
+the public provider interface, inject `LuaApiHostContext::actors`, and rebuild
+`soh.exe`. A legitimate-assets smoke and the MM provider remain outstanding.

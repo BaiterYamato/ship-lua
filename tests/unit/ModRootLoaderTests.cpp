@@ -27,7 +27,7 @@ void WriteText(const std::filesystem::path &path, const std::string &contents) {
 std::string Manifest(const std::string &id, const std::string &extra = {}) {
   return "id = \"" + id + "\"\nname = \"" + id +
          "\"\nversion = \"1.0.0\"\n"
-         "api = \">=0.1 <0.4\"\nentrypoint = \"main.lua\"\n" +
+         "api = \">=0.1 <0.5\"\nentrypoint = \"main.lua\"\n" +
          extra;
 }
 

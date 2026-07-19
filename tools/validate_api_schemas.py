@@ -171,6 +171,17 @@ def validate_documents(api: dict[str, Any], events: dict[str, Any],
         result_type = _base_type(function.get("returns"), f"função '{name}' retorno", errors)
         if result_type is not None and result_type not in known_types:
             errors.append(f"função '{name}': retorno desconhecido '{result_type}'")
+        error_mode = function.get("error_mode", "raise")
+        if error_mode not in {"raise", "return"}:
+            errors.append(f"função '{name}': error_mode inválido")
+        error_type = function.get("error_type")
+        if error_mode == "return":
+            if error_type not in custom_types:
+                errors.append(f"função '{name}': error_type de retorno desconhecido")
+            if not function.get("errors"):
+                errors.append(f"função '{name}': error_mode return exige códigos de erro")
+        elif error_type is not None:
+            errors.append(f"função '{name}': error_type só é válido com error_mode return")
         for code in function.get("errors", []):
             if code not in error_codes:
                 errors.append(f"função '{name}': erro desconhecido '{code}'")

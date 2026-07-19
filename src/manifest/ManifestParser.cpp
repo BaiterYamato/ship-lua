@@ -1,5 +1,6 @@
 #include "shiplua/manifest/ManifestParser.h"
 
+#include <algorithm>
 #include <exception>
 #include <fstream>
 #include <sstream>
@@ -24,6 +25,24 @@ void ReadStringArray(const toml::table& table, std::string_view key, std::vector
             }
         }
     }
+}
+
+bool IsValidPermissionId(const std::string& id) {
+    if (id.empty() || id.size() > 128 || id.front() < 'a' || id.front() > 'z' ||
+        id.find('.') == std::string::npos || id.back() == '.') {
+        return false;
+    }
+    bool previousDot = false;
+    for (unsigned char character : id) {
+        const bool valid = (character >= 'a' && character <= 'z') ||
+                           (character >= '0' && character <= '9') ||
+                           character == '_' || character == '-' || character == '.';
+        if (!valid || (character == '.' && previousDot)) {
+            return false;
+        }
+        previousDot = character == '.';
+    }
+    return true;
 }
 
 // Reads a required top-level string field; appends to `missing` when absent
@@ -125,6 +144,28 @@ Result<Manifest> ParseTable(const toml::table& table, const std::string& sourceN
         manifest.permStorage = (*perms)["storage"].value_or(false);
         manifest.permNetwork = (*perms)["network"].value_or(false);
         manifest.permClipboard = (*perms)["clipboard"].value_or(false);
+        ReadStringArray(*perms, "grants", manifest.permissionGrants);
+        for (const std::string& permission : manifest.permissionGrants) {
+            if (!IsValidPermissionId(permission)) {
+                return Result<Manifest>::err(
+                    ErrorCode::InvalidArgument,
+                    sourceName + ": invalid permission grant '" + permission + "'");
+            }
+        }
+        std::sort(manifest.permissionGrants.begin(), manifest.permissionGrants.end());
+        manifest.permissionGrants.erase(
+            std::unique(manifest.permissionGrants.begin(), manifest.permissionGrants.end()),
+            manifest.permissionGrants.end());
+    }
+
+    if (const toml::table* limits = table["limits"].as_table()) {
+        const std::int64_t actors = (*limits)["actors"].value_or(std::int64_t{16});
+        if (actors < 0 || actors > 256) {
+            return Result<Manifest>::err(
+                ErrorCode::InvalidArgument,
+                sourceName + ": field 'limits.actors' must be between 0 and 256");
+        }
+        manifest.limitActors = static_cast<std::size_t>(actors);
     }
 
     return Result<Manifest>::ok(std::move(manifest));

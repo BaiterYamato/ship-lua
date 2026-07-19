@@ -8,8 +8,8 @@ local validate = require("shiplua_validate")
 local M = {}
 
 M.contract_capabilities = {
-  oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "world.travel", "oot.player.jump", "oot.spawn_dog" },
-  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "save.events", "text.events", "audio.sequence.events", "world.travel", "mm.player.jump", "mm.spawn_dog" },
+  oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "oot.player.jump", "oot.spawn_dog" },
+  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "mm.player.jump", "mm.spawn_dog" },
 }
 
 M.host = {
@@ -119,6 +119,9 @@ local function make_stub(name, spec)
   return function(...)
     local ok, code, message = validate.validate(name, ...)
     if not ok then
+      if spec.error_mode == "return" then
+        return nil, { code = code, message = message }
+      end
       error(code .. ": " .. message, 2)
     end
     local args = table.pack(...)
@@ -126,7 +129,9 @@ local function make_stub(name, spec)
     M.calls[#M.calls + 1] = { name = name, arguments = args }
     local handler = handlers[name]
     if handler ~= nil then return handler(...) end
-    return default_return(spec.returns)
+    local value = default_return(spec.returns)
+    if spec.error_mode == "return" then return value, nil end
+    return value
   end
 end
 

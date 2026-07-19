@@ -111,6 +111,9 @@ def function_spec_lua(function: dict[str, Any]) -> list[str]:
     else:
         lines.append("    arguments = {},")
     lines.append(f"    returns = {q(function['returns'])},")
+    lines.append(f"    error_mode = {q(function.get('error_mode', 'raise'))},")
+    if function.get("error_type"):
+        lines.append(f"    error_type = {q(function['error_type'])},")
     lines.append(f"    errors = {qlist(function.get('errors', []))},")
     if requires_callback(function):
         lines.append("    requires_callback = true,")
@@ -391,6 +394,9 @@ def generate_mock_lua(api: dict[str, Any], events: dict[str, Any],
         "  return function(...)",
         "    local ok, code, message = validate.validate(name, ...)",
         "    if not ok then",
+        "      if spec.error_mode == \"return\" then",
+        "        return nil, { code = code, message = message }",
+        "      end",
         "      error(code .. \": \" .. message, 2)",
         "    end",
         "    local args = table.pack(...)",
@@ -398,7 +404,9 @@ def generate_mock_lua(api: dict[str, Any], events: dict[str, Any],
         "    M.calls[#M.calls + 1] = { name = name, arguments = args }",
         "    local handler = handlers[name]",
         "    if handler ~= nil then return handler(...) end",
-        "    return default_return(spec.returns)",
+        "    local value = default_return(spec.returns)",
+        "    if spec.error_mode == \"return\" then return value, nil end",
+        "    return value",
         "  end",
         "end",
         "",
@@ -508,7 +516,8 @@ def generate_api_contract_lua(api: dict[str, Any], events: dict[str, Any],
                              if argument.get("required", True))
         lines.append(
             f"  {{ name = {q(function['name'])}, availability = {q(function['availability'])}, "
-            f"required_arguments = {required_count} }},")
+            f"required_arguments = {required_count}, error_mode = "
+            f"{q(function.get('error_mode', 'raise'))} }},")
     lines.extend([
         "}",
         "",
@@ -590,7 +599,14 @@ def generate_api_contract_lua(api: dict[str, Any], events: dict[str, Any],
         "  local fn = resolve((spec.name:gsub(\"^ship%.\", \"\")))",
         "  if spec.availability == \"common\" and spec.required_arguments > 0",
         "      and type(fn) == \"function\" then",
-        "    check(not pcall(fn), spec.name .. \" deveria falhar sem argumentos obrigatórios\")",
+        "    if spec.error_mode == \"return\" then",
+        "      local ok, value, err = pcall(fn)",
+        "      check(ok and value == nil and type(err) == \"table\"",
+        "          and err.code == \"invalid_argument\",",
+        "        spec.name .. \" deveria retornar invalid_argument estruturado\")",
+        "    else",
+        "      check(not pcall(fn), spec.name .. \" deveria falhar sem argumentos obrigatórios\")",
+        "    end",
         "  end",
         "end",
         "",
@@ -965,15 +981,26 @@ def generate_mock_contract_lua(api: dict[str, Any], events: dict[str, Any],
             "ship_mod = mock.build()",
         ])
         for function in arg_checked:
-            lines.extend([
-                "do",
-                f"  local fn = resolve(ship_mod, {q(dotted(function['name']))})",
-                "  local ok, err = pcall(fn)",
-                f"  check(not ok, {q(function['name'] + ' sem argumentos deveria falhar')})",
-                "  check(type(err) == \"string\" and err:find(\"invalid_argument\", 1, true) ~= nil,",
-                f"    {q('erro de ' + function['name'] + ' deveria carregar invalid_argument')})",
-                "end",
-            ])
+            if function.get("error_mode") == "return":
+                lines.extend([
+                    "do",
+                    f"  local fn = resolve(ship_mod, {q(dotted(function['name']))})",
+                    "  local value, err = fn()",
+                    f"  check(value == nil, {q(function['name'] + ' sem argumentos não deveria retornar valor')})",
+                    "  check(type(err) == \"table\" and err.code == \"invalid_argument\",",
+                    f"    {q('erro de ' + function['name'] + ' deveria carregar invalid_argument')})",
+                    "end",
+                ])
+            else:
+                lines.extend([
+                    "do",
+                    f"  local fn = resolve(ship_mod, {q(dotted(function['name']))})",
+                    "  local ok, err = pcall(fn)",
+                    f"  check(not ok, {q(function['name'] + ' sem argumentos deveria falhar')})",
+                    "  check(type(err) == \"string\" and err:find(\"invalid_argument\", 1, true) ~= nil,",
+                    f"    {q('erro de ' + function['name'] + ' deveria carregar invalid_argument')})",
+                    "end",
+                ])
         lines.append("")
 
     lines.extend([

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "api_version": "0.3.0",
+  "api_version": "0.4.0",
   "capabilities": [
     {"name": "core.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos e lifecycle centrais do host."},
     {"name": "core.timers", "status": "contract", "hosts": ["oot", "mm"], "description": "Timers por frame com ownership por mod."},
@@ -8,6 +8,9 @@
     {"name": "core.storage", "status": "contract", "hosts": ["oot", "mm"], "description": "Armazenamento chave-valor com namespace por mod."},
     {"name": "scene.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de cena."},
     {"name": "actor.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de ator com handles e snapshots."},
+    {"name": "actor.spawn", "status": "contract", "hosts": ["oot", "mm"], "description": "Cria um ator allowlisted com ownership e handle seguro."},
+    {"name": "actor.destroy", "status": "contract", "hosts": ["oot", "mm"], "description": "Destrói um ator pertencente ao mod chamador."},
+    {"name": "actor.exists", "status": "contract", "hosts": ["oot", "mm"], "description": "Consulta a validade de um handle de ator pertencente ao mod."},
     {"name": "save.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de carregamento de save."},
     {"name": "text.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos comuns de texto somente leitura."},
     {"name": "audio.sequence.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos de início de sequência de áudio."},

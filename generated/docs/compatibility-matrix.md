@@ -1,7 +1,7 @@
 <!-- Gerado por tools/generate_api_contracts.py. Não edite manualmente. -->
 # Matriz de compatibilidade — ShipLua Runtime API
 
-Versão da API: `0.3.0` (schema `1`).
+Versão da API: `0.4.0` (schema `1`).
 Derivada dos schemas canônicos em `schema/` (IDL); regenere com
 `tools/generate_api_contracts.py`.
 
@@ -18,6 +18,9 @@ Derivada dos schemas canônicos em `schema/` (IDL); regenere com
 | `ship.events.on` | `0.1.0` | `stable` | sim | sim | — | `invalid_argument`, `unsupported` |
 | `ship.events.off` | `0.1.0` | `stable` | sim | sim | — | `invalid_handle` |
 | `ship.hotkeys.register` | `0.2.0` | `preview` | sim | sim | — | `invalid_argument`, `unsupported` |
+| `ship.actor.spawn` | `0.4.0` | `experimental` | sim | sim | `actor.spawn` | `invalid_argument`, `unsupported`, `permission_denied`, `invalid_state`, `resource_limit`, `host_failure` |
+| `ship.actor.destroy` | `0.4.0` | `experimental` | sim | sim | `actor.destroy` | `invalid_argument`, `unsupported`, `permission_denied`, `invalid_handle`, `host_failure` |
+| `ship.actor.exists` | `0.4.0` | `experimental` | sim | sim | `actor.exists` | `invalid_argument`, `unsupported`, `permission_denied`, `host_failure` |
 | `ship.world.travel` | `0.3.0` | `experimental` | sim | sim | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
 | `ship.mm.player.jump` | `0.2.0` | `experimental` | — | sim | `mm.player.jump` | — |
 | `ship.mm.spawn_dog` | `0.3.0` | `experimental` | — | sim | `mm.spawn_dog` | — |
@@ -65,6 +68,9 @@ nunca registra `ship.oot.*` ou `ship.mm.*` (RFC 0001).
 | `core.storage` | `contract` | sim | sim |
 | `scene.events` | `contract` | sim | sim |
 | `actor.events` | `contract` | sim | sim |
+| `actor.spawn` | `contract` | sim | sim |
+| `actor.destroy` | `contract` | sim | sim |
+| `actor.exists` | `contract` | sim | sim |
 | `save.events` | `contract` | sim | sim |
 | `text.events` | `contract` | sim | sim |
 | `audio.sequence.events` | `contract` | sim | sim |
@@ -87,5 +93,5 @@ nunca registra `ship.oot.*` ou `ship.mm.*` (RFC 0001).
 |---|---:|
 | `stable` | 12 |
 | `preview` | 1 |
-| `experimental` | 12 |
+| `experimental` | 15 |
 

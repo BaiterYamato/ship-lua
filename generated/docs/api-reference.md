@@ -1,7 +1,7 @@
 <!-- Gerado por tools/generate_api_docs.py. Não edite manualmente. -->
 # Referência da API ShipLua
 
-Versão da API: `0.3.0`. Versão do schema: `1`.
+Versão da API: `0.4.0`. Versão do schema: `1`.
 
 ## Tipos
 
@@ -11,7 +11,11 @@ Versão da API: `0.3.0`. Versão do schema: `1`.
 | `subscription` | `opaque` | Lua `integer` | Identificador opaco de inscrição em evento. |
 | `timer_handle` | `opaque` | Lua `integer` | Identificador opaco de timer em frames. |
 | `event_options` | `object` | `priority: integer?` | Opções determinísticas de inscrição. |
-| `actor_handle` | `object` | `slot: integer`, `generation: integer`, `game: game_id` | Handle validado por slot, geração e host. |
+| `actor_handle` | `object` | `kind: string`, `slot: integer`, `generation: integer`, `scene_generation: integer` | Handle opaco validado por kind, slot, geração e cena. |
+| `actor_position` | `object` | `x: number`, `y: number`, `z: number` | Posição absoluta finita em coordenadas do mundo. |
+| `actor_rotation` | `object` | `x: number`, `y: number`, `z: number` | Rotação XYZ em graus. |
+| `actor_spawn_options` | `object` | `position: actor_position`, `rotation: actor_rotation?` | Transform seguro para criação de ator. |
+| `operation_error` | `object` | `code: string`, `message: string` | Erro estruturado retornado sem lançar lua_error. |
 | `actor_snapshot` | `object` | `handle: actor_handle`, `actor_id: integer`, `category: integer` | Snapshot mínimo e estável de ator. |
 | `hotkey_options` | `object` | `default: string?`, `label: string?` | Opções de registro de hotkey (tecla default e rótulo). |
 
@@ -28,6 +32,9 @@ Versão da API: `0.3.0`. Versão do schema: `1`.
 | `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | `stable` | `0.1.0` | — | `invalid_argument`, `unsupported` |
 | `ship.events.off` | `subscription: subscription` | `boolean` | `common` | `stable` | `0.1.0` | — | `invalid_handle` |
 | `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | `preview` | `0.2.0` | — | `invalid_argument`, `unsupported` |
+| `ship.actor.spawn` | `actor_type: string`, `options: actor_spawn_options` | `actor_handle, operation_error?` | `common` | `experimental` | `0.4.0` | `actor.spawn` | `invalid_argument`, `unsupported`, `permission_denied`, `invalid_state`, `resource_limit`, `host_failure` |
+| `ship.actor.destroy` | `handle: actor_handle` | `boolean, operation_error?` | `common` | `experimental` | `0.4.0` | `actor.destroy` | `invalid_argument`, `unsupported`, `permission_denied`, `invalid_handle`, `host_failure` |
+| `ship.actor.exists` | `handle: actor_handle` | `boolean, operation_error?` | `common` | `experimental` | `0.4.0` | `actor.exists` | `invalid_argument`, `unsupported`, `permission_denied`, `host_failure` |
 | `ship.world.travel` | `world: game_id`, `destination: string` | `boolean` | `common` | `experimental` | `0.3.0` | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
 | `ship.mm.player.jump` | — | `boolean` | `mm` | `experimental` | `0.2.0` | `mm.player.jump` | — |
 | `ship.mm.spawn_dog` | — | `boolean` | `mm` | `experimental` | `0.3.0` | `mm.spawn_dog` | — |
@@ -71,6 +78,9 @@ Versão da API: `0.3.0`. Versão do schema: `1`.
 | `core.storage` | `contract` | `oot`, `mm` | Armazenamento chave-valor com namespace por mod. |
 | `scene.events` | `contract` | `oot`, `mm` | Eventos comuns de cena. |
 | `actor.events` | `contract` | `oot`, `mm` | Eventos comuns de ator com handles e snapshots. |
+| `actor.spawn` | `contract` | `oot`, `mm` | Cria um ator allowlisted com ownership e handle seguro. |
+| `actor.destroy` | `contract` | `oot`, `mm` | Destrói um ator pertencente ao mod chamador. |
+| `actor.exists` | `contract` | `oot`, `mm` | Consulta a validade de um handle de ator pertencente ao mod. |
 | `save.events` | `contract` | `oot`, `mm` | Eventos comuns de carregamento de save. |
 | `text.events` | `contract` | `oot`, `mm` | Eventos comuns de texto somente leitura. |
 | `audio.sequence.events` | `contract` | `oot`, `mm` | Eventos de início de sequência de áudio. |

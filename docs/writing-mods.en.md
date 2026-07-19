@@ -25,7 +25,7 @@ Optionally: `scripts/`, `assets/`, `locale/`, `README.md`.
 id = "community.my_mod"       # Required, unique, reverse-domain style
 name = "My Mod"               # Required
 version = "0.1.0"             # Required, SemVer
-api = ">=0.1 <0.2"            # Required API range supported by the mod
+api = ">=0.4 <0.5"            # Required API range supported by the mod
 entrypoint = "main.lua"       # Required
 description = "What it does."
 authors = ["Your Name"]
@@ -50,6 +50,10 @@ after = ["community.core_utils"]
 [permissions]                  # Optional
 storage = true
 network = false
+grants = ["world.entities.create", "world.entities.destroy", "world.entities.read"]
+
+[limits]
+actors = 8                     # 16 by default; zero disables actor spawn
 ```
 
 Only `id`, `name`, `version`, `api` and `entrypoint` are required. The loader validates
@@ -97,6 +101,60 @@ if ship.capabilities.has("mm.cycle") then
 end
 for _, cap in ipairs(ship.capabilities.list()) do ... end
 ```
+
+### Generic actors
+
+`ship.actor` uses logical names and opaque handles; never pass native
+pointers around. Expected failures return `nil, err` instead of raising:
+
+```lua
+local actor, err = ship.actor.spawn("oot.en_dog", {
+    position = { x = 0, y = 0, z = 0 }, -- (0,0,0) = in front of the player
+    rotation = { x = 0, y = 90, z = 0 }, -- degrees
+})
+if not actor then
+    ship.log.warn(err.code .. ": " .. err.message)
+    return
+end
+
+local alive, exists_err = ship.actor.exists(actor)
+local destroyed, destroy_err = ship.actor.destroy(actor)
+```
+
+Curated catalog keys currently shipped by the hosts:
+
+| Key | Game | What it spawns |
+|---|---|---|
+| `oot.en_dog` | OoT | Market dog (En_Dog) |
+| `oot.en_torch2` | OoT | Dark Link (En_Torch2) |
+| `oot.link_child_puppet` | OoT | Young Link skeleton puppet (skins from `.otr` replacers apply) |
+| `oot.mm_elegy_statue` | OoT | MM's Elegy of Emptiness statue, read live from `mm.o2r` ([cross-world](cross-world-assets.en.md)) |
+| `mm.en_dg` | MM | Clock Town dog (En_Dg) |
+| `mm.oot_rauru` | MM | Skeletal Rauru, read live from OoT's `oot.o2r` ([cross-world](cross-world-assets.en.md)) |
+
+**Generic spawn by id** — any actor of the game, no catalog entry needed:
+use `oot.id.<actorId>[.<params>]` (in OoT) or `mm.id.<actorId>[.<params>]`
+(in MM), numbers in decimal or `0x` hex:
+
+```lua
+-- MM's NATIVE Elegy statue (En_Torch2, actor 0x021), human form:
+local statue = ship.actor.spawn("mm.id.0x021", { position = { x = 0, y = 0, z = 0 } })
+
+-- OoT cucco (En_Niw, 0x0019):
+local cucco = ship.actor.spawn("oot.id.0x0019", { position = { x = 0, y = 0, z = 0 } })
+```
+
+Generic-spawn rules: the **engine validates the scene object** (spawn fails
+cleanly with `invalid_state` when the actor's model is not loaded in the
+current scene — no crash); `ACTOR_PLAYER` is forbidden (a second player
+corrupts the game); `params` is the actor's native variant parameter — see
+the decomp's `actor_table.h` for ids and meanings.
+
+Handles are valid only for the current session/scene and must not be persisted.
+Scene changes invalidate handles (`ship.actor.exists` returns `false`).
+Runtime unload automatically destroys actors owned by the mod, and
+`[limits] actors` in the manifest caps how many live at once. See the ROM-free
+testable example in [`examples/actor-spawn`](../examples/actor-spawn/).
 
 ### Events
 ```lua

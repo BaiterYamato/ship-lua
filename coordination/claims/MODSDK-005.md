@@ -1,0 +1,47 @@
+# MODSDK-005
+
+- Status: review
+- Agent: Codex
+- Platform: Windows 11 / MSVC 2022 / CMake
+- Repository: BaiterYamato/ship-lua
+- Branch: agent/MODSDK-005-actor-api
+- PR: https://github.com/BaiterYamato/link-span/pull/41
+- Started: 2026-07-18T15:31:00-03:00
+- Depends on: MODSDK-001, MODSDK-002, MODSDK-003, MODSDK-004, OOT-MODSDK-001
+- Files:
+  - rfcs/0009-generic-actor-api.md
+  - rfcs/0009-generic-actor-api.en.md
+  - include/shiplua/actor/**
+  - src/actor/**
+  - include/shiplua/api/LuaApiBinding.h
+  - src/api/LuaApiBinding.cpp
+  - schema/api.yml
+  - schema/capabilities.yml
+  - schema/events.yml
+  - schema/manifest.schema.json
+  - tools/generate_*.py
+  - tools/validate_api_schemas.py
+  - tools/shipmod.py
+  - generated/**
+  - README.md
+  - README.pt-BR.md
+  - docs/writing-mods.md
+  - docs/writing-mods.en.md
+  - tests/**
+  - examples/**/manifest.toml
+  - examples/actor-spawn/**
+  - coordination/claims/MODSDK-005.md
+  - coordination/claims/MODSDK-005.en.md
+  - coordination/handoffs/MODSDK-005.md
+  - coordination/handoffs/MODSDK-005.en.md
+  - coordination/STATUS.md
+  - coordination/STATUS.en.md
+- Goal:
+  - Definir o contrato público mínimo de atores genéricos sem ponteiros nativos.
+  - Expor `ship.actor.spawn`, `ship.actor.destroy` e `ship.actor.exists` por um provider injetável do host.
+  - Aplicar ownership, permissões, capabilities e erros estruturados por mod.
+  - Disponibilizar provider mock, testes de contrato e exemplo sem ROM.
+- Guardrails:
+  - Não expor IDs numéricos, ponteiros ou structs do engine.
+  - Não incluir transform, configure, animation ou behavior neste PR.
+  - Não depender de OoT, MM, ROM, O2R ou OTR no núcleo compartilhado.

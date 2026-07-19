@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "shiplua/actor/ActorProvider.h"
 #include "shiplua/capability/CapabilityRegistry.h"
 #include "shiplua/events/EventDispatcher.h"
 #include "shiplua/input/HotkeyRegistry.h"
@@ -33,10 +34,17 @@ struct LuaApiHostContext {
     std::shared_ptr<CapabilityRegistry> capabilityRegistry;
     std::shared_ptr<FrameTimerScheduler> timers;  // nullable; null = host sem ship.timer
     std::shared_ptr<KeyValueStorage> storage;     // nullable; null = host sem ship.storage
+    std::shared_ptr<ActorProvider> actors;         // nullable; null = host sem ship.actor
     std::function<Result<void>(const WorldDestination&)> worldTravel;
     // Games whose assets/hosts are available to the supervising Link-Span
     // process. Empty keeps standalone compatibility and means only gameId.
     std::vector<std::string> availableGames;
+};
+
+// Per-mod authorization and resource policy derived from manifest.toml.
+struct LuaApiModPolicy {
+    std::vector<std::string> permissions;
+    std::size_t maxActors = 16;
 };
 
 // Validates a host context before any binding is installed: game id must be
@@ -49,7 +57,8 @@ class LuaApiBinding {
   public:
     LuaApiBinding(LuaRuntime& runtime, EventDispatcher& events, Logger logger,
                   LuaApiHostContext hostContext, std::size_t modLoadOrder,
-                  int modPriority, std::size_t maxConsecutiveFailures = 3);
+                  int modPriority, std::size_t maxConsecutiveFailures = 3,
+                  LuaApiModPolicy modPolicy = {});
     ~LuaApiBinding();
 
     LuaApiBinding(const LuaApiBinding&) = delete;
@@ -94,6 +103,9 @@ class LuaApiBinding {
     static int StorageDelete(lua_State* state) noexcept;
     static int StorageClear(lua_State* state) noexcept;
     static int WorldTravel(lua_State* state) noexcept;
+    static int ActorSpawn(lua_State* state) noexcept;
+    static int ActorDestroy(lua_State* state) noexcept;
+    static int ActorExists(lua_State* state) noexcept;
     static int LogDebug(lua_State* state) noexcept;
     static int LogInfo(lua_State* state) noexcept;
     static int LogWarn(lua_State* state) noexcept;
@@ -122,6 +134,12 @@ class LuaApiBinding {
     int DeleteStorage(lua_State* state, const char*& error);
     int ClearStorage(lua_State* state, const char*& error);
     int WorldTravelFromLua(lua_State* state, const char*& error);
+    int ActorSpawnFromLua(lua_State* state);
+    int ActorDestroyFromLua(lua_State* state);
+    int ActorExistsFromLua(lua_State* state);
+    bool HasPermission(const std::string& permission) const;
+    std::size_t EffectiveActorLimit() const;
+    void PruneDeadActors() noexcept;
     EventFlow InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
                              EventPayload& payload);
     int WriteLog(lua_State* state, LogLevel level, const char*& error);
@@ -136,6 +154,8 @@ class LuaApiBinding {
     std::shared_ptr<CapabilityRegistry> mCapabilities;
     std::shared_ptr<FrameTimerScheduler> mTimers;
     std::shared_ptr<KeyValueStorage> mStorage;
+    std::shared_ptr<ActorProvider> mActors;
+    LuaApiModPolicy mModPolicy;
     std::map<std::string, std::shared_ptr<HotkeyCallback>> mHotkeyCallbacks;
     std::size_t mModLoadOrder = 0;
     int mModPriority = 50;
@@ -143,6 +163,7 @@ class LuaApiBinding {
     std::size_t mMaxTimersPerMod = 64; // plan-sdk.md [limits] timers = 64
     std::map<std::uint64_t, std::shared_ptr<LuaCallback>> mCallbacks;
     std::map<std::uint64_t, std::shared_ptr<LuaCallback>> mTimerCallbacks;
+    std::vector<Handle> mActorHandles;
     int mShipReference = -2;
     bool mInstalled = false;
 };

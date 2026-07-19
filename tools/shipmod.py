@@ -83,7 +83,7 @@ MANIFEST_TEMPLATE = """\
 id = {mod_id}
 name = {display_name}
 version = "0.1.0"
-api = ">=0.1 <0.4"
+api = ">=0.1 <0.5"
 entrypoint = "main.lua"
 description = {description}
 authors = [{author}]

@@ -166,6 +166,8 @@ def generate(api: dict[str, Any], events: dict[str, Any],
         "    std::string_view version;",
         "    std::string_view stability;",
         "    std::string_view returnType;",
+        "    std::string_view errorMode;",
+        "    std::string_view errorType;",
         "    std::string_view availability;",
         "    std::string_view capability;",
         "    std::span<const FieldBinding> arguments;",
@@ -183,7 +185,10 @@ def generate(api: dict[str, Any], events: dict[str, Any],
         lines.append(
             f"    {{FunctionId::{cpp_identifier(function['name'])}, {cpp_string(function['name'])}, "
             f"{cpp_string(function['version'])}, {cpp_string(function['stability'])}, "
-            f"{cpp_string(function['returns'])}, {cpp_string(function['availability'])}, "
+            f"{cpp_string(function['returns'])}, "
+            f"{cpp_string(function.get('error_mode', 'raise'))}, "
+            f"{cpp_string(function.get('error_type'))}, "
+            f"{cpp_string(function['availability'])}, "
             f"{cpp_string(function.get('capability'))}, {stem}Arguments, {stem}Errors}},")
     lines.extend(["}};", ""])
 

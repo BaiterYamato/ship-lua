@@ -1,0 +1,17 @@
+id = "baiteryamato.elegy_statue"
+name = "Elegy Statue (MM em OOT)"
+version = "0.1.0"
+api = ">=0.4 <0.5"
+entrypoint = "main.lua"
+description = "Aperte K para spawnar a estátua da Elegia do Vazio (Majora's Mask) dentro do OOT — demo de compatibilidade de assets entre os jogos."
+authors = ["BaiterYamato"]
+games = ["oot"]
+
+[capabilities]
+required = ["actor.spawn", "actor.destroy", "actor.exists"]
+
+[permissions]
+grants = ["world.entities.create", "world.entities.destroy", "world.entities.read"]
+
+[limits]
+actors = 1

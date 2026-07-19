@@ -204,6 +204,27 @@ do
     "erro de ship.hotkeys.register deveria carregar invalid_argument")
 end
 do
+  local fn = resolve(ship_mod, "actor.spawn")
+  local value, err = fn()
+  check(value == nil, "ship.actor.spawn sem argumentos não deveria retornar valor")
+  check(type(err) == "table" and err.code == "invalid_argument",
+    "erro de ship.actor.spawn deveria carregar invalid_argument")
+end
+do
+  local fn = resolve(ship_mod, "actor.destroy")
+  local value, err = fn()
+  check(value == nil, "ship.actor.destroy sem argumentos não deveria retornar valor")
+  check(type(err) == "table" and err.code == "invalid_argument",
+    "erro de ship.actor.destroy deveria carregar invalid_argument")
+end
+do
+  local fn = resolve(ship_mod, "actor.exists")
+  local value, err = fn()
+  check(value == nil, "ship.actor.exists sem argumentos não deveria retornar valor")
+  check(type(err) == "table" and err.code == "invalid_argument",
+    "erro de ship.actor.exists deveria carregar invalid_argument")
+end
+do
   local fn = resolve(ship_mod, "world.travel")
   local ok, err = pcall(fn)
   check(not ok, "ship.world.travel sem argumentos deveria falhar")
