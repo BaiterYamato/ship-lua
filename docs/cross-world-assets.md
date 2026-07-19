@@ -12,11 +12,11 @@ O mecanismo depende do layout de pastas irmãs criado pelo launcher:
 ```text
 Link-Span/
 ├── link-span.exe
-├── OOT/
+├── hosts/oot/
 │   ├── soh.exe
 │   ├── oot.o2r        ← gerado da SUA ROM no primeiro boot
 │   └── mods/
-└── MM/
+└── hosts/mm/
     ├── 2ship.exe
     ├── mm.o2r         ← gerado da SUA ROM no primeiro boot
     └── mods/

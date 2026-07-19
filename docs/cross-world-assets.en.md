@@ -12,11 +12,11 @@ The mechanism relies on the sibling-folder layout created by the launcher:
 ```text
 Link-Span/
 ├── link-span.exe
-├── OOT/
+├── hosts/oot/
 │   ├── soh.exe
 │   ├── oot.o2r        ← generated from YOUR ROM on first boot
 │   └── mods/
-└── MM/
+└── hosts/mm/
     ├── 2ship.exe
     ├── mm.o2r         ← generated from YOUR ROM on first boot
     └── mods/
