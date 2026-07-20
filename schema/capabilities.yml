@@ -24,6 +24,7 @@
     {"name": "mm.player.sword_skin", "status": "contract", "hosts": ["mm"], "description": "Alterna o visual da espada Kokiri empunhada entre o modelo de Majora's Mask e o de Ocarina of Time (lido do oot.o2r vizinho)."},
     {"name": "oot.player.jump", "status": "contract", "hosts": ["oot"], "description": "Aplica um impulso vertical validado ao jogador de OoT quando ele está no chão."},
     {"name": "oot.spawn_dog", "status": "contract", "hosts": ["oot"], "description": "Spawna um cachorro (En_Dog) perto do jogador de OoT."},
+    {"name": "oot.player.bunny_hood", "status": "contract", "hosts": ["oot"], "description": "Veste a Bunny Hood em OoT com o comportamento de Majora's Mask (corrida mais rápida e pulo maior)."},
     {"name": "oot.ocarina", "status": "planned", "hosts": ["oot"], "description": "Eventos e estado de ocarina de OoT."},
     {"name": "oot.dungeon_keys", "status": "planned", "hosts": ["oot"], "description": "Estado de chaves de dungeon de OoT."},
     {"name": "oot.equipment", "status": "planned", "hosts": ["oot"], "description": "Equipamento específico de OoT."}

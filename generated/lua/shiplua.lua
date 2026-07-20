@@ -197,6 +197,11 @@ function ship.mm.player.set_sword_skin(skin) end
 ---@return boolean
 function ship.oot.player.jump() end
 
+--- API oot; estabilidade: experimental; desde: 0.4.0; capability: oot.player.bunny_hood; erros: nenhum.
+---@param equipped boolean
+---@return boolean
+function ship.oot.player.set_bunny_hood(equipped) end
+
 --- API oot; estabilidade: experimental; desde: 0.3.0; capability: oot.spawn_dog; erros: nenhum.
 ---@return boolean
 function ship.oot.spawn_dog() end
