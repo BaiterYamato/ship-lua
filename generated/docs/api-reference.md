@@ -38,6 +38,7 @@ Versão da API: `0.4.0`. Versão do schema: `1`.
 | `ship.world.travel` | `world: game_id`, `destination: string` | `boolean` | `common` | `experimental` | `0.3.0` | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
 | `ship.mm.player.jump` | — | `boolean` | `mm` | `experimental` | `0.2.0` | `mm.player.jump` | — |
 | `ship.mm.spawn_dog` | — | `boolean` | `mm` | `experimental` | `0.3.0` | `mm.spawn_dog` | — |
+| `ship.mm.player.set_sword_skin` | `skin: string` | `boolean` | `mm` | `experimental` | `0.4.0` | `mm.player.sword_skin` | — |
 | `ship.oot.player.jump` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.player.jump` | — |
 | `ship.oot.spawn_dog` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.spawn_dog` | — |
 | `ship.log.debug` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
@@ -91,6 +92,7 @@ Versão da API: `0.4.0`. Versão do schema: `1`.
 | `mm.clock` | `planned` | `mm` | Leitura estável do relógio de MM. |
 | `mm.player.jump` | `contract` | `mm` | Aplica um impulso vertical validado ao jogador de Majora's Mask quando ele está no chão. |
 | `mm.spawn_dog` | `contract` | `mm` | Spawna o cachorro de Clock Town (En_Dg) perto do jogador de Majora's Mask. |
+| `mm.player.sword_skin` | `contract` | `mm` | Alterna o visual da espada Kokiri empunhada entre o modelo de Majora's Mask e o de Ocarina of Time (lido do oot.o2r vizinho). |
 | `oot.player.jump` | `contract` | `oot` | Aplica um impulso vertical validado ao jogador de OoT quando ele está no chão. |
 | `oot.spawn_dog` | `contract` | `oot` | Spawna um cachorro (En_Dog) perto do jogador de OoT. |
 | `oot.ocarina` | `planned` | `oot` | Eventos e estado de ocarina de OoT. |

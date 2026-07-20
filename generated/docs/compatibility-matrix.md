@@ -24,6 +24,7 @@ Derivada dos schemas canônicos em `schema/` (IDL); regenere com
 | `ship.world.travel` | `0.3.0` | `experimental` | sim | sim | `world.travel` | `invalid_argument`, `unsupported`, `invalid_state`, `host_failure` |
 | `ship.mm.player.jump` | `0.2.0` | `experimental` | — | sim | `mm.player.jump` | — |
 | `ship.mm.spawn_dog` | `0.3.0` | `experimental` | — | sim | `mm.spawn_dog` | — |
+| `ship.mm.player.set_sword_skin` | `0.4.0` | `experimental` | — | sim | `mm.player.sword_skin` | — |
 | `ship.oot.player.jump` | `0.3.0` | `experimental` | sim | — | `oot.player.jump` | — |
 | `ship.oot.spawn_dog` | `0.3.0` | `experimental` | sim | — | `oot.spawn_dog` | — |
 | `ship.log.debug` | `0.1.0` | `stable` | sim | sim | — | `invalid_argument` |
@@ -81,6 +82,7 @@ nunca registra `ship.oot.*` ou `ship.mm.*` (RFC 0001).
 | `mm.clock` | `planned` | — | sim |
 | `mm.player.jump` | `contract` | — | sim |
 | `mm.spawn_dog` | `contract` | — | sim |
+| `mm.player.sword_skin` | `contract` | — | sim |
 | `oot.player.jump` | `contract` | sim | — |
 | `oot.spawn_dog` | `contract` | sim | — |
 | `oot.ocarina` | `planned` | sim | — |
@@ -93,5 +95,5 @@ nunca registra `ship.oot.*` ou `ship.mm.*` (RFC 0001).
 |---|---:|
 | `stable` | 12 |
 | `preview` | 1 |
-| `experimental` | 15 |
+| `experimental` | 16 |
 

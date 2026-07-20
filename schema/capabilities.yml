@@ -21,6 +21,7 @@
     {"name": "mm.clock", "status": "planned", "hosts": ["mm"], "description": "Leitura estável do relógio de MM."},
     {"name": "mm.player.jump", "status": "contract", "hosts": ["mm"], "description": "Aplica um impulso vertical validado ao jogador de Majora's Mask quando ele está no chão."},
     {"name": "mm.spawn_dog", "status": "contract", "hosts": ["mm"], "description": "Spawna o cachorro de Clock Town (En_Dg) perto do jogador de Majora's Mask."},
+    {"name": "mm.player.sword_skin", "status": "contract", "hosts": ["mm"], "description": "Alterna o visual da espada Kokiri empunhada entre o modelo de Majora's Mask e o de Ocarina of Time (lido do oot.o2r vizinho)."},
     {"name": "oot.player.jump", "status": "contract", "hosts": ["oot"], "description": "Aplica um impulso vertical validado ao jogador de OoT quando ele está no chão."},
     {"name": "oot.spawn_dog", "status": "contract", "hosts": ["oot"], "description": "Spawna um cachorro (En_Dog) perto do jogador de OoT."},
     {"name": "oot.ocarina", "status": "planned", "hosts": ["oot"], "description": "Eventos e estado de ocarina de OoT."},
