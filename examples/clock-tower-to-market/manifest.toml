@@ -1,0 +1,12 @@
+id = "linkspan.clock_tower_to_market"
+name = "Torre do Relógio para o Mercado"
+version = "0.1.0"
+api = ">=0.3 <0.5"
+entrypoint = "main.lua"
+description = "A viagem de volta: solicita uma travessia portátil de MM para o Mercado de Hyrule em OoT."
+authors = ["BaiterYamato"]
+games = ["oot", "mm"]
+requires_both_games = true
+
+[capabilities]
+required = ["world.travel"]

@@ -101,6 +101,7 @@ enum class FunctionId {
     ShipWorldTravel,
     ShipMmPlayerJump,
     ShipMmSpawnDog,
+    ShipMmPlayerSetSwordSkin,
     ShipOotPlayerJump,
     ShipOotSpawnDog,
     ShipLogDebug,
@@ -229,6 +230,11 @@ inline constexpr std::array<FieldBinding, 0> kShipMmSpawnDogArguments{{
 }};
 inline constexpr std::array<std::string_view, 0> kShipMmSpawnDogErrors{{
 }};
+inline constexpr std::array<FieldBinding, 1> kShipMmPlayerSetSwordSkinArguments{{
+    {"skin", "string", true},
+}};
+inline constexpr std::array<std::string_view, 0> kShipMmPlayerSetSwordSkinErrors{{
+}};
 inline constexpr std::array<FieldBinding, 0> kShipOotPlayerJumpArguments{{
 }};
 inline constexpr std::array<std::string_view, 0> kShipOotPlayerJumpErrors{{
@@ -316,7 +322,7 @@ inline constexpr std::array<std::string_view, 1> kShipStorageClearErrors{{
     "unsupported",
 }};
 
-inline constexpr std::array<FunctionBinding, 28> kFunctions{{
+inline constexpr std::array<FunctionBinding, 29> kFunctions{{
     {FunctionId::ShipGameId, "ship.game.id", "0.1.0", "stable", "game_id", "raise", {}, "common", {}, kShipGameIdArguments, kShipGameIdErrors},
     {FunctionId::ShipGameHostVersion, "ship.game.host_version", "0.1.0", "stable", "string", "raise", {}, "common", {}, kShipGameHostVersionArguments, kShipGameHostVersionErrors},
     {FunctionId::ShipRuntimeVersion, "ship.runtime.version", "0.1.0", "stable", "string", "raise", {}, "common", {}, kShipRuntimeVersionArguments, kShipRuntimeVersionErrors},
@@ -332,6 +338,7 @@ inline constexpr std::array<FunctionBinding, 28> kFunctions{{
     {FunctionId::ShipWorldTravel, "ship.world.travel", "0.3.0", "experimental", "boolean", "raise", {}, "common", "world.travel", kShipWorldTravelArguments, kShipWorldTravelErrors},
     {FunctionId::ShipMmPlayerJump, "ship.mm.player.jump", "0.2.0", "experimental", "boolean", "raise", {}, "mm", "mm.player.jump", kShipMmPlayerJumpArguments, kShipMmPlayerJumpErrors},
     {FunctionId::ShipMmSpawnDog, "ship.mm.spawn_dog", "0.3.0", "experimental", "boolean", "raise", {}, "mm", "mm.spawn_dog", kShipMmSpawnDogArguments, kShipMmSpawnDogErrors},
+    {FunctionId::ShipMmPlayerSetSwordSkin, "ship.mm.player.set_sword_skin", "0.4.0", "experimental", "boolean", "raise", {}, "mm", "mm.player.sword_skin", kShipMmPlayerSetSwordSkinArguments, kShipMmPlayerSetSwordSkinErrors},
     {FunctionId::ShipOotPlayerJump, "ship.oot.player.jump", "0.3.0", "experimental", "boolean", "raise", {}, "oot", "oot.player.jump", kShipOotPlayerJumpArguments, kShipOotPlayerJumpErrors},
     {FunctionId::ShipOotSpawnDog, "ship.oot.spawn_dog", "0.3.0", "experimental", "boolean", "raise", {}, "oot", "oot.spawn_dog", kShipOotSpawnDogArguments, kShipOotSpawnDogErrors},
     {FunctionId::ShipLogDebug, "ship.log.debug", "0.1.0", "stable", "nil", "raise", {}, "common", {}, kShipLogDebugArguments, kShipLogDebugErrors},
@@ -417,7 +424,7 @@ struct CapabilityBinding {
     bool supportsMm;
 };
 
-inline constexpr std::array<CapabilityBinding, 24> kCapabilities{{
+inline constexpr std::array<CapabilityBinding, 25> kCapabilities{{
     {"core.events", "contract", true, true},
     {"core.timers", "contract", true, true},
     {"core.input", "contract", true, true},
@@ -437,6 +444,7 @@ inline constexpr std::array<CapabilityBinding, 24> kCapabilities{{
     {"mm.clock", "planned", false, true},
     {"mm.player.jump", "contract", false, true},
     {"mm.spawn_dog", "contract", false, true},
+    {"mm.player.sword_skin", "contract", false, true},
     {"oot.player.jump", "contract", true, false},
     {"oot.spawn_dog", "contract", true, false},
     {"oot.ocarina", "planned", true, false},

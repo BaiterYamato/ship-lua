@@ -22,6 +22,7 @@ local FUNCTIONS = {
   { name = "ship.world.travel", availability = "common", required_arguments = 2, error_mode = "raise" },
   { name = "ship.mm.player.jump", availability = "mm", required_arguments = 0, error_mode = "raise" },
   { name = "ship.mm.spawn_dog", availability = "mm", required_arguments = 0, error_mode = "raise" },
+  { name = "ship.mm.player.set_sword_skin", availability = "mm", required_arguments = 1, error_mode = "raise" },
   { name = "ship.oot.player.jump", availability = "oot", required_arguments = 0, error_mode = "raise" },
   { name = "ship.oot.spawn_dog", availability = "oot", required_arguments = 0, error_mode = "raise" },
   { name = "ship.log.debug", availability = "common", required_arguments = 1, error_mode = "raise" },
@@ -45,7 +46,7 @@ local ENUM_VALUES = {
 
 local CONTRACT_CAPABILITIES = {
   oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "oot.player.jump", "oot.spawn_dog" },
-  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "mm.player.jump", "mm.spawn_dog" },
+  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "mm.player.jump", "mm.spawn_dog", "mm.player.sword_skin" },
 }
 
 local failures = {}

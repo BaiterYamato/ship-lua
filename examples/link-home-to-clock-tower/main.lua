@@ -11,10 +11,10 @@ ship.events.on("game.ready", function()
 
     ship.hotkeys.register(
         "link_home_to_clock_tower",
-        { default = "F", label = "Ir para a entrada da Torre do Relógio" },
+        { default = "Y", label = "Ir para a entrada da Torre do Relógio" },
         function()
             ship.world.travel("mm", "mm.clock_tower.entrance")
         end
     )
-    ship.log.info("Teleporte pronto: aperte F na casa do Link")
+    ship.log.info("Teleporte pronto: aperte Y na casa do Link")
 end)

@@ -145,6 +145,7 @@ probe("ship.storage.delete", { "probe" }, "boolean")
 probe("ship.storage.clear", {  }, "integer")
 check(resolve(ship_mod, "mm.player.jump") == nil, "ship.mm.player.jump não deveria existir no host oot")
 check(resolve(ship_mod, "mm.spawn_dog") == nil, "ship.mm.spawn_dog não deveria existir no host oot")
+check(resolve(ship_mod, "mm.player.set_sword_skin") == nil, "ship.mm.player.set_sword_skin não deveria existir no host oot")
 
 -- Sondas de chamada válida no host OOT (funções do adaptador).
 mock.configure({ game = "oot" })
@@ -157,6 +158,7 @@ mock.configure({ game = "mm" })
 ship_mod = mock.build()
 probe("ship.mm.player.jump", {  }, "boolean")
 probe("ship.mm.spawn_dog", {  }, "boolean")
+probe("ship.mm.player.set_sword_skin", { "probe" }, "boolean")
 
 -- Gating por capability: sem o grant, o binding do adaptador não é instalado.
 mock.configure({ game = "mm", capabilities = {} })
@@ -165,6 +167,9 @@ check(resolve(ship_mod, "mm.player.jump") == nil, "ship.mm.player.jump sem capab
 mock.configure({ game = "mm", capabilities = {} })
 ship_mod = mock.build()
 check(resolve(ship_mod, "mm.spawn_dog") == nil, "ship.mm.spawn_dog sem capability não deveria existir")
+mock.configure({ game = "mm", capabilities = {} })
+ship_mod = mock.build()
+check(resolve(ship_mod, "mm.player.set_sword_skin") == nil, "ship.mm.player.set_sword_skin sem capability não deveria existir")
 mock.configure({ game = "oot", capabilities = {} })
 ship_mod = mock.build()
 check(resolve(ship_mod, "oot.player.jump") == nil, "ship.oot.player.jump sem capability não deveria existir")

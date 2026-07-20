@@ -9,7 +9,7 @@ local M = {}
 
 M.contract_capabilities = {
   oot = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "oot.player.jump", "oot.spawn_dog" },
-  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "mm.player.jump", "mm.spawn_dog" },
+  mm = { "core.events", "core.timers", "core.input", "core.storage", "scene.events", "actor.events", "actor.spawn", "actor.destroy", "actor.exists", "save.events", "text.events", "audio.sequence.events", "world.travel", "mm.player.jump", "mm.spawn_dog", "mm.player.sword_skin" },
 }
 
 M.host = {

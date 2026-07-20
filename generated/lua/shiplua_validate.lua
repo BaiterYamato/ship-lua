@@ -238,6 +238,18 @@ M.functions = {
     error_mode = "raise",
     errors = {},
   },
+  ["ship.mm.player.set_sword_skin"] = {
+    version = "0.4.0",
+    stability = "experimental",
+    availability = "mm",
+    capability = "mm.player.sword_skin",
+    arguments = {
+      { name = "skin", type = "string", required = true },
+    },
+    returns = "boolean",
+    error_mode = "raise",
+    errors = {},
+  },
   ["ship.oot.player.jump"] = {
     version = "0.3.0",
     stability = "experimental",

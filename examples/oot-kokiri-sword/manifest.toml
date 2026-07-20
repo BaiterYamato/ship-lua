@@ -1,0 +1,11 @@
+id = "baiteryamato.oot_kokiri_sword"
+name = "Espada Kokiri do OoT"
+version = "0.1.0"
+api = ">=0.4 <0.5"
+entrypoint = "main.lua"
+description = "Aperte T para alternar o visual da espada Kokiri entre o do MM e o do Ocarina of Time, lido ao vivo do oot.o2r."
+authors = ["BaiterYamato"]
+games = ["mm"]
+
+[capabilities]
+required = ["mm.player.sword_skin"]

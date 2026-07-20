@@ -188,6 +188,11 @@ function ship.mm.player.jump() end
 ---@return boolean
 function ship.mm.spawn_dog() end
 
+--- API mm; estabilidade: experimental; desde: 0.4.0; capability: mm.player.sword_skin; erros: nenhum.
+---@param skin string
+---@return boolean
+function ship.mm.player.set_sword_skin(skin) end
+
 --- API oot; estabilidade: experimental; desde: 0.3.0; capability: oot.player.jump; erros: nenhum.
 ---@return boolean
 function ship.oot.player.jump() end
