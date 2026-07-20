@@ -1,0 +1,11 @@
+id = "baiteryamato.bunny_hood"
+name = "Bunny Hood funcional (OoT)"
+version = "0.1.0"
+api = ">=0.4 <0.5"
+entrypoint = "main.lua"
+description = "Aperte U para vestir a Bunny Hood em Ocarina of Time com o comportamento de Majora's Mask: corrida mais rápida e pulo maior."
+authors = ["BaiterYamato"]
+games = ["oot"]
+
+[capabilities]
+required = ["oot.player.bunny_hood"]
