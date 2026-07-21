@@ -104,6 +104,7 @@ ship.hotkeys = ship.hotkeys or {}
 ship.log = ship.log or {}
 ship.mm = ship.mm or {}
 ship.oot = ship.oot or {}
+ship.player = ship.player or {}
 ship.runtime = ship.runtime or {}
 ship.storage = ship.storage or {}
 ship.timer = ship.timer or {}
@@ -201,6 +202,16 @@ function ship.oot.player.jump() end
 ---@param equipped boolean
 ---@return boolean
 function ship.oot.player.set_bunny_hood(equipped) end
+
+--- API oot; estabilidade: experimental; desde: 0.4.0; capability: oot.player.mask; erros: nenhum.
+---@param mask string
+---@return boolean
+function ship.oot.player.set_mask(mask) end
+
+--- API common; estabilidade: experimental; desde: 0.4.0; capability: player.speed; erros: nenhum.
+---@param factor number
+---@return boolean
+function ship.player.set_speed_multiplier(factor) end
 
 --- API oot; estabilidade: experimental; desde: 0.3.0; capability: oot.spawn_dog; erros: nenhum.
 ---@return boolean
