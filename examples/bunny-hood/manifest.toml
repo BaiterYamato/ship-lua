@@ -8,4 +8,4 @@ authors = ["BaiterYamato"]
 games = ["oot"]
 
 [capabilities]
-required = ["oot.player.bunny_hood"]
+optional = ["oot.player.mask", "player.speed", "oot.player.bunny_hood"]
