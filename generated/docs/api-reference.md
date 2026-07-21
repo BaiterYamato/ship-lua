@@ -43,6 +43,9 @@ Versão da API: `0.4.0`. Versão do schema: `1`.
 | `ship.oot.player.set_bunny_hood` | `equipped: boolean` | `boolean` | `oot` | `experimental` | `0.4.0` | `oot.player.bunny_hood` | — |
 | `ship.oot.player.set_mask` | `mask: string` | `boolean` | `oot` | `experimental` | `0.4.0` | `oot.player.mask` | — |
 | `ship.player.set_speed_multiplier` | `factor: number` | `boolean` | `common` | `experimental` | `0.4.0` | `player.speed` | — |
+| `ship.player.get` | `field: string` | `any` | `oot` | `experimental` | `0.4.0` | `player.fields` | — |
+| `ship.player.set` | `field: string`, `value: number` | `boolean` | `oot` | `experimental` | `0.4.0` | `player.fields` | — |
+| `ship.oot.player.attach_model` | `slot: string`, `path: string` | `boolean` | `oot` | `experimental` | `0.4.0` | `oot.player.attach_model` | — |
 | `ship.oot.spawn_dog` | — | `boolean` | `oot` | `experimental` | `0.3.0` | `oot.spawn_dog` | — |
 | `ship.log.debug` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
 | `ship.log.info` | `message: string` | `nil` | `common` | `stable` | `0.1.0` | — | `invalid_argument` |
@@ -101,6 +104,9 @@ Versão da API: `0.4.0`. Versão do schema: `1`.
 | `oot.player.bunny_hood` | `contract` | `oot` | Veste a Bunny Hood em OoT com o comportamento de Majora's Mask (corrida mais rápida e pulo maior). |
 | `oot.player.mask` | `contract` | `oot` | Equipa qualquer máscara de OoT pelo nome lógico, sem ocupar um botão C. |
 | `player.speed` | `contract` | `oot`, `mm` | Multiplica a velocidade de movimento do jogador por um fator validado (0.1–5.0); 1.0 restaura. |
+| `player.fields` | `contract` | `oot` | Lê e escreve campos nomeados do jogador (vida, magia, rupees, posição, velocidade) com validação de faixa. |
+| `oot.player.attach_model` | `contract` | `oot` | Desenha uma display list arbitrária no jogador por caminho de resource, incluindo assets de mod e do jogo vizinho. |
+| `mod.assets` | `contract` | `oot` | Archives (.o2r/.otr) na pasta de mods ficam endereçáveis sob mod/<nome>/, permitindo que um mod traga conteúdo próprio. |
 | `oot.ocarina` | `planned` | `oot` | Eventos e estado de ocarina de OoT. |
 | `oot.dungeon_keys` | `planned` | `oot` | Estado de chaves de dungeon de OoT. |
 | `oot.equipment` | `planned` | `oot` | Equipamento específico de OoT. |
