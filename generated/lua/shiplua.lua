@@ -230,6 +230,22 @@ function ship.player.set(field, value) end
 ---@return boolean
 function ship.oot.player.attach_model(slot, path) end
 
+--- API oot; estabilidade: experimental; desde: 0.4.0; capability: oot.player.immunity; erros: nenhum.
+---@param kind string
+---@param enabled boolean
+---@return boolean
+function ship.oot.player.set_damage_immunity(kind, enabled) end
+
+--- API oot; estabilidade: experimental; desde: 0.4.0; capability: oot.player.weight; erros: nenhum.
+---@param weight string
+---@return boolean
+function ship.oot.player.set_weight(weight) end
+
+--- API oot; estabilidade: experimental; desde: 0.4.0; capability: oot.player.roll; erros: nenhum.
+---@param mode string
+---@return boolean
+function ship.oot.player.set_roll_mode(mode) end
+
 --- API oot; estabilidade: experimental; desde: 0.3.0; capability: oot.spawn_dog; erros: nenhum.
 ---@return boolean
 function ship.oot.spawn_dog() end

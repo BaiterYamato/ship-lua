@@ -109,6 +109,9 @@ enum class FunctionId {
     ShipPlayerGet,
     ShipPlayerSet,
     ShipOotPlayerAttachModel,
+    ShipOotPlayerSetDamageImmunity,
+    ShipOotPlayerSetWeight,
+    ShipOotPlayerSetRollMode,
     ShipOotSpawnDog,
     ShipLogDebug,
     ShipLogInfo,
@@ -277,6 +280,22 @@ inline constexpr std::array<FieldBinding, 2> kShipOotPlayerAttachModelArguments{
 }};
 inline constexpr std::array<std::string_view, 0> kShipOotPlayerAttachModelErrors{{
 }};
+inline constexpr std::array<FieldBinding, 2> kShipOotPlayerSetDamageImmunityArguments{{
+    {"kind", "string", true},
+    {"enabled", "boolean", true},
+}};
+inline constexpr std::array<std::string_view, 0> kShipOotPlayerSetDamageImmunityErrors{{
+}};
+inline constexpr std::array<FieldBinding, 1> kShipOotPlayerSetWeightArguments{{
+    {"weight", "string", true},
+}};
+inline constexpr std::array<std::string_view, 0> kShipOotPlayerSetWeightErrors{{
+}};
+inline constexpr std::array<FieldBinding, 1> kShipOotPlayerSetRollModeArguments{{
+    {"mode", "string", true},
+}};
+inline constexpr std::array<std::string_view, 0> kShipOotPlayerSetRollModeErrors{{
+}};
 inline constexpr std::array<FieldBinding, 0> kShipOotSpawnDogArguments{{
 }};
 inline constexpr std::array<std::string_view, 0> kShipOotSpawnDogErrors{{
@@ -360,7 +379,7 @@ inline constexpr std::array<std::string_view, 1> kShipStorageClearErrors{{
     "unsupported",
 }};
 
-inline constexpr std::array<FunctionBinding, 35> kFunctions{{
+inline constexpr std::array<FunctionBinding, 38> kFunctions{{
     {FunctionId::ShipGameId, "ship.game.id", "0.1.0", "stable", "game_id", "raise", {}, "common", {}, kShipGameIdArguments, kShipGameIdErrors},
     {FunctionId::ShipGameHostVersion, "ship.game.host_version", "0.1.0", "stable", "string", "raise", {}, "common", {}, kShipGameHostVersionArguments, kShipGameHostVersionErrors},
     {FunctionId::ShipRuntimeVersion, "ship.runtime.version", "0.1.0", "stable", "string", "raise", {}, "common", {}, kShipRuntimeVersionArguments, kShipRuntimeVersionErrors},
@@ -384,6 +403,9 @@ inline constexpr std::array<FunctionBinding, 35> kFunctions{{
     {FunctionId::ShipPlayerGet, "ship.player.get", "0.4.0", "experimental", "any", "raise", {}, "oot", "player.fields", kShipPlayerGetArguments, kShipPlayerGetErrors},
     {FunctionId::ShipPlayerSet, "ship.player.set", "0.4.0", "experimental", "boolean", "raise", {}, "oot", "player.fields", kShipPlayerSetArguments, kShipPlayerSetErrors},
     {FunctionId::ShipOotPlayerAttachModel, "ship.oot.player.attach_model", "0.4.0", "experimental", "boolean", "raise", {}, "oot", "oot.player.attach_model", kShipOotPlayerAttachModelArguments, kShipOotPlayerAttachModelErrors},
+    {FunctionId::ShipOotPlayerSetDamageImmunity, "ship.oot.player.set_damage_immunity", "0.4.0", "experimental", "boolean", "raise", {}, "oot", "oot.player.immunity", kShipOotPlayerSetDamageImmunityArguments, kShipOotPlayerSetDamageImmunityErrors},
+    {FunctionId::ShipOotPlayerSetWeight, "ship.oot.player.set_weight", "0.4.0", "experimental", "boolean", "raise", {}, "oot", "oot.player.weight", kShipOotPlayerSetWeightArguments, kShipOotPlayerSetWeightErrors},
+    {FunctionId::ShipOotPlayerSetRollMode, "ship.oot.player.set_roll_mode", "0.4.0", "experimental", "boolean", "raise", {}, "oot", "oot.player.roll", kShipOotPlayerSetRollModeArguments, kShipOotPlayerSetRollModeErrors},
     {FunctionId::ShipOotSpawnDog, "ship.oot.spawn_dog", "0.3.0", "experimental", "boolean", "raise", {}, "oot", "oot.spawn_dog", kShipOotSpawnDogArguments, kShipOotSpawnDogErrors},
     {FunctionId::ShipLogDebug, "ship.log.debug", "0.1.0", "stable", "nil", "raise", {}, "common", {}, kShipLogDebugArguments, kShipLogDebugErrors},
     {FunctionId::ShipLogInfo, "ship.log.info", "0.1.0", "stable", "nil", "raise", {}, "common", {}, kShipLogInfoArguments, kShipLogInfoErrors},
@@ -468,7 +490,7 @@ struct CapabilityBinding {
     bool supportsMm;
 };
 
-inline constexpr std::array<CapabilityBinding, 31> kCapabilities{{
+inline constexpr std::array<CapabilityBinding, 34> kCapabilities{{
     {"core.events", "contract", true, true},
     {"core.timers", "contract", true, true},
     {"core.input", "contract", true, true},
@@ -497,6 +519,9 @@ inline constexpr std::array<CapabilityBinding, 31> kCapabilities{{
     {"player.fields", "contract", true, false},
     {"oot.player.attach_model", "contract", true, false},
     {"mod.assets", "contract", true, false},
+    {"oot.player.immunity", "contract", true, false},
+    {"oot.player.weight", "contract", true, false},
+    {"oot.player.roll", "contract", true, false},
     {"oot.ocarina", "planned", true, false},
     {"oot.dungeon_keys", "planned", true, false},
     {"oot.equipment", "planned", true, false},

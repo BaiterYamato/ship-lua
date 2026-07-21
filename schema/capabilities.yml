@@ -30,6 +30,9 @@
     {"name": "player.fields", "status": "contract", "hosts": ["oot"], "description": "Lê e escreve campos nomeados do jogador (vida, magia, rupees, posição, velocidade) com validação de faixa."},
     {"name": "oot.player.attach_model", "status": "contract", "hosts": ["oot"], "description": "Desenha uma display list arbitrária no jogador por caminho de resource, incluindo assets de mod e do jogo vizinho."},
     {"name": "mod.assets", "status": "contract", "hosts": ["oot"], "description": "Archives (.o2r/.otr) na pasta de mods ficam endereçáveis sob mod/<nome>/, permitindo que um mod traga conteúdo próprio."},
+    {"name": "oot.player.immunity", "status": "contract", "hosts": ["oot"], "description": "Concede imunidade a um tipo de dano (hoje: fogo)."},
+    {"name": "oot.player.weight", "status": "contract", "hosts": ["oot"], "description": "Alterna o peso do jogador entre normal e pesado (afunda na água, resiste a empurrão)."},
+    {"name": "oot.player.roll", "status": "contract", "hosts": ["oot"], "description": "Ativa rolamento contínuo e dirigível, encadeado indefinidamente."},
     {"name": "oot.ocarina", "status": "planned", "hosts": ["oot"], "description": "Eventos e estado de ocarina de OoT."},
     {"name": "oot.dungeon_keys", "status": "planned", "hosts": ["oot"], "description": "Estado de chaves de dungeon de OoT."},
     {"name": "oot.equipment", "status": "planned", "hosts": ["oot"], "description": "Equipamento específico de OoT."}
