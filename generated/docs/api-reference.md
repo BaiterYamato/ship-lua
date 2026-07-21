@@ -78,12 +78,23 @@ Versão da API: `0.4.0`. Versão do schema: `1`.
 | `text.open` | `observe` | `host_bridge` | `oot`, `mm` | não | `text.events` | `text_id: integer` |
 | `audio.sequence_started` | `observe` | `host_bridge` | `oot`, `mm` | não | `audio.sequence.events` | `player_index: integer`, `sequence_id: integer` |
 | `input.hotkey` | `observe` | `host_bridge` | `oot`, `mm` | não | — | `action: string`, `key: string` |
+| `hook.oot.player.speed.run` | `transform` | `hook_bridge` | `oot` | não | `hooks.bridge` | `speed: number` |
+| `hook.oot.player.fall_damage` | `transform` | `hook_bridge` | `oot` | não | `hooks.bridge` | — |
+| `hook.oot.item.receive` | `observe` | `hook_bridge` | `oot` | não | `hooks.bridge` | `item_id: integer`, `get_item_id: integer` |
+| `hook.oot.player.health_change` | `observe` | `hook_bridge` | `oot` | não | `hooks.bridge` | `amount: integer` |
+| `hook.oot.player.bonk` | `observe` | `hook_bridge` | `oot` | não | `hooks.bridge` | — |
+| `hook.mm.player.speed.walk` | `transform` | `hook_bridge` | `mm` | não | `hooks.bridge` | `speed: number` |
+| `hook.mm.player.goron_roll.consume_magic` | `transform` | `hook_bridge` | `mm` | não | `hooks.bridge` | — |
+| `hook.mm.player.goron_roll.disable_spike_mode` | `transform` | `hook_bridge` | `mm` | não | `hooks.bridge` | — |
+| `hook.mm.player.goron_roll.increase_spike_level` | `transform` | `hook_bridge` | `mm` | não | `hooks.bridge` | — |
+| `hook.mm.item.give` | `observe` | `hook_bridge` | `mm` | não | `hooks.bridge` | `item: integer` |
 
 ## Capabilities
 
 | Capability | Estado | Hosts | Descrição |
 |---|---|---|---|
 | `core.events` | `contract` | `oot`, `mm` | Eventos e lifecycle centrais do host. |
+| `hooks.bridge` | `contract` | `oot`, `mm` | Ponte genérica para os pontos de instrumentação nativos (VB_*/On* do GameInteractor) — eventos hook.* assináveis com ship.events.on e decididos com ship.hooks.result, sem precisar de função nativa dedicada por habilidade. |
 | `core.timers` | `contract` | `oot`, `mm` | Timers por frame com ownership por mod. |
 | `core.input` | `contract` | `oot`, `mm` | Registro de hotkeys e eventos de input. |
 | `core.storage` | `contract` | `oot`, `mm` | Armazenamento chave-valor com namespace por mod. |

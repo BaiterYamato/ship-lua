@@ -476,8 +476,34 @@ inline constexpr std::array<FieldBinding, 2> kInputHotkeyPayload{{
     {"action", "string", true},
     {"key", "string", true},
 }};
+inline constexpr std::array<FieldBinding, 1> kHookOotPlayerSpeedRunPayload{{
+    {"speed", "number", true},
+}};
+inline constexpr std::array<FieldBinding, 0> kHookOotPlayerFallDamagePayload{{
+}};
+inline constexpr std::array<FieldBinding, 2> kHookOotItemReceivePayload{{
+    {"item_id", "integer", true},
+    {"get_item_id", "integer", true},
+}};
+inline constexpr std::array<FieldBinding, 1> kHookOotPlayerHealthChangePayload{{
+    {"amount", "integer", true},
+}};
+inline constexpr std::array<FieldBinding, 0> kHookOotPlayerBonkPayload{{
+}};
+inline constexpr std::array<FieldBinding, 1> kHookMmPlayerSpeedWalkPayload{{
+    {"speed", "number", true},
+}};
+inline constexpr std::array<FieldBinding, 0> kHookMmPlayerGoronRollConsumeMagicPayload{{
+}};
+inline constexpr std::array<FieldBinding, 0> kHookMmPlayerGoronRollDisableSpikeModePayload{{
+}};
+inline constexpr std::array<FieldBinding, 0> kHookMmPlayerGoronRollIncreaseSpikeLevelPayload{{
+}};
+inline constexpr std::array<FieldBinding, 1> kHookMmItemGivePayload{{
+    {"item", "integer", true},
+}};
 
-inline constexpr std::array<EventBinding, 11> kEvents{{
+inline constexpr std::array<EventBinding, 21> kEvents{{
     {"game.ready", EventKind::Observe, "mvp", false, true, true, {}, kGameReadyPayload},
     {"game.frame", EventKind::Observe, "mvp", false, true, true, {}, kGameFramePayload},
     {"game.shutdown", EventKind::Observe, "mvp", false, true, true, {}, kGameShutdownPayload},
@@ -489,6 +515,16 @@ inline constexpr std::array<EventBinding, 11> kEvents{{
     {"text.open", EventKind::Observe, "host_bridge", false, true, true, "text.events", kTextOpenPayload},
     {"audio.sequence_started", EventKind::Observe, "host_bridge", false, true, true, "audio.sequence.events", kAudioSequenceStartedPayload},
     {"input.hotkey", EventKind::Observe, "host_bridge", false, true, true, {}, kInputHotkeyPayload},
+    {"hook.oot.player.speed.run", EventKind::Transform, "hook_bridge", false, true, false, "hooks.bridge", kHookOotPlayerSpeedRunPayload},
+    {"hook.oot.player.fall_damage", EventKind::Transform, "hook_bridge", false, true, false, "hooks.bridge", kHookOotPlayerFallDamagePayload},
+    {"hook.oot.item.receive", EventKind::Observe, "hook_bridge", false, true, false, "hooks.bridge", kHookOotItemReceivePayload},
+    {"hook.oot.player.health_change", EventKind::Observe, "hook_bridge", false, true, false, "hooks.bridge", kHookOotPlayerHealthChangePayload},
+    {"hook.oot.player.bonk", EventKind::Observe, "hook_bridge", false, true, false, "hooks.bridge", kHookOotPlayerBonkPayload},
+    {"hook.mm.player.speed.walk", EventKind::Transform, "hook_bridge", false, false, true, "hooks.bridge", kHookMmPlayerSpeedWalkPayload},
+    {"hook.mm.player.goron_roll.consume_magic", EventKind::Transform, "hook_bridge", false, false, true, "hooks.bridge", kHookMmPlayerGoronRollConsumeMagicPayload},
+    {"hook.mm.player.goron_roll.disable_spike_mode", EventKind::Transform, "hook_bridge", false, false, true, "hooks.bridge", kHookMmPlayerGoronRollDisableSpikeModePayload},
+    {"hook.mm.player.goron_roll.increase_spike_level", EventKind::Transform, "hook_bridge", false, false, true, "hooks.bridge", kHookMmPlayerGoronRollIncreaseSpikeLevelPayload},
+    {"hook.mm.item.give", EventKind::Observe, "hook_bridge", false, false, true, "hooks.bridge", kHookMmItemGivePayload},
 }};
 
 struct CapabilityBinding {
@@ -498,8 +534,9 @@ struct CapabilityBinding {
     bool supportsMm;
 };
 
-inline constexpr std::array<CapabilityBinding, 34> kCapabilities{{
+inline constexpr std::array<CapabilityBinding, 35> kCapabilities{{
     {"core.events", "contract", true, true},
+    {"hooks.bridge", "contract", true, true},
     {"core.timers", "contract", true, true},
     {"core.input", "contract", true, true},
     {"core.storage", "contract", true, true},

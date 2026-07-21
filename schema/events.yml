@@ -37,6 +37,29 @@
     {"name": "input.hotkey", "kind": "observe", "phase": "host_bridge", "cancellable": false, "support": ["oot", "mm"], "capability": null, "payload": [
       {"name": "action", "type": "string", "required": true},
       {"name": "key", "type": "string", "required": true}
+    ]},
+
+    {"name": "hook.oot.player.speed.run", "kind": "transform", "phase": "hook_bridge", "cancellable": false, "support": ["oot"], "capability": "hooks.bridge", "payload": [
+      {"name": "speed", "type": "number", "required": true}
+    ]},
+    {"name": "hook.oot.player.fall_damage", "kind": "transform", "phase": "hook_bridge", "cancellable": false, "support": ["oot"], "capability": "hooks.bridge", "payload": []},
+    {"name": "hook.oot.item.receive", "kind": "observe", "phase": "hook_bridge", "cancellable": false, "support": ["oot"], "capability": "hooks.bridge", "payload": [
+      {"name": "item_id", "type": "integer", "required": true},
+      {"name": "get_item_id", "type": "integer", "required": true}
+    ]},
+    {"name": "hook.oot.player.health_change", "kind": "observe", "phase": "hook_bridge", "cancellable": false, "support": ["oot"], "capability": "hooks.bridge", "payload": [
+      {"name": "amount", "type": "integer", "required": true}
+    ]},
+    {"name": "hook.oot.player.bonk", "kind": "observe", "phase": "hook_bridge", "cancellable": false, "support": ["oot"], "capability": "hooks.bridge", "payload": []},
+
+    {"name": "hook.mm.player.speed.walk", "kind": "transform", "phase": "hook_bridge", "cancellable": false, "support": ["mm"], "capability": "hooks.bridge", "payload": [
+      {"name": "speed", "type": "number", "required": true}
+    ]},
+    {"name": "hook.mm.player.goron_roll.consume_magic", "kind": "transform", "phase": "hook_bridge", "cancellable": false, "support": ["mm"], "capability": "hooks.bridge", "payload": []},
+    {"name": "hook.mm.player.goron_roll.disable_spike_mode", "kind": "transform", "phase": "hook_bridge", "cancellable": false, "support": ["mm"], "capability": "hooks.bridge", "payload": []},
+    {"name": "hook.mm.player.goron_roll.increase_spike_level", "kind": "transform", "phase": "hook_bridge", "cancellable": false, "support": ["mm"], "capability": "hooks.bridge", "payload": []},
+    {"name": "hook.mm.item.give", "kind": "observe", "phase": "hook_bridge", "cancellable": false, "support": ["mm"], "capability": "hooks.bridge", "payload": [
+      {"name": "item", "type": "integer", "required": true}
     ]}
   ]
 }

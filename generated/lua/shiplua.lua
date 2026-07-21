@@ -92,7 +92,33 @@
 ---@field action string
 ---@field key string
 
----@alias ShipLuaEventName "game.ready"|"game.frame"|"game.shutdown"|"scene.enter"|"actor.init"|"actor.update"|"actor.destroy"|"save.loaded"|"text.open"|"audio.sequence_started"|"input.hotkey"
+---@class ShipLuaEventHookOotPlayerSpeedRun
+---@field speed number
+
+---@class ShipLuaEventHookOotPlayerFallDamage
+
+---@class ShipLuaEventHookOotItemReceive
+---@field item_id integer
+---@field get_item_id integer
+
+---@class ShipLuaEventHookOotPlayerHealthChange
+---@field amount integer
+
+---@class ShipLuaEventHookOotPlayerBonk
+
+---@class ShipLuaEventHookMmPlayerSpeedWalk
+---@field speed number
+
+---@class ShipLuaEventHookMmPlayerGoronRollConsumeMagic
+
+---@class ShipLuaEventHookMmPlayerGoronRollDisableSpikeMode
+
+---@class ShipLuaEventHookMmPlayerGoronRollIncreaseSpikeLevel
+
+---@class ShipLuaEventHookMmItemGive
+---@field item integer
+
+---@alias ShipLuaEventName "game.ready"|"game.frame"|"game.shutdown"|"scene.enter"|"actor.init"|"actor.update"|"actor.destroy"|"save.loaded"|"text.open"|"audio.sequence_started"|"input.hotkey"|"hook.oot.player.speed.run"|"hook.oot.player.fall_damage"|"hook.oot.item.receive"|"hook.oot.player.health_change"|"hook.oot.player.bonk"|"hook.mm.player.speed.walk"|"hook.mm.player.goron_roll.consume_magic"|"hook.mm.player.goron_roll.disable_spike_mode"|"hook.mm.player.goron_roll.increase_spike_level"|"hook.mm.item.give"
 
 ship = ship or {}
 ship.actor = ship.actor or {}

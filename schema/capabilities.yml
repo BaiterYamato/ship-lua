@@ -3,6 +3,7 @@
   "api_version": "0.4.0",
   "capabilities": [
     {"name": "core.events", "status": "contract", "hosts": ["oot", "mm"], "description": "Eventos e lifecycle centrais do host."},
+    {"name": "hooks.bridge", "status": "contract", "hosts": ["oot", "mm"], "description": "Ponte genérica para os pontos de instrumentação nativos (VB_*/On* do GameInteractor) — eventos hook.* assináveis com ship.events.on e decididos com ship.hooks.result, sem precisar de função nativa dedicada por habilidade."},
     {"name": "core.timers", "status": "contract", "hosts": ["oot", "mm"], "description": "Timers por frame com ownership por mod."},
     {"name": "core.input", "status": "contract", "hosts": ["oot", "mm"], "description": "Registro de hotkeys e eventos de input."},
     {"name": "core.storage", "status": "contract", "hosts": ["oot", "mm"], "description": "Armazenamento chave-valor com namespace por mod."},
