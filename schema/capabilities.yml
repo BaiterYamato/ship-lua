@@ -27,6 +27,9 @@
     {"name": "oot.player.bunny_hood", "status": "contract", "hosts": ["oot"], "description": "Veste a Bunny Hood em OoT com o comportamento de Majora's Mask (corrida mais rápida e pulo maior)."},
     {"name": "oot.player.mask", "status": "contract", "hosts": ["oot"], "description": "Equipa qualquer máscara de OoT pelo nome lógico, sem ocupar um botão C."},
     {"name": "player.speed", "status": "contract", "hosts": ["oot", "mm"], "description": "Multiplica a velocidade de movimento do jogador por um fator validado (0.1–5.0); 1.0 restaura."},
+    {"name": "player.fields", "status": "contract", "hosts": ["oot"], "description": "Lê e escreve campos nomeados do jogador (vida, magia, rupees, posição, velocidade) com validação de faixa."},
+    {"name": "oot.player.attach_model", "status": "contract", "hosts": ["oot"], "description": "Desenha uma display list arbitrária no jogador por caminho de resource, incluindo assets de mod e do jogo vizinho."},
+    {"name": "mod.assets", "status": "contract", "hosts": ["oot"], "description": "Archives (.o2r/.otr) na pasta de mods ficam endereçáveis sob mod/<nome>/, permitindo que um mod traga conteúdo próprio."},
     {"name": "oot.ocarina", "status": "planned", "hosts": ["oot"], "description": "Eventos e estado de ocarina de OoT."},
     {"name": "oot.dungeon_keys", "status": "planned", "hosts": ["oot"], "description": "Estado de chaves de dungeon de OoT."},
     {"name": "oot.equipment", "status": "planned", "hosts": ["oot"], "description": "Equipamento específico de OoT."}

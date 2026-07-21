@@ -213,6 +213,23 @@ function ship.oot.player.set_mask(mask) end
 ---@return boolean
 function ship.player.set_speed_multiplier(factor) end
 
+--- API oot; estabilidade: experimental; desde: 0.4.0; capability: player.fields; erros: nenhum.
+---@param field string
+---@return any
+function ship.player.get(field) end
+
+--- API oot; estabilidade: experimental; desde: 0.4.0; capability: player.fields; erros: nenhum.
+---@param field string
+---@param value number
+---@return boolean
+function ship.player.set(field, value) end
+
+--- API oot; estabilidade: experimental; desde: 0.4.0; capability: oot.player.attach_model; erros: nenhum.
+---@param slot string
+---@param path string
+---@return boolean
+function ship.oot.player.attach_model(slot, path) end
+
 --- API oot; estabilidade: experimental; desde: 0.3.0; capability: oot.spawn_dog; erros: nenhum.
 ---@return boolean
 function ship.oot.spawn_dog() end
