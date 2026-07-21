@@ -100,6 +100,7 @@ ship.api = ship.api or {}
 ship.capabilities = ship.capabilities or {}
 ship.events = ship.events or {}
 ship.game = ship.game or {}
+ship.hooks = ship.hooks or {}
 ship.hotkeys = ship.hotkeys or {}
 ship.log = ship.log or {}
 ship.mm = ship.mm or {}
@@ -148,6 +149,11 @@ function ship.events.on(event, options_or_callback, callback) end
 ---@param subscription ShipLuaSubscription
 ---@return boolean
 function ship.events.off(subscription) end
+
+--- API common; estabilidade: experimental; desde: 0.4.0; capability: comum; erros: invalid_argument.
+---@param value any
+---@return boolean
+function ship.hooks.result(value) end
 
 --- API common; estabilidade: preview; desde: 0.2.0; capability: comum; erros: invalid_argument, unsupported.
 ---@param id string

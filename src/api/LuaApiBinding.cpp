@@ -578,6 +578,14 @@ void LuaApiBinding::BuildModule(lua_State* state) {
     SetFunction(state, -1, "off", &LuaApiBinding::EventsOff, this);
     lua_setfield(state, ship, "events");
 
+    // Ponte de hooks: eventos "hook:*" declarados em schema/events.yml (kind
+    // "transform") já se assinam com ship.events.on como qualquer outro
+    // evento. A única peça nova é este verbo — devolver ao host o resultado
+    // que ele deve aplicar (gate booleano ou valor modificado).
+    lua_newtable(state);
+    SetFunction(state, -1, "result", &LuaApiBinding::HooksResult, this);
+    lua_setfield(state, ship, "hooks");
+
     lua_newtable(state);
     SetFunction(state, -1, "debug", &LuaApiBinding::LogDebug, this);
     SetFunction(state, -1, "info", &LuaApiBinding::LogInfo, this);
@@ -1112,6 +1120,47 @@ int LuaApiBinding::RemoveEventFromLua(lua_State* state, const char*& error) {
     if (!removed.isOk()) {
         error = ErrorMessage(removed.code);
         return 0;
+    }
+    lua_pushboolean(state, 1);
+    return 1;
+}
+
+// ship.hooks.result(value): só tem efeito quando chamado de dentro de um
+// callback inscrito num evento "hook:*" (EventKind::Transform). value pode
+// ser boolean (hooks "should"/gate) ou number (hooks "modify", como um
+// multiplicador de velocidade). Fora desse contexto, é um no-op que retorna
+// false — nunca lança, para não derrubar o mod por engano de uso.
+int LuaApiBinding::HooksResult(lua_State* state) noexcept {
+    LuaApiBinding* binding = FromUpvalue(state);
+    const char* error = nullptr;
+    int result = 0;
+    try {
+        if (binding == nullptr) {
+            error = "contexto da API ship indisponível";
+        } else {
+            result = binding->HooksResultFromLua(state, error);
+        }
+    } catch (...) {
+        error = ErrorMessage(ErrorCode::HostFailure);
+    }
+    return error != nullptr ? Fail(state, error) : result;
+}
+
+int LuaApiBinding::HooksResultFromLua(lua_State* state, const char*& error) {
+    if (mCurrentHookPayload == nullptr) {
+        lua_pushboolean(state, 0);
+        return 1;
+    }
+    switch (lua_type(state, 1)) {
+        case LUA_TBOOLEAN:
+            (*mCurrentHookPayload)["__hook_result"] = EventValue(lua_toboolean(state, 1) != 0);
+            break;
+        case LUA_TNUMBER:
+            (*mCurrentHookPayload)["__hook_result"] = EventValue(static_cast<double>(lua_tonumber(state, 1)));
+            break;
+        default:
+            error = "ship.hooks.result exige um valor boolean ou number";
+            return 0;
     }
     lua_pushboolean(state, 1);
     return 1;
@@ -1910,7 +1959,12 @@ EventFlow LuaApiBinding::InvokeCallback(const std::shared_ptr<LuaCallback>& call
     const int handlerIndex = lua_gettop(state);
     lua_rawgeti(state, LUA_REGISTRYINDEX, callback->registryReference);
     PushEventPayload(state, payload);
+    // Torna o payload real (não a cópia que outras kinds de evento recebem)
+    // alcançável por ship.hooks.result() enquanto este callback específico
+    // roda. Precisa ser limpo em TODO caminho de saída, inclusive o que lança.
+    mCurrentHookPayload = &payload;
     const int status = lua_pcall(state, 1, 0, handlerIndex);
+    mCurrentHookPayload = nullptr;
     if (status == LUA_OK) {
         lua_pop(state, 1);
         callback->consecutiveFailures = 0;

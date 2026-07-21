@@ -94,6 +94,7 @@ enum class FunctionId {
     ShipCapabilitiesList,
     ShipEventsOn,
     ShipEventsOff,
+    ShipHooksResult,
     ShipHotkeysRegister,
     ShipActorSpawn,
     ShipActorDestroy,
@@ -180,6 +181,12 @@ inline constexpr std::array<FieldBinding, 1> kShipEventsOffArguments{{
 }};
 inline constexpr std::array<std::string_view, 1> kShipEventsOffErrors{{
     "invalid_handle",
+}};
+inline constexpr std::array<FieldBinding, 1> kShipHooksResultArguments{{
+    {"value", "any", true},
+}};
+inline constexpr std::array<std::string_view, 1> kShipHooksResultErrors{{
+    "invalid_argument",
 }};
 inline constexpr std::array<FieldBinding, 3> kShipHotkeysRegisterArguments{{
     {"id", "string", true},
@@ -379,7 +386,7 @@ inline constexpr std::array<std::string_view, 1> kShipStorageClearErrors{{
     "unsupported",
 }};
 
-inline constexpr std::array<FunctionBinding, 38> kFunctions{{
+inline constexpr std::array<FunctionBinding, 39> kFunctions{{
     {FunctionId::ShipGameId, "ship.game.id", "0.1.0", "stable", "game_id", "raise", {}, "common", {}, kShipGameIdArguments, kShipGameIdErrors},
     {FunctionId::ShipGameHostVersion, "ship.game.host_version", "0.1.0", "stable", "string", "raise", {}, "common", {}, kShipGameHostVersionArguments, kShipGameHostVersionErrors},
     {FunctionId::ShipRuntimeVersion, "ship.runtime.version", "0.1.0", "stable", "string", "raise", {}, "common", {}, kShipRuntimeVersionArguments, kShipRuntimeVersionErrors},
@@ -388,6 +395,7 @@ inline constexpr std::array<FunctionBinding, 38> kFunctions{{
     {FunctionId::ShipCapabilitiesList, "ship.capabilities.list", "0.1.0", "stable", "array<string>", "raise", {}, "common", {}, kShipCapabilitiesListArguments, kShipCapabilitiesListErrors},
     {FunctionId::ShipEventsOn, "ship.events.on", "0.1.0", "stable", "subscription", "raise", {}, "common", {}, kShipEventsOnArguments, kShipEventsOnErrors},
     {FunctionId::ShipEventsOff, "ship.events.off", "0.1.0", "stable", "boolean", "raise", {}, "common", {}, kShipEventsOffArguments, kShipEventsOffErrors},
+    {FunctionId::ShipHooksResult, "ship.hooks.result", "0.4.0", "experimental", "boolean", "raise", {}, "common", {}, kShipHooksResultArguments, kShipHooksResultErrors},
     {FunctionId::ShipHotkeysRegister, "ship.hotkeys.register", "0.2.0", "preview", "boolean", "raise", {}, "common", {}, kShipHotkeysRegisterArguments, kShipHotkeysRegisterErrors},
     {FunctionId::ShipActorSpawn, "ship.actor.spawn", "0.4.0", "experimental", "actor_handle", "return", "operation_error", "common", "actor.spawn", kShipActorSpawnArguments, kShipActorSpawnErrors},
     {FunctionId::ShipActorDestroy, "ship.actor.destroy", "0.4.0", "experimental", "boolean", "return", "operation_error", "common", "actor.destroy", kShipActorDestroyArguments, kShipActorDestroyErrors},

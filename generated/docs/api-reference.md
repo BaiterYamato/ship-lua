@@ -31,6 +31,7 @@ Versão da API: `0.4.0`. Versão do schema: `1`.
 | `ship.capabilities.list` | — | `array<string>` | `common` | `stable` | `0.1.0` | — | — |
 | `ship.events.on` | `event: string`, `options_or_callback: any`, `callback: callback?` | `subscription` | `common` | `stable` | `0.1.0` | — | `invalid_argument`, `unsupported` |
 | `ship.events.off` | `subscription: subscription` | `boolean` | `common` | `stable` | `0.1.0` | — | `invalid_handle` |
+| `ship.hooks.result` | `value: any` | `boolean` | `common` | `experimental` | `0.4.0` | — | `invalid_argument` |
 | `ship.hotkeys.register` | `id: string`, `options: hotkey_options?`, `callback: callback` | `boolean` | `common` | `preview` | `0.2.0` | — | `invalid_argument`, `unsupported` |
 | `ship.actor.spawn` | `actor_type: string`, `options: actor_spawn_options` | `actor_handle, operation_error?` | `common` | `experimental` | `0.4.0` | `actor.spawn` | `invalid_argument`, `unsupported`, `permission_denied`, `invalid_state`, `resource_limit`, `host_failure` |
 | `ship.actor.destroy` | `handle: actor_handle` | `boolean, operation_error?` | `common` | `experimental` | `0.4.0` | `actor.destroy` | `invalid_argument`, `unsupported`, `permission_denied`, `invalid_handle`, `host_failure` |

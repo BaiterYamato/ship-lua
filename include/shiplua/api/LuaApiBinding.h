@@ -94,6 +94,7 @@ class LuaApiBinding {
     static int CapabilityProviders(lua_State* state) noexcept;
     static int EventsOn(lua_State* state) noexcept;
     static int EventsOff(lua_State* state) noexcept;
+    static int HooksResult(lua_State* state) noexcept;
     static int HotkeysRegister(lua_State* state) noexcept;
     static int TimerAfter(lua_State* state) noexcept;
     static int TimerEvery(lua_State* state) noexcept;
@@ -119,6 +120,7 @@ class LuaApiBinding {
     // erro ao wrapper somente depois de destruir todo estado C++ não trivial.
     int RegisterEventFromLua(lua_State* state, const char*& error);
     int RemoveEventFromLua(lua_State* state, const char*& error);
+    int HooksResultFromLua(lua_State* state, const char*& error);
     int RegisterHotkey(lua_State* state, const char*& error);
     int CapabilityHasFromLua(lua_State* state, const char*& error);
     int CapabilityListFromLua(lua_State* state, const char*& error);
@@ -142,6 +144,14 @@ class LuaApiBinding {
     void PruneDeadActors() noexcept;
     EventFlow InvokeCallback(const std::shared_ptr<LuaCallback>& callback,
                              EventPayload& payload);
+    // Não-nulo apenas durante a chamada de um callback Lua disparado por um
+    // evento "hook" (kind Transform, ver EventDispatcher::Dispatch): aponta
+    // para o EventPayload real (não uma cópia), permitindo que
+    // ship.hooks.result() escreva "__hook_result" e a mutação sobreviva ao
+    // retorno do Dispatch — é assim que um mod controla o resultado de um
+    // gate (*should) ou de um valor modificado (velocidade etc.) sem
+    // nenhuma função nativa dedicada por habilidade.
+    EventPayload* mCurrentHookPayload = nullptr;
     int WriteLog(lua_State* state, LogLevel level, const char*& error);
     void BuildModule(lua_State* state);
     void Uninstall() noexcept;
